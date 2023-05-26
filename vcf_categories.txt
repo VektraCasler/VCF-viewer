@@ -1,0 +1,20 @@
+
+Variant Call File
+	AF
+	FAO
+	FDP
+	HRUN
+	Filter
+	Genotype
+
+
+Variant Annotation
+	Coding
+	Sequence Ontology
+	Transcript
+	All Mappings
+UniProt (GENE): Accession Number
+dbSNP: rsID
+MDL: Sample Count
+MDL: Variant Frequency
+MDL: Sample List

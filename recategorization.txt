@@ -1,0 +1,85 @@
+Gene Information
+
+	Gene
+	Chromosome
+	Base Pair Location
+	Reference Allele
+	Alternate Allele
+	DNA Change (c-dot)
+	Protein Change (p-dot)
+
+Web Resources
+
+    COSMIC
+        ID
+        Variant Count
+	    Variant Count (Tissue)
+    ClinVar
+    	ID
+    	Clinical Significance
+
+Web Resources / Interpretation
+
+	gnomAD3: Global AF
+	PhyloP: Vert Score
+	CADD: Phred
+	PolyPhen-2: HDIV Prediction
+	SIFT: Prediction
+
+Variant Call File
+
+	FS Var Fwd
+	FS Var Rev
+	FS Ref Fwd
+	FS Ref Rev
+
+	Fisher Odds Ratio
+	Fisher P-Value
+	Binomial Proportion
+	Binomial P-Value
+
+	Length (in BPs)
+	QD
+	Strand Bias
+	Strand Bias P-Value
+	SVTYPE
+	Type (Variant Type)
+	Quality Score (Proprietary)
+
+	Allele Frequency (AF)
+	Flow Space Alternate Allele Depth (FAO)
+	Flow Total Depth at Position (FDP)
+	HRUN
+	Filter (Pass/Fail)
+	Genotype (0/1, 1/1, -/-)
+
+M-Pileup File
+
+	Total Read Depth
+	Start Count
+	Stop Count
+
+    Filtered Reads (Q20)
+
+        Ref Fwd RD
+        Ref Rev RD
+        Var Fwd RD
+        Var Rev RD
+
+        Binomial Proportion
+        Binomial P-Value
+        Fishers Odds Ratio
+        Fishers P-Value
+
+    Unfiltered Reads (Q1)
+
+        Ref Fwd RD
+        Ref Rev RD
+        Var Fwd RD
+        Var Rev RD
+
+        Binomial Proportion
+        Binomial P-Value
+        Fishers Odds Ratio
+        Fishers P-Value
+
