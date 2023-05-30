@@ -94,6 +94,75 @@ vcf_columns = [
     "MDL: Sample List", # Very long text, needs wordwrap
 ]
 
+tooltips = {
+    "Disposition":'What to call this variant.',
+    "Original Input: Chrom":'Chromosome on which this gene is found.',
+    "Original Input: Pos":'Base pair position of the gene on the chromosome.',
+    "Original Input: Reference allele":'Expected finding at this base pair location.',
+    "Original Input: Alternate allele":'Specimen finding at this base pair location.',
+    "Variant Annotation: Gene":'Gene currently selected from the variant list.',
+    "Variant Annotation: cDNA change":'Alteration in the DNA at this location.',
+    "Variant Annotation: Protein Change":'Resultant alteration in the protein at this location.',
+    "VCF: AF":'Allele fraction of reads with this variant.',
+    "VCF: FAO":"tooltip needed",
+    "VCF: FDP":"tooltip needed",
+    "VCF: HRUN":"tooltip needed",
+    "VCF: Filter":"tooltip needed",
+    "VCF: Genotype":"tooltip needed",
+    "COSMIC: ID":"tooltip needed",
+    "COSMIC: Variant Count":"tooltip needed",
+    "COSMIC: Variant Count (Tissue)":"tooltip needed", # Very long text, needs wordwrap
+    "ClinVar: ClinVar ID":"tooltip needed",
+    "ClinVar: Clinical Significance":"tooltip needed",
+    "gnomAD3: Global AF":"tooltip needed",
+    "PhyloP: Vert Score":"tooltip needed",
+    "CADD: Phred":"tooltip needed",
+    "PolyPhen-2: HDIV Prediction":"tooltip needed",
+    "SIFT: Prediction":"tooltip needed",
+    "VCF: FSAF":"tooltip needed",
+    "VCF: FSAR":"tooltip needed",
+    "VCF: FSRF":"tooltip needed",
+    "VCF: FSRR":"tooltip needed",
+    "VCF: Fisher Odds Ratio":"tooltip needed",
+    "VCF: Fisher P Value":"tooltip needed",
+    "VCF: Binom Proportion":"tooltip needed",
+    "VCF: Binom P Value":"tooltip needed",
+    "Mpileup Qual: Read Depth":"tooltip needed",
+    "Mpileup Qual: Start Reads":"tooltip needed",
+    "Mpileup Qual: Stop Reads":"tooltip needed",
+    "Mpileup Qual: Filtered Reference Forward Read Depth":"tooltip needed",
+    "Mpileup Qual: Filtered Reference Reverse Read Depth":"tooltip needed",
+    "Mpileup Qual: Unfiltered Reference Forward Read Depth":"tooltip needed",
+    "Mpileup Qual: Unfiltered Reference Reverse Read Depth":"tooltip needed",
+    "Mpileup Qual: Filtered Variant Forward Read Depth":"tooltip needed",
+    "Mpileup Qual: Filtered Variant Reverse Read Depth":"tooltip needed",
+    "Mpileup Qual: Filtered Variant Binomial Proportion":"tooltip needed",
+    "Mpileup Qual: Filtered Variant Binomial P Value":"tooltip needed",
+    "Mpileup Qual: Filtered Variant Fishers Odds Ratio":"tooltip needed",
+    "Mpileup Qual: Filtered Variant Fishers P Value":"tooltip needed",
+    "Mpileup Qual: Unfiltered Variant Forward Read Depth":"tooltip needed",
+    "Mpileup Qual: Unfiltered Variant Reverse Read Depth":"tooltip needed",
+    "Mpileup Qual: Unfiltered Variant Binomial Proportion":"tooltip needed",
+    "Mpileup Qual: Unfiltered Variant Binomial P Value":"tooltip needed",
+    "Mpileup Qual: Unfiltered Variant Fishers Odds Ratio":"tooltip needed",
+    "Mpileup Qual: Unfiltered Variant Fishers P Value":"tooltip needed",
+    "VCF: LEN":"tooltip needed",
+    "VCF: QD":"tooltip needed",
+    "VCF: STB":"tooltip needed",
+    "VCF: STBP":"tooltip needed",
+    "VCF: SVTYPE":"tooltip needed",
+    "VCF: TYPE":"tooltip needed",
+    "VCF: QUAL":"tooltip needed",
+    "Variant Annotation: Coding":"tooltip needed",
+    "Variant Annotation: Sequence Ontology":"tooltip needed",
+    "Variant Annotation: Transcript":"tooltip needed",
+    "Variant Annotation: All Mappings":"tooltip needed", # Very long text, needs wordwrap
+    "UniProt (GENE): Accession Number":"tooltip needed",
+    "dbSNP: rsID":"tooltip needed",
+    "MDL: Sample Count":"tooltip needed",
+    "MDL: Variant Frequency":"tooltip needed",
+    "MDL: Sample List":"tooltip needed", # Very long text, needs wordwrap
+}
 
 # CLASSES ------------------------------------------------
 
@@ -144,27 +213,41 @@ class App(tk.Tk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.geometry('800x600')
-        self.warning_color = '#CC0000'
-        self.normal_color = '#000000'
+        self.color_warning = '#CC0000'
+        self.color_normal = '#000000'
+        self.color_enabled = '#ffffff'
+        self.color_disabled = '#cccccc'
 
 
         # Variables
-        self.filename = tk.StringVar()
-        self.filename.set('No CSV File Loaded')
-        self.status_text = tk.StringVar()
-        self.disposition = tk.StringVar()
-        self.dispo_none_count = tk.IntVar()
-        self.dispo_unknown_count = tk.IntVar()
-        self.dispo_VUS_count = tk.IntVar()
-        self.dispo_mutation_count = tk.IntVar()
+        self.vars = dict()
+        self.vars['filename'] = tk.StringVar()
+        self.vars['filename'].set('No CSV File Loaded')
+        self.vars['status_text'] = tk.StringVar()
+        self.vars['disposition'] = tk.StringVar()
+        self.vars['dispo_none_count'] = tk.IntVar()
+        self.vars['dispo_unknown_count'] = tk.IntVar()
+        self.vars['dispo_VUS_count'] = tk.IntVar()
+        self.vars['dispo_mutation_count'] = tk.IntVar()
 
-        self.variant_info = dict()
+        self.variant = dict()
         for x in vcf_columns:
-            self.variant_info[x] = tk.StringVar()
+            self.variant[x] = tk.StringVar()
 
         self.labels = dict()
         for x in vcf_columns:
             self.labels[x] = tk.Label()
+
+        self.validation = dict()
+        self.validation['p-values'] = [
+            "VCF: Binom P Value",
+            "VCF: Fisher P Value",
+            "Mpileup Qual: Filtered Variant Binomial P Value",
+            "Mpileup Qual: Filtered Variant Fishers P Value",
+            "Mpileup Qual: Unfiltered Variant Binomial P Value",
+            "Mpileup Qual: Unfiltered Variant Fishers P Value",
+            "VCF: STBP"
+        ]
         
         # FRAMES ------------------------------------------------------------------------
 
@@ -175,10 +258,9 @@ class App(tk.Tk):
         self.frame_left = tk.LabelFrame(self.frame_base, text="VCF File Info", relief='groove')
         self.frame_left.pack(side='left', expand=False, fill='y',ipadx=10, ipady=10, padx=5, pady=5)
         #File load button
-        self.label_filename = tk.Label(self.frame_left, textvariable=self.filename, relief='groove')
-        self.label_filename.pack(side='top', expand=False, fill='x',ipady=5, padx=5, pady=5)
+        self.labels['filename'] = tk.Label(self.frame_left, textvariable=self.vars['filename'], relief='groove')
+        self.labels['filename'].pack(side='top', expand=False, fill='x',ipady=5, padx=5, pady=5)
         tk.Button(self.frame_left, text="Load a CSV File", command=self.loadCSV).pack(side='top', expand=False, fill='x', ipady=5, padx=5, pady=5)
-        CreateToolTip(self.label_filename, text = 'VCF processing output file currently loaded for viewing.')
         # Treeview Frame
         self.frame_treeview = tk.Frame(self.frame_left)
         self.frame_treeview.pack(side='top',expand=True,fill='both', padx=5)
@@ -208,22 +290,22 @@ class App(tk.Tk):
         self.frame_dispo_4 = tk.Frame(self.frame_disposition)
         self.frame_dispo_4.pack(side='top', expand=False, fill='x')
         # Disposition labels
-        self.label_none_count = tk.Label(self.frame_dispo_1, textvariable=self.dispo_none_count, width=5)
-        self.label_none_count.pack(side='left', expand=False, fill='y')
-        self.label_low_vaf_count = tk.Label(self.frame_dispo_2, textvariable=self.dispo_unknown_count, width=5)
-        self.label_low_vaf_count.pack(side='left', expand=False, fill='y')
-        self.label_vus_count = tk.Label(self.frame_dispo_3, textvariable=self.dispo_VUS_count, width=5)
-        self.label_vus_count.pack(side='left', expand=False, fill='y')
-        self.label_mutation_count = tk.Label(self.frame_dispo_4, textvariable=self.dispo_mutation_count, width=5)
-        self.label_mutation_count.pack(side='left', expand=False, fill='y')
+        self.labels['none_count'] = tk.Label(self.frame_dispo_1, textvariable=self.vars['dispo_none_count'], width=5)
+        self.labels['none_count'].pack(side='left', expand=False, fill='y')
+        self.labels['low_vaf_count'] = tk.Label(self.frame_dispo_2, textvariable=self.vars['dispo_unknown_count'], width=5)
+        self.labels['low_vaf_count'].pack(side='left', expand=False, fill='y')
+        self.labels['vus_count'] = tk.Label(self.frame_dispo_3, textvariable=self.vars['dispo_VUS_count'], width=5)
+        self.labels['vus_count'].pack(side='left', expand=False, fill='y')
+        self.labels['mutation_count'] = tk.Label(self.frame_dispo_4, textvariable=self.vars['dispo_mutation_count'], width=5)
+        self.labels['mutation_count'].pack(side='left', expand=False, fill='y')
         # Radio buttons for disposition
-        self.radio_none = tk.Radiobutton(self.frame_dispo_1, text="Unassigned", variable=self.disposition, anchor='w')
+        self.radio_none = tk.Radiobutton(self.frame_dispo_1, text="Unassigned", variable=self.vars['disposition'], anchor='w')
         self.radio_none.pack(side='left', expand=False, fill='both')
-        self.radio_unknown = tk.Radiobutton(self.frame_dispo_2, text="Low VAF", variable=self.disposition, anchor='w')
+        self.radio_unknown = tk.Radiobutton(self.frame_dispo_2, text="Low VAF", variable=self.vars['disposition'], anchor='w')
         self.radio_unknown.pack(side='left', expand=False, fill='both')
-        self.radio_VUS = tk.Radiobutton(self.frame_dispo_3, text="VUS", variable=self.disposition, anchor='w')
+        self.radio_VUS = tk.Radiobutton(self.frame_dispo_3, text="VUS", variable=self.vars['disposition'], anchor='w')
         self.radio_VUS.pack(side='left', expand=False, fill='both')
-        self.radio_mutation = tk.Radiobutton(self.frame_dispo_4, text="Harmful", variable=self.disposition, anchor='w')
+        self.radio_mutation = tk.Radiobutton(self.frame_dispo_4, text="Harmful", variable=self.vars['disposition'], anchor='w')
         self.radio_mutation.pack(side='left', expand=False, fill='both')
         # Process output files button
         tk.Button(self.frame_left, text="Create Disposition Lists").pack(side='top', expand=False, fill='x', padx=5, pady=5, ipady=5)
@@ -242,33 +324,26 @@ class App(tk.Tk):
         self.frame_basic_info_alleles = tk.Frame(self.frame_basic_info)
         self.frame_basic_info_alleles.pack(side='left',expand=True,fill='both', padx=5, pady=5)
         tk.Label(self.frame_basic_info_gene, text="Gene").pack(side='top',expand=False,fill='x')
-        self.label_gene = tk.Label(self.frame_basic_info_gene, width=8, textvariable=self.variant_info["Variant Annotation: Gene"], relief='groove', font=('bold', 24, 'bold'))
-        self.label_gene.pack(side='top',expand=True,fill='both')
-        CreateToolTip(self.label_gene, text = 'Gene currently selected from the variant list.')
+        self.labels["Variant Annotation: Gene"] = tk.Label(self.frame_basic_info_gene, width=8, textvariable=self.variant["Variant Annotation: Gene"], relief='groove', font=('bold', 24, 'bold'))
+        self.labels["Variant Annotation: Gene"].pack(side='top',expand=True,fill='both')
         tk.Label(self.frame_basic_info_chrom, text="Chromosome").pack(side='top',expand=False, fill='x')
-        self.label_chrom = tk.Label(self.frame_basic_info_chrom, width=6, textvariable=self.variant_info["Original Input: Chrom"], relief='groove')
-        self.label_chrom.pack(side='top',expand=False, fill='x')
-        CreateToolTip(self.label_chrom, text = 'Chromosome on which this gene is located.')
+        self.labels["Original Input: Chrom"] = tk.Label(self.frame_basic_info_chrom, width=6, textvariable=self.variant["Original Input: Chrom"], relief='groove')
+        self.labels["Original Input: Chrom"].pack(side='top',expand=False, fill='x')
         tk.Label(self.frame_basic_info_chrom, text="Base Pair").pack(side='top',expand=False, fill='x')
-        self.label_base_pair = tk.Label(self.frame_basic_info_chrom, width=12, textvariable=self.variant_info["Original Input: Pos"], relief='groove')
-        self.label_base_pair.pack(side='top',expand=False, fill='x')
-        CreateToolTip(self.label_base_pair, text = 'Base pair location for gene on this chromosome.')
+        self.labels["Original Input: Pos"] = tk.Label(self.frame_basic_info_chrom, width=12, textvariable=self.variant["Original Input: Pos"], relief='groove')
+        self.labels["Original Input: Pos"].pack(side='top',expand=False, fill='x')
         tk.Label(self.frame_basic_info_alleles, text="Ref Allele", anchor='nw').pack(side='top',expand=False, fill='x')
-        self.label_ref_allele = tk.Label(self.frame_basic_info_alleles, anchor='w', textvariable=self.variant_info["Original Input: Reference allele"], relief='groove')
-        self.label_ref_allele.pack(side='top',expand=False, fill='x')
-        CreateToolTip(self.label_ref_allele, text = 'Reference allele found at this location.')
+        self.labels["Original Input: Reference allele"] = tk.Label(self.frame_basic_info_alleles, anchor='w', textvariable=self.variant["Original Input: Reference allele"], relief='groove')
+        self.labels["Original Input: Reference allele"].pack(side='top',expand=False, fill='x')
         tk.Label(self.frame_basic_info_alleles, text="Variant Allele", anchor='w').pack(side='top',expand=False, fill='x')
-        self.label_alt_allele = tk.Label(self.frame_basic_info_alleles, anchor='w', textvariable=self.variant_info["Original Input: Alternate allele"], relief='groove')
-        self.label_alt_allele.pack(side='top',expand=False, fill='x')
-        CreateToolTip(self.label_alt_allele, text = 'Variant allele encountered in sequencing.')
+        self.labels["Original Input: Alternate allele"] = tk.Label(self.frame_basic_info_alleles, anchor='w', textvariable=self.variant["Original Input: Alternate allele"], relief='groove')
+        self.labels["Original Input: Alternate allele"].pack(side='top',expand=False, fill='x')
         tk.Label(self.frame_basic_info_changes, text="DNA Change (c-dot)").pack(side='top',expand=False, fill='x')
-        self.label_cdot = tk.Label(self.frame_basic_info_changes, text="C-dot", textvariable=self.variant_info["Variant Annotation: cDNA change"], relief='groove')
-        self.label_cdot.pack(side='top',expand=False, fill='x')
-        CreateToolTip(self.label_cdot, text = 'DNA change nomenclature.')
+        self.labels["Variant Annotation: cDNA change"] = tk.Label(self.frame_basic_info_changes, text="C-dot", textvariable=self.variant["Variant Annotation: cDNA change"], relief='groove')
+        self.labels["Variant Annotation: cDNA change"].pack(side='top',expand=False, fill='x')
         tk.Label(self.frame_basic_info_changes, text="Protein Change (p-dot)").pack(side='top',expand=False, fill='x')
-        self.label_pdot = tk.Label(self.frame_basic_info_changes, text="P-dot", width=24, textvariable=self.variant_info["Variant Annotation: Protein Change"], relief='groove')
-        self.label_pdot.pack(side='top',expand=False, fill='x')
-        CreateToolTip(self.label_pdot, text = 'Protein change nomenclature.')
+        self.labels["Variant Annotation: Protein Change"] = tk.Label(self.frame_basic_info_changes, text="P-dot", width=24, textvariable=self.variant["Variant Annotation: Protein Change"], relief='groove')
+        self.labels["Variant Annotation: Protein Change"].pack(side='top',expand=False, fill='x')
 
         # middle frame
         self.frame_middle = tk.Frame(self.frame_right)
@@ -288,10 +363,14 @@ class App(tk.Tk):
         tk.Label(self.frame_sb_GX, text='Reverse').grid(column=3, row=0, sticky='news', pady=(5,0), padx=5)
         tk.Label(self.frame_sb_GX, text='Reference', anchor='e').grid(column=1, row=1, sticky='news', pady=5, padx=5)
         tk.Label(self.frame_sb_GX, text='Variant', anchor='e').grid(column=1, row=2, sticky='news', pady=5, padx=5)
-        tk.Label(self.frame_sb_GX, textvariable=self.variant_info["VCF: FSRF"], relief='groove').grid(column=2, row=1, sticky='news', pady=5, padx=5)
-        tk.Label(self.frame_sb_GX, textvariable=self.variant_info["VCF: FSRR"], relief='groove').grid(column=3, row=1, sticky='news', pady=5, padx=5)
-        tk.Label(self.frame_sb_GX, textvariable=self.variant_info["VCF: FSAF"], relief='groove').grid(column=2, row=2, sticky='news', pady=5, padx=5)
-        tk.Label(self.frame_sb_GX, textvariable=self.variant_info["VCF: FSAR"], relief='groove').grid(column=3, row=2, sticky='news', pady=5, padx=5)
+        self.labels['VCF: FSRF'] = tk.Label(self.frame_sb_GX, textvariable=self.variant["VCF: FSRF"], relief='groove')
+        self.labels['VCF: FSRF'].grid(column=2, row=1, sticky='news', pady=5, padx=5)
+        self.labels['VCF: FSRR'] = tk.Label(self.frame_sb_GX, textvariable=self.variant["VCF: FSRR"], relief='groove')
+        self.labels['VCF: FSRR'].grid(column=3, row=1, sticky='news', pady=5, padx=5)
+        self.labels['VCF: FSAF'] = tk.Label(self.frame_sb_GX, textvariable=self.variant["VCF: FSAF"], relief='groove')
+        self.labels['VCF: FSAF'].grid(column=2, row=2, sticky='news', pady=5, padx=5)
+        self.labels['VCF: FSAR'] = tk.Label(self.frame_sb_GX, textvariable=self.variant["VCF: FSAR"], relief='groove')
+        self.labels['VCF: FSAR'].grid(column=3, row=2, sticky='news', pady=5, padx=5)
         # Separator
         ttk.Separator(self.frame_sb_GX, orient='horizontal').grid(column=0, row=4, columnspan=4, sticky='ew', pady=5)
         self.frame_sb_GX_results = tk.Frame(self.frame_sb_GX)
@@ -304,17 +383,17 @@ class App(tk.Tk):
         self.frame_sb_GX_results.columnconfigure(3, weight=1)
         # Genexys Stats Area
         tk.Label(self.frame_sb_GX_results, text="Binomial Prop.", anchor='e').grid(column=0, row=0, sticky='news', padx=5)
-        self.label_GX_binom_GX = tk.Label(self.frame_sb_GX_results, textvariable=self.variant_info["VCF: Fisher Odds Ratio"], relief='groove', anchor='center')
-        self.label_GX_binom_GX.grid(column=1, row=0, sticky='news', pady=5, padx=5)
-        tk.Label(self.frame_sb_GX_results, text="p-val.", anchor='e').grid(column=2, row=0, sticky='news')
-        self.label_GX_binom_pval = tk.Label(self.frame_sb_GX_results, textvariable=self.variant_info["VCF: Fisher P Value"], relief='groove', anchor='center')
-        self.label_GX_binom_pval.grid(column=3, row=0, sticky='news', pady=5, padx=5)
-        tk.Label(self.frame_sb_GX_results, text="Fishers OR", anchor='e').grid(column=0, row=1, sticky='news', padx=5)
-        self.label_GX_fisher_or = tk.Label(self.frame_sb_GX_results, textvariable=self.variant_info["VCF: Binom Proportion"], relief='groove', anchor='center')
-        self.label_GX_fisher_or.grid(column=1, row=1, sticky='news', pady=5, padx=5)
+        self.labels["VCF: Binom Proportion"] = tk.Label(self.frame_sb_GX_results, textvariable=self.variant["VCF: Binom Proportion"], relief='groove', anchor='center')
+        self.labels["VCF: Binom Proportion"].grid(column=1, row=1, sticky='news', pady=5, padx=5)
         tk.Label(self.frame_sb_GX_results, text="p-val.", anchor='e').grid(column=2, row=1, sticky='news')
-        self.label_GX_fisher_or_pval = tk.Label(self.frame_sb_GX_results, textvariable=self.variant_info["VCF: Binom P Value"], relief='groove', anchor='center')
-        self.label_GX_fisher_or_pval.grid(column=3, row=1, sticky='news', pady=5, padx=5)
+        self.labels["VCF: Binom P Value"] = tk.Label(self.frame_sb_GX_results, textvariable=self.variant["VCF: Binom P Value"], relief='groove', anchor='center')
+        self.labels["VCF: Binom P Value"].grid(column=3, row=1, sticky='news', pady=5, padx=5)
+        tk.Label(self.frame_sb_GX_results, text="Fishers OR", anchor='e').grid(column=0, row=1, sticky='news', padx=5)
+        self.labels["VCF: Fisher Odds Ratio"] = tk.Label(self.frame_sb_GX_results, textvariable=self.variant["VCF: Fisher Odds Ratio"], relief='groove', anchor='center')
+        self.labels["VCF: Fisher Odds Ratio"].grid(column=1, row=0, sticky='news', pady=5, padx=5)
+        tk.Label(self.frame_sb_GX_results, text="p-val.", anchor='e').grid(column=2, row=0, sticky='news')
+        self.labels["VCF: Fisher P Value"] = tk.Label(self.frame_sb_GX_results, textvariable=self.variant["VCF: Fisher P Value"], relief='groove', anchor='center')
+        self.labels["VCF: Fisher P Value"].grid(column=3, row=0, sticky='news', pady=5, padx=5)
         # Q20 Read Bias Area
         self.frame_sb_Q20 = tk.LabelFrame(self.frame_genexys, text="Filtered M-Pileup")
         self.frame_sb_Q20.pack(side='top', expand=True, fill='both', padx=5, pady=5)
@@ -327,10 +406,14 @@ class App(tk.Tk):
         tk.Label(self.frame_sb_Q20, text='Reverse').grid(column=3, row=0, sticky='news', pady=(5,0), padx=5)
         tk.Label(self.frame_sb_Q20, text='Reference', anchor='e').grid(column=1, row=1, sticky='news', pady=5, padx=5)
         tk.Label(self.frame_sb_Q20, text='Variant', anchor='e').grid(column=1, row=2, sticky='news', pady=5, padx=5)
-        tk.Label(self.frame_sb_Q20, textvariable=self.variant_info["Mpileup Qual: Filtered Variant Forward Read Depth"], relief='groove').grid(column=2, row=1, sticky='news', pady=5, padx=5)
-        tk.Label(self.frame_sb_Q20, textvariable=self.variant_info["Mpileup Qual: Filtered Variant Reverse Read Depth"], relief='groove').grid(column=3, row=1, sticky='news', pady=5, padx=5)
-        tk.Label(self.frame_sb_Q20, textvariable=self.variant_info["Mpileup Qual: Filtered Reference Forward Read Depth"], relief='groove').grid(column=2, row=2, sticky='news', pady=5, padx=5)
-        tk.Label(self.frame_sb_Q20, textvariable=self.variant_info["Mpileup Qual: Filtered Reference Reverse Read Depth"], relief='groove').grid(column=3, row=2, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Filtered Variant Forward Read Depth"] = tk.Label(self.frame_sb_Q20, textvariable=self.variant["Mpileup Qual: Filtered Variant Forward Read Depth"], relief='groove')
+        self.labels["Mpileup Qual: Filtered Variant Forward Read Depth"].grid(column=2, row=1, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Filtered Variant Reverse Read Depth"] = tk.Label(self.frame_sb_Q20, textvariable=self.variant["Mpileup Qual: Filtered Variant Reverse Read Depth"], relief='groove')
+        self.labels["Mpileup Qual: Filtered Variant Reverse Read Depth"].grid(column=3, row=1, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Filtered Reference Forward Read Depth"] = tk.Label(self.frame_sb_Q20, textvariable=self.variant["Mpileup Qual: Filtered Reference Forward Read Depth"], relief='groove')
+        self.labels["Mpileup Qual: Filtered Reference Forward Read Depth"].grid(column=2, row=2, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Filtered Reference Reverse Read Depth"] = tk.Label(self.frame_sb_Q20, textvariable=self.variant["Mpileup Qual: Filtered Reference Reverse Read Depth"], relief='groove')
+        self.labels["Mpileup Qual: Filtered Reference Reverse Read Depth"].grid(column=3, row=2, sticky='news', pady=5, padx=5)
         # Separator
         ttk.Separator(self.frame_sb_Q20, orient='horizontal').grid(column=0, row=4, columnspan=4, sticky='ew', pady=5)
         self.frame_sb_Q20_results = tk.Frame(self.frame_sb_Q20)
@@ -343,17 +426,17 @@ class App(tk.Tk):
         self.frame_sb_Q20_results.columnconfigure(3, weight=1)
         # Q20 Stats Area
         tk.Label(self.frame_sb_Q20_results, text="Binomial Prop.", anchor='e').grid(column=0, row=0, sticky='news', padx=5)
-        self.label_mpl_binom_Q20 = tk.Label(self.frame_sb_Q20_results, textvariable=self.variant_info["Mpileup Qual: Filtered Variant Binomial Proportion"], relief='groove', anchor='center')
-        self.label_mpl_binom_Q20.grid(column=1, row=0, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Filtered Variant Binomial Proportion"] = tk.Label(self.frame_sb_Q20_results, textvariable=self.variant["Mpileup Qual: Filtered Variant Binomial Proportion"], relief='groove', anchor='center')
+        self.labels["Mpileup Qual: Filtered Variant Binomial Proportion"].grid(column=1, row=0, sticky='news', pady=5, padx=5)
         tk.Label(self.frame_sb_Q20_results, text="p-val.", anchor='e').grid(column=2, row=0, sticky='news')
-        self.label_mpl_binom_pval_Q20 = tk.Label(self.frame_sb_Q20_results, textvariable=self.variant_info["Mpileup Qual: Filtered Variant Binomial P Value"], relief='groove', anchor='center')
-        self.label_mpl_binom_pval_Q20.grid(column=3, row=0, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Filtered Variant Binomial P Value"] = tk.Label(self.frame_sb_Q20_results, textvariable=self.variant["Mpileup Qual: Filtered Variant Binomial P Value"], relief='groove', anchor='center')
+        self.labels["Mpileup Qual: Filtered Variant Binomial P Value"].grid(column=3, row=0, sticky='news', pady=5, padx=5)
         tk.Label(self.frame_sb_Q20_results, text="Fishers OR", anchor='e').grid(column=0, row=1, sticky='news', padx=5)
-        self.label_mpl_fisher_or_Q20 = tk.Label(self.frame_sb_Q20_results, textvariable=self.variant_info["Mpileup Qual: Filtered Variant Fishers Odds Ratio"], relief='groove', anchor='center')
-        self.label_mpl_fisher_or_Q20.grid(column=1, row=1, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Filtered Variant Fishers Odds Ratio"] = tk.Label(self.frame_sb_Q20_results, textvariable=self.variant["Mpileup Qual: Filtered Variant Fishers Odds Ratio"], relief='groove', anchor='center')
+        self.labels["Mpileup Qual: Filtered Variant Fishers Odds Ratio"].grid(column=1, row=1, sticky='news', pady=5, padx=5)
         tk.Label(self.frame_sb_Q20_results, text="p-val.", anchor='e').grid(column=2, row=1, sticky='news')
-        self.label_mpl_fisher_or_pval_Q20 = tk.Label(self.frame_sb_Q20_results, textvariable=self.variant_info["Mpileup Qual: Filtered Variant Fishers P Value"], relief='groove', anchor='center')
-        self.label_mpl_fisher_or_pval_Q20.grid(column=3, row=1, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Filtered Variant Fishers P Value"] = tk.Label(self.frame_sb_Q20_results, textvariable=self.variant["Mpileup Qual: Filtered Variant Fishers P Value"], relief='groove', anchor='center')
+        self.labels["Mpileup Qual: Filtered Variant Fishers P Value"].grid(column=3, row=1, sticky='news', pady=5, padx=5)
         # Q1 Read Bias Area
         self.frame_sb_Q1 = tk.LabelFrame(self.frame_genexys, text="Unfiltered M-Pileup")
         self.frame_sb_Q1.pack(side='top', expand=True, fill='both', padx=5, pady=5)
@@ -366,10 +449,14 @@ class App(tk.Tk):
         tk.Label(self.frame_sb_Q1, text='Reverse').grid(column=3, row=0, sticky='news', pady=(5,0), padx=5)
         tk.Label(self.frame_sb_Q1, text='Reference', anchor='e').grid(column=1, row=1, sticky='news', pady=5, padx=5)
         tk.Label(self.frame_sb_Q1, text='Variant', anchor='e').grid(column=1, row=2, sticky='news', pady=5, padx=5)
-        tk.Label(self.frame_sb_Q1, width=5, textvariable=self.variant_info["Mpileup Qual: Unfiltered Reference Forward Read Depth"], relief='groove').grid(column=2, row=2, sticky='news', pady=5, padx=5)
-        tk.Label(self.frame_sb_Q1, width=5, textvariable=self.variant_info["Mpileup Qual: Unfiltered Reference Reverse Read Depth"], relief='groove').grid(column=3, row=2, sticky='news', pady=5, padx=5)
-        tk.Label(self.frame_sb_Q1, width=5, textvariable=self.variant_info["Mpileup Qual: Unfiltered Variant Forward Read Depth"], relief='groove').grid(column=2, row=1, sticky='news', pady=5, padx=5)
-        tk.Label(self.frame_sb_Q1, width=5, textvariable=self.variant_info["Mpileup Qual: Unfiltered Variant Reverse Read Depth"], relief='groove').grid(column=3, row=1, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Unfiltered Reference Forward Read Depth"] = tk.Label(self.frame_sb_Q1, width=5, textvariable=self.variant["Mpileup Qual: Unfiltered Reference Forward Read Depth"], relief='groove')
+        self.labels["Mpileup Qual: Unfiltered Reference Forward Read Depth"].grid(column=2, row=2, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Unfiltered Reference Reverse Read Depth"] = tk.Label(self.frame_sb_Q1, width=5, textvariable=self.variant["Mpileup Qual: Unfiltered Reference Reverse Read Depth"], relief='groove')
+        self.labels["Mpileup Qual: Unfiltered Reference Reverse Read Depth"].grid(column=3, row=2, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Unfiltered Variant Forward Read Depth"] = tk.Label(self.frame_sb_Q1, width=5, textvariable=self.variant["Mpileup Qual: Unfiltered Variant Forward Read Depth"], relief='groove')
+        self.labels["Mpileup Qual: Unfiltered Variant Forward Read Depth"].grid(column=2, row=1, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Unfiltered Variant Reverse Read Depth"] = tk.Label(self.frame_sb_Q1, width=5, textvariable=self.variant["Mpileup Qual: Unfiltered Variant Reverse Read Depth"], relief='groove')
+        self.labels["Mpileup Qual: Unfiltered Variant Reverse Read Depth"].grid(column=3, row=1, sticky='news', pady=5, padx=5)
         # Separator
         ttk.Separator(self.frame_sb_Q1, orient='horizontal').grid(column=0, row=4, columnspan=4, sticky='ew', pady=5)
         self.frame_sb_Q1_results = tk.Frame(self.frame_sb_Q1)
@@ -382,17 +469,17 @@ class App(tk.Tk):
         self.frame_sb_Q1_results.columnconfigure(3, weight=1)
         # Q1 Stats Area
         tk.Label(self.frame_sb_Q1_results, text="Binomial Prop.", anchor='e').grid(column=0, row=0, sticky='news', padx=5)
-        self.label_mpl_binom_Q1 = tk.Label(self.frame_sb_Q1_results, textvariable=self.variant_info["Mpileup Qual: Unfiltered Variant Binomial Proportion"], relief='groove', anchor='center')
-        self.label_mpl_binom_Q1.grid(column=1, row=0, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Unfiltered Variant Binomial Proportion"] = tk.Label(self.frame_sb_Q1_results, textvariable=self.variant["Mpileup Qual: Unfiltered Variant Binomial Proportion"], relief='groove', anchor='center')
+        self.labels["Mpileup Qual: Unfiltered Variant Binomial Proportion"].grid(column=1, row=0, sticky='news', pady=5, padx=5)
         tk.Label(self.frame_sb_Q1_results, text="p-val.", anchor='e').grid(column=2, row=0, sticky='news')
-        self.label_mpl_binom_pval_Q1 = tk.Label(self.frame_sb_Q1_results, textvariable=self.variant_info["Mpileup Qual: Unfiltered Variant Binomial P Value"], relief='groove', anchor='center')
-        self.label_mpl_binom_pval_Q1.grid(column=3, row=0, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Unfiltered Variant Binomial P Value"] = tk.Label(self.frame_sb_Q1_results, textvariable=self.variant["Mpileup Qual: Unfiltered Variant Binomial P Value"], relief='groove', anchor='center')
+        self.labels["Mpileup Qual: Unfiltered Variant Binomial P Value"].grid(column=3, row=0, sticky='news', pady=5, padx=5)
         tk.Label(self.frame_sb_Q1_results, text="Fishers OR", anchor='e').grid(column=0, row=1, sticky='news', padx=5)
-        self.label_mpl_fisher_or_Q1 = tk.Label(self.frame_sb_Q1_results, textvariable=self.variant_info["Mpileup Qual: Unfiltered Variant Fishers Odds Ratio"], relief='groove', anchor='center')
-        self.label_mpl_fisher_or_Q1.grid(column=1, row=1, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Unfiltered Variant Fishers Odds Ratio"] = tk.Label(self.frame_sb_Q1_results, textvariable=self.variant["Mpileup Qual: Unfiltered Variant Fishers Odds Ratio"], relief='groove', anchor='center')
+        self.labels["Mpileup Qual: Unfiltered Variant Fishers Odds Ratio"].grid(column=1, row=1, sticky='news', pady=5, padx=5)
         tk.Label(self.frame_sb_Q1_results, text="p-val.", anchor='e').grid(column=2, row=1, sticky='news')
-        self.label_mpl_fisher_or_pval_Q1 = tk.Label(self.frame_sb_Q1_results, textvariable=self.variant_info["Mpileup Qual: Unfiltered Variant Fishers P Value"], relief='groove', anchor='center')
-        self.label_mpl_fisher_or_pval_Q1.grid(column=3, row=1, sticky='news', pady=5, padx=5)
+        self.labels["Mpileup Qual: Unfiltered Variant Fishers P Value"] = tk.Label(self.frame_sb_Q1_results, textvariable=self.variant["Mpileup Qual: Unfiltered Variant Fishers P Value"], relief='groove', anchor='center')
+        self.labels["Mpileup Qual: Unfiltered Variant Fishers P Value"].grid(column=3, row=1, sticky='news', pady=5, padx=5)
 
         # MPL Info Frame------------------------------------------------
         self.frame_other = tk.LabelFrame(self.frame_middle, text='Other Data')
@@ -402,56 +489,80 @@ class App(tk.Tk):
         self.frame_other.columnconfigure(2, weight=0)
         self.frame_other.columnconfigure(3, weight=1)
         tk.Label(self.frame_other, text="Allele Fraction", anchor='e').grid(column=0, row=0, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["VCF: AF"], relief='groove').grid(column=1, columnspan=3, row=0, sticky='news')
+        self.labels["VCF: AF"] = tk.Label(self.frame_other, textvariable=self.variant["VCF: AF"], relief='groove')
+        self.labels["VCF: AF"].grid(column=1, columnspan=3, row=0, sticky='news')
         tk.Label(self.frame_other, text="FAO", anchor='e').grid(column=0, row=1, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["VCF: FAO"], relief='groove').grid(column=1, columnspan=3, row=1, sticky='news')
+        self.labels["VCF: FAO"] = tk.Label(self.frame_other, textvariable=self.variant["VCF: FAO"], relief='groove')
+        self.labels["VCF: FAO"].grid(column=1, columnspan=3, row=1, sticky='news')
         tk.Label(self.frame_other, text="FDP", anchor='e').grid(column=0, row=2, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["VCF: FDP"], relief='groove').grid(column=1, columnspan=3, row=2, sticky='news')
+        self.labels["VCF: FDP"] = tk.Label(self.frame_other, textvariable=self.variant["VCF: FDP"], relief='groove')
+        self.labels["VCF: FDP"].grid(column=1, columnspan=3, row=2, sticky='news')
         tk.Label(self.frame_other, text="HRUN", anchor='e').grid(column=0, row=3, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["VCF: HRUN"], relief='groove').grid(column=1, columnspan=3, row=3, sticky='news')
+        self.labels["VCF: HRUN"] = tk.Label(self.frame_other, textvariable=self.variant["VCF: HRUN"], relief='groove')
+        self.labels["VCF: HRUN"].grid(column=1, columnspan=3, row=3, sticky='news')
         tk.Label(self.frame_other, text="Filter (Genexys)", anchor='e').grid(column=0, row=4, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["VCF: Filter"], relief='groove').grid(column=1, columnspan=3, row=4, sticky='news')
+        self.labels["VCF: Filter"] = tk.Label(self.frame_other, textvariable=self.variant["VCF: Filter"], relief='groove')
+        self.labels["VCF: Filter"].grid(column=1, columnspan=3, row=4, sticky='news')
         tk.Label(self.frame_other, text="Genotype", anchor='e').grid(column=0, row=5, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["VCF: Genotype"], relief='groove').grid(column=1, columnspan=3, row=5, sticky='news')
+        self.labels["VCF: Genotype"] = tk.Label(self.frame_other, textvariable=self.variant["VCF: Genotype"], relief='groove')
+        self.labels["VCF: Genotype"].grid(column=1, columnspan=3, row=5, sticky='news')
         tk.Label(self.frame_other, text="Length of Variant (BP)", anchor='e').grid(column=0, row=6, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["VCF: LEN"], relief='groove').grid(column=1, columnspan=3, row=6, sticky='news')
+        self.labels["VCF: LEN"] = tk.Label(self.frame_other, textvariable=self.variant["VCF: LEN"], relief='groove')
+        self.labels["VCF: LEN"].grid(column=1, columnspan=3, row=6, sticky='news')
         tk.Label(self.frame_other, text="QD", anchor='e').grid(column=0, row=7, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["VCF: QD"], relief='groove').grid(column=1, columnspan=3, row=7, sticky='news')
+        self.labels["VCF: QD"] = tk.Label(self.frame_other, textvariable=self.variant["VCF: QD"], relief='groove')
+        self.labels["VCF: QD"].grid(column=1, columnspan=3, row=7, sticky='news')
         tk.Label(self.frame_other, text="Strand Bias Calc. (Genexys)", anchor='e').grid(column=0, row=8, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["VCF: STB"], relief='groove').grid(column=1, row=8, sticky='news')
+        self.labels["VCF: STB"] = tk.Label(self.frame_other, textvariable=self.variant["VCF: STB"], relief='groove')
+        self.labels["VCF: STB"].grid(column=1, row=8, sticky='news')
         tk.Label(self.frame_other, text="p-val.", anchor='e').grid(column=2, row=8, sticky='news', padx=5)
-        self.label_sb_vcf_pval = tk.Label(self.frame_other, textvariable=self.variant_info["VCF: STBP"], relief='groove')
-        self.label_sb_vcf_pval.grid(column=3, row=8, sticky='news')
+        self.labels["VCF: STBP"] = tk.Label(self.frame_other, textvariable=self.variant["VCF: STBP"], relief='groove')
+        self.labels["VCF: STBP"].grid(column=3, row=8, sticky='news')
         tk.Label(self.frame_other, text="SVTYPE (Unused)", anchor='e').grid(column=0, row=10, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["VCF: SVTYPE"], relief='groove').grid(column=1, columnspan=3, row=10, sticky='news')
+        self.labels["VCF: SVTYPE"] = tk.Label(self.frame_other, textvariable=self.variant["VCF: SVTYPE"], relief='groove')
+        self.labels["VCF: SVTYPE"].grid(column=1, columnspan=3, row=10, sticky='news')
         tk.Label(self.frame_other, text="Variant Type", anchor='e').grid(column=0, row=11, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["VCF: TYPE"], relief='groove').grid(column=1, columnspan=3, row=11, sticky='news')
+        self.labels["VCF: TYPE"] = tk.Label(self.frame_other, textvariable=self.variant["VCF: TYPE"], relief='groove')
+        self.labels["VCF: TYPE"].grid(column=1, columnspan=3, row=11, sticky='news')
         tk.Label(self.frame_other, text="Quality Score", anchor='e').grid(column=0, row=12, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["VCF: QUAL"], relief='groove').grid(column=1, columnspan=3, row=12, sticky='news')
+        self.labels["VCF: QUAL"] = tk.Label(self.frame_other, textvariable=self.variant["VCF: QUAL"], relief='groove')
+        self.labels["VCF: QUAL"].grid(column=1, columnspan=3, row=12, sticky='news')
         tk.Label(self.frame_other, text="Total Read Depth", anchor='e').grid(column=0, row=13, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["Mpileup Qual: Read Depth"], relief='groove').grid(column=1, columnspan=3, row=13, sticky='news')
+        self.labels["Mpileup Qual: Read Depth"] = tk.Label(self.frame_other, textvariable=self.variant["Mpileup Qual: Read Depth"], relief='groove')
+        self.labels["Mpileup Qual: Read Depth"].grid(column=1, columnspan=3, row=13, sticky='news')
         tk.Label(self.frame_other, text="Read Start-Point Count", anchor='e').grid(column=0, row=14, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["Mpileup Qual: Start Reads"], relief='groove').grid(column=1, columnspan=3, row=14, sticky='news')
+        self.labels["Mpileup Qual: Start Reads"] = tk.Label(self.frame_other, textvariable=self.variant["Mpileup Qual: Start Reads"], relief='groove')
+        self.labels["Mpileup Qual: Start Reads"].grid(column=1, columnspan=3, row=14, sticky='news')
         tk.Label(self.frame_other, text="Read End-Point Count", anchor='e').grid(column=0, row=15, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["Mpileup Qual: Stop Reads"], relief='groove').grid(column=1, columnspan=3, row=15, sticky='news')
+        self.labels["Mpileup Qual: Stop Reads"] = tk.Label(self.frame_other, textvariable=self.variant["Mpileup Qual: Stop Reads"], relief='groove')
+        self.labels["Mpileup Qual: Stop Reads"].grid(column=1, columnspan=3, row=15, sticky='news')
         tk.Label(self.frame_other, text="Variant Annotation: Coding", anchor='e').grid(column=0, row=17, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["Variant Annotation: Coding"], relief='groove').grid(column=1, columnspan=3, row=17, sticky='news')
+        self.labels["Variant Annotation: Coding"] = tk.Label(self.frame_other, textvariable=self.variant["Variant Annotation: Coding"], relief='groove')
+        self.labels["Variant Annotation: Coding"].grid(column=1, columnspan=3, row=17, sticky='news')
         tk.Label(self.frame_other, text="Variant Annotation: Sequence Ontology", anchor='e').grid(column=0, row=18, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["Variant Annotation: Sequence Ontology"], relief='groove').grid(column=1, columnspan=3, row=18, sticky='news')
+        self.labels["Variant Annotation: Sequence"] = tk.Label(self.frame_other, textvariable=self.variant["Variant Annotation: Sequence Ontology"], relief='groove')
+        self.labels["Variant Annotation: Sequence"].grid(column=1, columnspan=3, row=18, sticky='news')
         tk.Label(self.frame_other, text="Variant Annotation: Transcript", anchor='e').grid(column=0, row=19, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["Variant Annotation: Transcript"], relief='groove').grid(column=1, columnspan=3, row=19, sticky='news')
+        self.labels["Variant Annotation: Transcript"] = tk.Label(self.frame_other, textvariable=self.variant["Variant Annotation: Transcript"], relief='groove')
+        self.labels["Variant Annotation: Transcript"].grid(column=1, columnspan=3, row=19, sticky='news')
         tk.Label(self.frame_other, text="Variant Annotation: All Mappings", anchor='e').grid(column=0, row=20, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["Variant Annotation: All Mappings"], relief='groove', wraplength=800).grid(column=1, columnspan=3, row=20, sticky='news')
+        self.labels["Variant Annotation: All Mappings"] = tk.Label(self.frame_other, textvariable=self.variant["Variant Annotation: All Mappings"], relief='groove', wraplength=800)
+        self.labels["Variant Annotation: All Mappings"].grid(column=1, columnspan=3, row=20, sticky='news')
         tk.Label(self.frame_other, text="UniProt (GENE): Accession Number", anchor='e').grid(column=0, row=21, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["UniProt (GENE): Accession Number"], relief='groove').grid(column=1, columnspan=3, row=21, sticky='news')
+        self.labels["UniProt (GENE): Accession Number"] = tk.Label(self.frame_other, textvariable=self.variant["UniProt (GENE): Accession Number"], relief='groove')
+        self.labels["UniProt (GENE): Accession Number"].grid(column=1, columnspan=3, row=21, sticky='news')
         tk.Label(self.frame_other, text="dbSNP: rsID", anchor='e').grid(column=0, row=22, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["dbSNP: rsID"], relief='groove').grid(column=1, columnspan=3, row=22, sticky='news')
+        self.labels["dbSNP: rsID"] = tk.Label(self.frame_other, textvariable=self.variant["dbSNP: rsID"], relief='groove')
+        self.labels["dbSNP: rsID"].grid(column=1, columnspan=3, row=22, sticky='news')
         tk.Label(self.frame_other, text="MDL: Sample Count", anchor='e').grid(column=0, row=23, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["MDL: Sample Count"], relief='groove').grid(column=1, columnspan=3, row=23, sticky='news')
+        self.labels["MDL: Sample Count"] = tk.Label(self.frame_other, textvariable=self.variant["MDL: Sample Count"], relief='groove')
+        self.labels["MDL: Sample Count"].grid(column=1, columnspan=3, row=23, sticky='news')
         tk.Label(self.frame_other, text="MDL: Variant Frequency", anchor='e').grid(column=0, row=24, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["MDL: Variant Frequency"], relief='groove').grid(column=1, columnspan=3, row=24, sticky='news')
+        self.labels["MDL: Variant Frequency"]  = tk.Label(self.frame_other, textvariable=self.variant["MDL: Variant Frequency"], relief='groove')
+        self.labels["MDL: Variant Frequency"].grid(column=1, columnspan=3, row=24, sticky='news')
         tk.Label(self.frame_other, text="MDL: Sample List", anchor='e').grid(column=0, row=25, sticky='news', padx=5)
-        tk.Label(self.frame_other, textvariable=self.variant_info["MDL: Sample List"], relief='groove', wraplength=800).grid(column=1, columnspan=3, row=25, sticky='news')
+        self.labels["MDL: Sample List"] = tk.Label(self.frame_other, textvariable=self.variant["MDL: Sample List"], relief='groove', wraplength=800)
+        self.labels["MDL: Sample List"].grid(column=1, columnspan=3, row=25, sticky='news')
 
         # # MPL Listed Stats
         self.frame_bottom = tk.LabelFrame(self.frame_right, text='Web Information')
@@ -464,102 +575,108 @@ class App(tk.Tk):
         self.frame_bottom_2.grid(column=1, row=0, sticky='news')
 
         # COSMIC Tissue Variant Count Region
-        self.label_cosmic_count_tissue = tk.Label(self.frame_bottom_l, textvariable=self.variant_info["COSMIC: Variant Count (Tissue)"], relief='groove', wraplength=600)
-        self.label_cosmic_count_tissue.pack(side='left', expand=True, fill='both', padx=5, pady=5)
+        self.labels["COSMIC: Variant Count (Tissue)"] = tk.Label(self.frame_bottom_l, textvariable=self.variant["COSMIC: Variant Count (Tissue)"], relief='groove', wraplength=600)
+        self.labels["COSMIC: Variant Count (Tissue)"].pack(side='left', expand=True, fill='both', padx=5, pady=5)
         # COSMIC Area
         self.frame_web_cosmic = ttk.LabelFrame(self.frame_bottom_2, text='COSMIC')
         self.frame_web_cosmic.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_cosmic, text="ID", anchor='center').pack(side='top', expand=False, fill='x', padx=5)
-        self.label_cosmic_id = tk.Label(self.frame_web_cosmic, textvariable=self.variant_info["COSMIC: ID"], relief='groove', width=12)
-        self.label_cosmic_id.pack(side='top', expand=True, fill='both', padx=5, pady=5)
+        self.labels["COSMIC: ID"] = tk.Label(self.frame_web_cosmic, textvariable=self.variant["COSMIC: ID"], relief='groove', width=12)
+        self.labels["COSMIC: ID"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_cosmic, text="Count").pack(side='top', expand=False, fill='x', padx=5)
-        self.label_cosmic_count = tk.Label(self.frame_web_cosmic, textvariable=self.variant_info["COSMIC: Variant Count"], relief='groove')
-        self.label_cosmic_count.pack(side='top', expand=True, fill='both', padx=5, pady=5)
+        self.labels["COSMIC: Variant Count"] = tk.Label(self.frame_web_cosmic, textvariable=self.variant["COSMIC: Variant Count"], relief='groove')
+        self.labels["COSMIC: Variant Count"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         # Clinvar Area
         self.frame_web_clinvar = ttk.LabelFrame(self.frame_bottom_2, text='ClinVar')
         self.frame_web_clinvar.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_clinvar, text="ID").pack(side='top', expand=False, fill='x', padx=5)
-        self.label_clinvar_id = tk.Label(self.frame_web_clinvar, textvariable=self.variant_info["ClinVar: ClinVar ID"], relief='groove')
-        self.label_clinvar_id.pack(side='top', expand=True, fill='both', padx=5, pady=5)
+        self.labels["ClinVar: ClinVar ID"] = tk.Label(self.frame_web_clinvar, textvariable=self.variant["ClinVar: ClinVar ID"], relief='groove')
+        self.labels["ClinVar: ClinVar ID"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_clinvar, text="Significance").pack(side='top', expand=False, fill='x', padx=5)
-        self.label_clinvar_sig = tk.Label(self.frame_web_clinvar, textvariable=self.variant_info["ClinVar: Clinical Significance"], relief='groove')
-        self.label_clinvar_sig.pack(side='top', expand=True, fill='both', padx=5, pady=5)
+        self.labels["ClinVar: Clinical Significance"] = tk.Label(self.frame_web_clinvar, textvariable=self.variant["ClinVar: Clinical Significance"], relief='groove')
+        self.labels["ClinVar: Clinical Significance"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         # Gnomad Area
         self.frame_web_gnomad = ttk.LabelFrame(self.frame_bottom_2, text='GnomAD')
         self.frame_web_gnomad.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_gnomad, text="Global AF").pack(side='top', expand=False, fill='x', padx=5)
-        self.label_gnomad_global_af = tk.Label(self.frame_web_gnomad, textvariable=self.variant_info["gnomAD3: Global AF"], relief='groove')
-        self.label_gnomad_global_af.pack(side='top', expand=True, fill='both', padx=5, pady=5)
+        self.labels["gnomAD3: Global AF"] = tk.Label(self.frame_web_gnomad, textvariable=self.variant["gnomAD3: Global AF"], relief='groove')
+        self.labels["gnomAD3: Global AF"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         # CADD Area
         self.frame_web_cadd = ttk.LabelFrame(self.frame_bottom_2, text='CADD')
         self.frame_web_cadd.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_cadd, text="Phred Score").pack(side='top', expand=False, fill='x', padx=5)
-        self.label_cadd_phred = tk.Label(self.frame_web_cadd, textvariable=self.variant_info["CADD: Phred"], relief='groove')
-        self.label_cadd_phred.pack(side='top', expand=True, fill='both', padx=5, pady=5)
+        self.labels["CADD: Phred"] = tk.Label(self.frame_web_cadd, textvariable=self.variant["CADD: Phred"], relief='groove')
+        self.labels["CADD: Phred"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         # PolyPhen Area
         self.frame_web_polyphen = ttk.LabelFrame(self.frame_bottom_2, text='PolyPhen-2')
         self.frame_web_polyphen.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_polyphen, text="HDIV").pack(side='top', expand=False, fill='x', padx=5)
-        self.label_polyphen_predict = tk.Label(self.frame_web_polyphen, textvariable=self.variant_info["PolyPhen-2: HDIV Prediction"], relief='groove')
-        self.label_polyphen_predict.pack(side='top', expand=True, fill='both', padx=5, pady=5)
+        self.labels["PolyPhen-2: HDIV Prediction"] = tk.Label(self.frame_web_polyphen, textvariable=self.variant["PolyPhen-2: HDIV Prediction"], relief='groove')
+        self.labels["PolyPhen-2: HDIV Prediction"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         # SIFT Area
         self.frame_web_sift = ttk.LabelFrame(self.frame_bottom_2, text='SIFT')
         self.frame_web_sift.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_sift, text="Prediction").pack(side='top', expand=False, fill='x', padx=5)
-        self.label_sift_predict = tk.Label(self.frame_web_sift, textvariable=self.variant_info["SIFT: Prediction"], relief='groove')
-        self.label_sift_predict.pack(side='top', expand=True, fill='both', padx=5, pady=5)
+        self.labels["SIFT: Prediction"] = tk.Label(self.frame_web_sift, textvariable=self.variant["SIFT: Prediction"], relief='groove')
+        self.labels["SIFT: Prediction"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         
+        for key,value in tooltips.items():
+            CreateToolTip(self.labels[key], value)
+
         return
     
     def validate_cells(self):
 
         for x in vcf_columns:
-            self.labels[x]['bg'] = 'white'
-            self.labels[x]['fg'] = 'black'
+            self.labels[x]['bg'] = self.color_enabled
+            self.labels[x]['fg'] = self.color_normal
 
-        # P-Value Fields
-        self.label_GX_binom_pval['fg'] = 'black'
-        if self.variant_info["VCF: Binom P Value"].get():
-            if float(self.variant_info["VCF: Binom P Value"].get()) > 0.05:
-                self.label_GX_binom_pval['fg'] = self.warning_color
+            if not self.variant[x].get():
+                self.labels[x]['bg'] = self.color_disabled
+                continue
 
-        self.label_GX_fisher_or_pval['fg'] = 'black'
-        if self.variant_info["VCF: Fisher P Value"].get():
-            if float(self.variant_info["VCF: Fisher P Value"].get()) > 0.05:
-                self.label_GX_fisher_or_pval['fg'] = self.warning_color
+            if x in self.validation['p-values']:
+                if float(self.variant[x].get()) > 0.05:
+                    self.labels[x]['fg'] = self.color_warning
 
-        self.label_mpl_binom_pval_Q20['fg'] = 'black'
-        if self.variant_info["Mpileup Qual: Filtered Variant Binomial P Value"].get():
-            if float(self.variant_info["Mpileup Qual: Filtered Variant Binomial P Value"].get()) > 0.05:
-                self.label_mpl_binom_pval_Q20['fg'] = self.warning_color
+        # # P-Value Fields
+        # if self.variant["VCF: Binom P Value"].get():
+        #     if float(self.variant["VCF: Binom P Value"].get()) > 0.05:
+        #         self.labels["VCF: Binom P Value"]['fg'] = self.color_warning
+        # else:
+        #     self.variant["VCF: Binom P Value"]['bg'] = self.color_disabled
 
-        self.label_mpl_fisher_or_pval_Q20['fg'] = 'black'
-        if self.variant_info["Mpileup Qual: Filtered Variant Fishers P Value"].get():
-            if float(self.variant_info["Mpileup Qual: Filtered Variant Fishers P Value"].get()) > 0.05:
-                self.label_mpl_fisher_or_pval_Q20['fg'] = self.warning_color
+        # if self.variant["VCF: Fisher P Value"].get():
+        #     if float(self.variant["VCF: Fisher P Value"].get()) > 0.05:
+        #         self.labels["VCF: Fisher P Value"]['fg'] = self.color_warning
 
-        self.label_mpl_binom_pval_Q1['fg'] = 'black'
-        if self.variant_info["Mpileup Qual: Unfiltered Variant Binomial P Value"].get():
-            if float(self.variant_info["Mpileup Qual: Unfiltered Variant Binomial P Value"].get()) > 0.05:
-                self.label_mpl_binom_pval_Q1['fg'] = self.warning_color
+        # if self.variant["Mpileup Qual: Filtered Variant Binomial P Value"].get():
+        #     if float(self.variant["Mpileup Qual: Filtered Variant Binomial P Value"].get()) > 0.05:
+        #         self.labels["Mpileup Qual: Filtered Variant Binomial P Value"]['fg'] = self.color_warning
 
-        self.label_mpl_fisher_or_pval_Q1['fg'] = 'black'
-        if self.variant_info["Mpileup Qual: Unfiltered Variant Fishers P Value"].get():
-            if float(self.variant_info["Mpileup Qual: Unfiltered Variant Fishers P Value"].get()) > 0.05:
-                self.label_mpl_fisher_or_pval_Q1['fg'] = self.warning_color
+        # if self.variant["Mpileup Qual: Filtered Variant Fishers P Value"].get():
+        #     if float(self.variant["Mpileup Qual: Filtered Variant Fishers P Value"].get()) > 0.05:
+        #         self.labels["Mpileup Qual: Filtered Variant Fishers P Value"]['fg'] = self.color_warning
 
-        self.label_sb_vcf_pval['fg'] = 'black'
-        if self.variant_info["VCF: STBP"].get():
-            if float(self.variant_info["VCF: STBP"].get()) > 0.05:
-                self.label_sb_vcf_pval['fg'] = self.warning_color
+        # if self.variant["Mpileup Qual: Unfiltered Variant Binomial P Value"].get():
+        #     if float(self.variant["Mpileup Qual: Unfiltered Variant Binomial P Value"].get()) > 0.05:
+        #         self.labels["Mpileup Qual: Unfiltered Variant Binomial P Value"]['fg'] = self.color_warning
+
+        # if self.variant["Mpileup Qual: Unfiltered Variant Fishers P Value"].get():
+        #     if float(self.variant["Mpileup Qual: Unfiltered Variant Fishers P Value"].get()) > 0.05:
+        #         self.labels["Mpileup Qual: Unfiltered Variant Fishers P Value"]['fg'] = self.color_warning
+
+        # if self.variant["VCF: STBP"].get():
+        #     if float(self.variant["VCF: STBP"].get()) > 0.05:
+        #         self.labels["VCF: STBP"]['fg'] = self.color_warning
 
         return
 
     def loadCSV(self):
 
         csv_dict = dict()
-        self.filename.set(str(fd.askopenfilename(filetypes=[('CSV','*.csv')])))
-        with open(self.filename.get(), 'r') as csv_file:
+        self.vars['filename'].set(str(fd.askopenfilename(filetypes=[('CSV','*.csv')])))
+        with open(self.vars['filename'].get(), 'r') as csv_file:
             counter = 0
             for row in csv.DictReader(csv_file, fieldnames=vcf_columns, delimiter='\t'):
                 if counter != 0:
@@ -586,7 +703,7 @@ class App(tk.Tk):
             record = item['values']
 
             for x in range(len(vcf_columns)):
-                self.variant_info[vcf_columns[x]].set(record[x])
+                self.variant[vcf_columns[x]].set(record[x])
 
         self.validate_cells()
 
