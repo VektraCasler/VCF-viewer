@@ -5,7 +5,7 @@
 
 import tkinter as tk 
 from tkinter import filedialog as fd
-import tkinter.ttk as ttk 
+import ttkbootstrap as ttk 
 import os 
 import csv
 import json
@@ -143,6 +143,7 @@ class App(tk.Tk):
         self.grid_columnconfigure(0, weight=1)
         self.geometry('600x400')
 
+
         # Variables
         self.filename = tk.StringVar()
         self.filename.set('No CSV File Loaded')
@@ -157,21 +158,35 @@ class App(tk.Tk):
         for x in vcf_columns:
             self.variant_info[x] = tk.StringVar()
         
+
         # Base Frame
-        self.base_frame = tk.Frame(self)
-        self.base_frame.columnconfigure(0, weight=1)
-        self.base_frame.columnconfigure(1, weight=99)
-        self.base_frame.rowconfigure(0, weight=1)
-        self.base_frame.grid(column=0,row=0, sticky='nsew')
+        self.base_frame = tk.Frame(self, bg='#123456')
+        # self.base_frame.columnconfigure(0, weight=1)
+        # self.base_frame.columnconfigure(1, weight=99)
+        # self.base_frame.rowconfigure(0, weight=1)
+        # self.base_frame.grid(column=0,row=0, sticky='nsew')
+        self.base_frame.pack(expand=True, fill='both')
         
         # Left Frame
-        self.frame_left = tk.LabelFrame(self.base_frame, text="VCF File Info")
-        self.frame_left.grid(column=0, row=0, sticky='wens', ipadx=5, ipady=5, padx=10, pady=10)
-        self.frame_left.columnconfigure(0, weight=5)
-        self.frame_left.columnconfigure(1, weight=1)
-        self.frame_left.rowconfigure(0, weight=1)
-        self.frame_left.rowconfigure(1, weight=1)
-        self.frame_left.rowconfigure(2, weight=99)
+        self.frame_left = tk.LabelFrame(self.base_frame, text="VCF File Info", bg="#236745")
+        # self.frame_left.grid(column=0, row=0, sticky='wens', ipadx=5, ipady=5, padx=10, pady=10)
+        # self.frame_left.columnconfigure(0, weight=5)
+        # self.frame_left.columnconfigure(1, weight=1)
+        # self.frame_left.rowconfigure(0, weight=1)
+        # self.frame_left.rowconfigure(1, weight=1)
+        # self.frame_left.rowconfigure(2, weight=99)
+        self.frame_left.pack(side='left', expand=False, fill='y')
+
+        # Right Frame------------------------------------------------
+        self.frame_right = tk.Frame(self.base_frame, bg='#894567')
+        # self.frame_right.columnconfigure(0, weight=1)
+        # self.frame_right.columnconfigure(1, weight=1)
+        # self.frame_right.rowconfigure(0,weight=0)
+        # self.frame_right.rowconfigure(1,weight=1)
+        # self.frame_right.rowconfigure(2,weight=1)
+        # self.frame_right.grid(column=1, row=0, sticky='nsew', ipadx=5, ipady=5)
+        self.frame_right.pack(side='left', expand=True, fill='both')
+
 
         # Left Frame widgets
         tk.Button(self.frame_left, text="Load a CSV File", command=self.loadCSV).grid(column=0, row=0, columnspan=2, sticky='news', padx=5, pady=5)
@@ -194,42 +209,37 @@ class App(tk.Tk):
 
         # Disposition Frame
         # tk.Button(self.frame_left, text="Load a CSV File", command=self.loadCSV).grid(column=0, row=9, columnspan=2, sticky='news', padx=5, pady=5)
-        self.disposition_frame = tk.LabelFrame(self.frame_left, text="Disposition")
+        self.disposition_frame = tk.LabelFrame(self.frame_left, text="Variant Disposition")
         self.disposition_frame.grid(column=0, columnspan=2, row=9, sticky='news', padx=10, pady=10)
-        self.disposition_frame.rowconfigure(0, weight=1)
         for x in range(4):
-            self.disposition_frame.columnconfigure(x, weight=1)
-        tk.Label(self.disposition_frame, text='NA').grid(row=0, column=0)
-        tk.Label(self.disposition_frame, text='???').grid(row=0, column=1)
-        tk.Label(self.disposition_frame, text='VUS').grid(row=0, column=2)
-        tk.Label(self.disposition_frame, text='Mut').grid(row=0, column=3)
+            self.disposition_frame.rowconfigure(x,weight=1)
+        self.disposition_frame.columnconfigure(1, weight=1)
+        # tk.Label(self.disposition_frame, text='None').grid(row=0, column=1)
+        # tk.Label(self.disposition_frame, text='Low VAF').grid(row=1, column=1)
+        # tk.Label(self.disposition_frame, text='VUS').grid(row=2, column=1)
+        # tk.Label(self.disposition_frame, text='Mutations').grid(row=3, column=1)
         
-        self.radio_none = tk.Radiobutton(self.disposition_frame, text="1", variable=self.disposition, anchor='center')
-        self.radio_none.grid(row=1, column=0, sticky='news')
-        self.radio_unknown = tk.Radiobutton(self.disposition_frame, text="2", variable=self.disposition, anchor='center')
+        self.radio_none = tk.Radiobutton(self.disposition_frame, text="Unassigned", variable=self.disposition, anchor='w')
+        self.radio_none.grid(row=0, column=1, sticky='news')
+        self.radio_unknown = tk.Radiobutton(self.disposition_frame, text="Low VAF", variable=self.disposition, anchor='w')
         self.radio_unknown.grid(row=1, column=1, sticky='news')
-        self.radio_VUS = tk.Radiobutton(self.disposition_frame, text="3", variable=self.disposition, anchor='center')
-        self.radio_VUS.grid(row=1, column=2, sticky='news')
-        self.radio_mutation = tk.Radiobutton(self.disposition_frame, text="4", variable=self.disposition, anchor='center')
-        self.radio_mutation.grid(row=1, column=3, sticky='news')
+        self.radio_VUS = tk.Radiobutton(self.disposition_frame, text="VUS", variable=self.disposition, anchor='w')
+        self.radio_VUS.grid(row=2, column=1, sticky='news')
+        self.radio_mutation = tk.Radiobutton(self.disposition_frame, text="Harmful", variable=self.disposition, anchor='w')
+        self.radio_mutation.grid(row=3, column=1, sticky='news')
         
-        tk.Label(self.disposition_frame, textvariable=self.dispo_none_count).grid(row=2, column=0, sticky='ns', padx=5)
-        tk.Label(self.disposition_frame, textvariable=self.dispo_unknown_count).grid(row=2, column=1, sticky='ns', padx=5)
-        tk.Label(self.disposition_frame, textvariable=self.dispo_VUS_count).grid(row=2, column=2, sticky='ns', padx=5)
-        tk.Label(self.disposition_frame, textvariable=self.dispo_mutation_count).grid(row=2, column=3, sticky='ns', padx=5)
+        self.label_none_count = tk.Label(self.disposition_frame, textvariable=self.dispo_none_count)
+        self.label_none_count.grid(row=0, column=0, sticky='ns', padx=5)
+        self.label_low_vaf_count = tk.Label(self.disposition_frame, textvariable=self.dispo_unknown_count)
+        self.label_low_vaf_count.grid(row=1, column=0, sticky='ns', padx=5)
+        self.label_vus_count = tk.Label(self.disposition_frame, textvariable=self.dispo_VUS_count)
+        self.label_vus_count.grid(row=2, column=0, sticky='ns', padx=5)
+        self.label_mutation_count = tk.Label(self.disposition_frame, textvariable=self.dispo_mutation_count)
+        self.label_mutation_count.grid(row=3, column=0, sticky='ns', padx=5)
         
         tk.Button(self.frame_left, text="Load a CSV File", command=self.loadCSV).grid(column=0, row=99, columnspan=4, sticky='news', padx=5, pady=5)
 
 
-        # Right Frame------------------------------------------------
-        self.frame_right = tk.Frame(self.base_frame)
-        self.frame_right.columnconfigure(0, weight=1)
-        self.frame_right.columnconfigure(1, weight=1)
-        self.frame_right.rowconfigure(0,weight=0)
-        self.frame_right.rowconfigure(1,weight=1)
-        self.frame_right.rowconfigure(2,weight=1)
-
-        self.frame_right.grid(column=1, row=0, sticky='nsew', ipadx=5, ipady=5)
 
         # Basic Info Frame-------------------------------------------
         self.BI_frame = tk.LabelFrame(self.frame_right, text='Locus Info')
@@ -320,31 +330,31 @@ class App(tk.Tk):
         tk.Label(self.GX_frame, textvariable=self.variant_info["Mpileup Qual: Filtered Variant Fishers P Value"], relief='sunken', bg='#FFFFFF').grid(column=3, row=25, sticky='news', pady=5, padx=10, ipady=5)
 
         tk.Label(self.GX_frame, text="Allele Fraction").grid(column=0, row=0, sticky='news')
-        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: AF"]).grid(column=1, row=0, sticky='news')
+        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: AF"], relief='sunken', bg='#FFFFFF').grid(column=1, row=0, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.GX_frame, text="FAO").grid(column=0, row=1, sticky='news')
-        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: FAO"]).grid(column=1, row=1, sticky='news')
+        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: FAO"], relief='sunken', bg='#FFFFFF').grid(column=1, row=1, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.GX_frame, text="FDP").grid(column=0, row=2, sticky='news')
-        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: FDP"]).grid(column=1, row=2, sticky='news')
+        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: FDP"], relief='sunken', bg='#FFFFFF').grid(column=1, row=2, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.GX_frame, text="HRUN").grid(column=0, row=3, sticky='news')
-        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: HRUN"]).grid(column=1, row=3, sticky='news')
+        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: HRUN"], relief='sunken', bg='#FFFFFF').grid(column=1, row=3, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.GX_frame, text="Filter").grid(column=0, row=4, sticky='news')
-        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: Filter"]).grid(column=1, row=4, sticky='news')
+        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: Filter"], relief='sunken', bg='#FFFFFF').grid(column=1, row=4, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.GX_frame, text="Genotype").grid(column=0, row=5, sticky='news')
-        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: Genotype"]).grid(column=1, row=5, sticky='news')
+        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: Genotype"], relief='sunken', bg='#FFFFFF').grid(column=1, row=5, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.GX_frame, text="Length of Variant (BP)").grid(column=0, row=14, sticky='news')
-        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: LEN"]).grid(column=1, row=14, sticky='news')
+        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: LEN"], relief='sunken', bg='#FFFFFF').grid(column=1, row=14, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.GX_frame, text="QD").grid(column=0, row=15, sticky='news')
-        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: QD"]).grid(column=1, row=15, sticky='news')
+        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: QD"], relief='sunken', bg='#FFFFFF').grid(column=1, row=15, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.GX_frame, text="Strand Bias Calculation").grid(column=0, row=16, sticky='news')
-        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: STB"]).grid(column=1, row=16, sticky='news')
+        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: STB"], relief='sunken', bg='#FFFFFF').grid(column=1, row=16, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.GX_frame, text="P-Value").grid(column=2, row=16, sticky='news')
-        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: STBP"]).grid(column=3, row=16, sticky='news')
+        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: STBP"], relief='sunken', bg='#FFFFFF').grid(column=3, row=16, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.GX_frame, text="SVTYPE").grid(column=0, row=18, sticky='news')
-        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: SVTYPE"]).grid(column=1, row=18, sticky='news')
+        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: SVTYPE"], relief='sunken', bg='#FFFFFF').grid(column=1, row=18, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.GX_frame, text="TYPE").grid(column=0, row=19, sticky='news')
-        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: TYPE"]).grid(column=1, row=19, sticky='news')
+        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: TYPE"], relief='sunken', bg='#FFFFFF').grid(column=1, row=19, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.GX_frame, text="QUAL").grid(column=0, row=30, sticky='news')
-        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: QUAL"]).grid(column=1, row=30, sticky='news')
+        tk.Label(self.GX_frame, textvariable=self.variant_info["VCF: QUAL"], relief='sunken', bg='#FFFFFF').grid(column=1, row=30, sticky='news', pady=5, padx=10, ipady=5)
 
         # MPL Info Frame------------------------------------------------
         self.MPL_frame = tk.LabelFrame(self.frame_right, text='M-Pileup Data')
@@ -402,13 +412,17 @@ class App(tk.Tk):
 
         # Q1 Stats Area
         tk.Label(self.MPL_frame, text="Variant Binomial Proportion").grid(column=0, row=7, sticky='news', pady=5, padx=5)
-        tk.Label(self.MPL_frame, textvariable=self.variant_info["Mpileup Qual: Unfiltered Variant Binomial Proportion"], relief='sunken', bg='#FFFFFF').grid(column=1, row=7, sticky='news', pady=5, padx=10, ipady=5)
+        self.label_mpl_binom = tk.Label(self.MPL_frame, textvariable=self.variant_info["Mpileup Qual: Unfiltered Variant Binomial Proportion"], relief='sunken', bg='#FFFFFF')
+        self.label_mpl_binom.grid(column=1, row=7, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.MPL_frame, text="P-value").grid(column=2, row=7, sticky='news', pady=5, padx=5)
-        tk.Label(self.MPL_frame, textvariable=self.variant_info["Mpileup Qual: Unfiltered Variant Binomial P Value"], relief='sunken', bg='#FFFFFF').grid(column=3, row=7, sticky='news', pady=5, padx=10, ipady=5)
+        self.label_mpl_binom_pval = tk.Label(self.MPL_frame, textvariable=self.variant_info["Mpileup Qual: Unfiltered Variant Binomial P Value"], relief='sunken', bg='#FFFFFF')
+        self.label_mpl_binom_pval.grid(column=3, row=7, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.MPL_frame, text="Variant Fishers Odds Ratio").grid(column=0, row=8, sticky='news', pady=5, padx=5)
-        tk.Label(self.MPL_frame, textvariable=self.variant_info["Mpileup Qual: Unfiltered Variant Fishers Odds Ratio"], relief='sunken', bg='#FFFFFF').grid(column=1, row=8, sticky='news', pady=5, padx=10, ipady=5)
+        self.label_mpl_fisher_or = tk.Label(self.MPL_frame, textvariable=self.variant_info["Mpileup Qual: Unfiltered Variant Fishers Odds Ratio"], relief='sunken', bg='#FFFFFF')
+        self.label_mpl_fisher_or.grid(column=1, row=8, sticky='news', pady=5, padx=10, ipady=5)
         tk.Label(self.MPL_frame, text="P-value").grid(column=2, row=8, sticky='news', pady=5, padx=5)
-        tk.Label(self.MPL_frame, textvariable=self.variant_info["Mpileup Qual: Unfiltered Variant Fishers P Value"], relief='sunken', bg='#FFFFFF').grid(column=3, row=8, sticky='news', pady=5, padx=10, ipady=5)
+        self.label_mpl_fisher_or_pval = tk.Label(self.MPL_frame, textvariable=self.variant_info["Mpileup Qual: Unfiltered Variant Fishers P Value"], relief='sunken', bg='#FFFFFF')
+        self.label_mpl_fisher_or_pval.grid(column=3, row=8, sticky='news', pady=5, padx=10, ipady=5)
 
         # MPL Listed Stats
         tk.Label(self.MPL_frame, text="Total Read Depth").grid(column=0, row=0, sticky='news')
