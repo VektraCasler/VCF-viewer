@@ -189,7 +189,7 @@ class ToolTip(object):
             tw, 
             text=self.text, 
             justify=ttk.LEFT,
-            background="#ffffe0", 
+            # background="#ffffe0", 
             relief=ttk.SOLID, 
             borderwidth=1,
             font=("tahoma", "8", "normal")
@@ -209,16 +209,11 @@ class App(ttk.Window):
 
         # Root Window
         self.title('VCF Result Viewer')
-        self.styleq = ttk.Style(theme='flatly')
+        self.styleq = ttk.Style(theme='yeti')
         self.resizable(True, True)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.geometry('800x600')
-        self.color_warning = '#CC0000'
-        self.color_normal = '#000000'
-        self.color_enabled = '#ffffff'
-        self.color_disabled = '#cccccc'
-
 
         # Variables
         self.vars = dict()
@@ -275,7 +270,7 @@ class App(ttk.Window):
         self.frame_base.pack(expand=True, fill='both')
         # Left Frame
         self.frame_left = ttk.Frame(self.frame_base)
-        self.frame_left.pack(side='left', expand=False, fill='y')
+        self.frame_left.pack(side='left', expand=False, fill='y', padx=(5,0), pady=5)
         self.frame_file = ttk.Labelframe(self.frame_left, text="VCF File Info", relief='groove')
         self.frame_file.pack(side='top', expand=True, fill='both', padx=5, pady=5)
         #File load button
@@ -307,14 +302,6 @@ class App(ttk.Window):
         self.frame_disposition.columnconfigure(1, weight=1)
         for x in range(4):
             self.frame_disposition.rowconfigure(x, weight=1)
-        # self.frame_dispo_1 = ttk.Frame(self.frame_disposition)
-        # self.frame_dispo_1.pack(side='top', expand=False, fill='x')
-        # self.frame_dispo_2 = ttk.Frame(self.frame_disposition)
-        # self.frame_dispo_2.pack(side='top', expand=False, fill='x')
-        # self.frame_dispo_3 = ttk.Frame(self.frame_disposition)
-        # self.frame_dispo_3.pack(side='top', expand=False, fill='x')
-        # self.frame_dispo_4 = ttk.Frame(self.frame_disposition)
-        # self.frame_dispo_4.pack(side='top', expand=False, fill='x')
         # Disposition labels
         self.labels['none_count'] = ttk.Label(self.frame_disposition, textvariable=self.vars['dispo_none_count'], width=5, relief='groove', anchor='center')
         self.labels['none_count'].grid(row=0, column=0, sticky='news', padx=5, pady=5)
@@ -339,7 +326,7 @@ class App(ttk.Window):
         # Process output files button
         # Right Frame
         self.frame_right = ttk.Frame(self.frame_base)
-        self.frame_right.pack(side='left', expand=True, fill='both',ipadx=10, ipady=10)
+        self.frame_right.pack(side='left', expand=True, fill='both',padx=5, pady=5)
         # Basic Info Frame
         self.frame_basic_info = ttk.Labelframe(self.frame_right, text='Locus Info')
         self.frame_basic_info.pack(side='top', expand=False, fill='x', padx=5, pady=5)
@@ -698,25 +685,24 @@ class App(ttk.Window):
         return
 
     def validate_cells(self):
-        pass
-        # for x in vcf_columns:
-            # self.labels[x].configure(style='normal.TLabel')
-            # self.labels[x]['fg'] = self.color_normal
-            # if not self.variant[x].get():
-            #     self.labels[x].configure(style='warning.TLabel')
-            #     continue
-            # if x in self.validation['p-values']:
-            #     if float(self.variant[x].get()) > 0.05:
-            #         self.labels[x]['fg'] = self.color_warning
-            # if x in self.validation['read depth 10']:
-            #     if int(self.variant[x].get()) <= 10:
-            #         self.labels[x]['fg'] = self.color_warning
-            # if x in self.validation['read depth 500']:
-            #     if int(self.variant[x].get()) <= 500:
-            #         self.labels[x]['fg'] = self.color_warning
-            # if x in self.validation['low vaf']:
-            #     if float(self.variant[x].get()) < 0.02:
-            #         self.labels[x]['fg'] = self.color_warning
+
+        for x in vcf_columns:
+            self.labels[x].configure(bootstyle='normal.TLabel')
+            if self.variant[x].get() == "":
+                self.labels[x].configure(bootstyle='inverse.TLabel')
+                continue
+            if x in self.validation['p-values']:
+                if float(self.variant[x].get()) > 0.05:
+                    self.labels[x].configure(bootstyle='danger.inverse.TLabel')
+            if x in self.validation['read depth 10']:
+                if int(self.variant[x].get()) <= 10:
+                    self.labels[x].configure(bootstyle='danger.inverse.TLabel')
+            if x in self.validation['read depth 500']:
+                if int(self.variant[x].get()) <= 500:
+                    self.labels[x].configure(bootstyle='danger.inverse.TLabel')
+            if x in self.validation['low vaf']:
+                if float(self.variant[x].get()) < 0.02:
+                    self.labels[x].configure(bootstyle='danger.inverse.TLabel')
         return
 
     def loadCSV(self):

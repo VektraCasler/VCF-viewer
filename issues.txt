@@ -1,6 +1,9 @@
 PolyPhen scoring needs tooltip explanation of results
+
 Weblinks needed
+
 data validation
+
 SVTYPE field does nothing?
 
 More types for ontology?
@@ -12,4 +15,12 @@ VCF: QD tooltip needed.  What is it?
 variant annotation, what is this knowledgebase?
 
 MDL knowledgebase?
+
+Menu needed
+
+Command to export text files
+
+validation on "Filter (Genexys)
+
+Genotype shows "Jan-1"
 
