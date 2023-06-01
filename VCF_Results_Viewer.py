@@ -11,6 +11,7 @@ import os
 import csv
 import json
 from tkinter.messagebox import showinfo
+import webbrowser
 
 # VARIABLES ----------------------------------------------
 
@@ -262,7 +263,20 @@ class App(ttk.Window):
         self.validation['low vaf']=[
             'VCF: FDP',
         ]
+        self.validation['web links'] = [
+            "Variant Annotation: Transcript",
+            "COSMIC: ID",
+            "ClinVar: ClinVar ID",
+            "ClinVar: ClinVar ID",
+            "dbSNP: rsID",
+            "UniProt (GENE): Accession Number",
+        ]
         self.big_text = ('bold', 14, 'bold')
+
+        # Keybinds
+        self.bind('<Right>', lambda event: self.goto_next_radio())
+        self.bind('<Left>', lambda event: self.goto_prev_radio())
+        self.bind('<space>', lambda event: self.save_disposition())
         
         # FRAMES ------------------------------------------------------------------------
         # Base Frame
@@ -314,8 +328,8 @@ class App(ttk.Window):
         # Radio buttons for disposition
         self.radio_none = ttk.Radiobutton(self.frame_disposition, text="None (Unassigned)", variable=self.vars['Disposition'], value='None')
         self.radio_none.grid(row=0, column=1, sticky='news', padx=5, pady=5)
-        self.radio_unknown = ttk.Radiobutton(self.frame_disposition, text="Low VAF", variable=self.vars['Disposition'], value='Low VAF')
-        self.radio_unknown.grid(row=1, column=1, sticky='news', padx=5, pady=5)
+        self.radio_low_vaf = ttk.Radiobutton(self.frame_disposition, text="Low VAF", variable=self.vars['Disposition'], value='Low VAF')
+        self.radio_low_vaf.grid(row=1, column=1, sticky='news', padx=5, pady=5)
         self.radio_VUS = ttk.Radiobutton(self.frame_disposition, text="VUS", variable=self.vars['Disposition'], value='VUS')
         self.radio_VUS.grid(row=2, column=1, sticky='news', padx=5, pady=5)
         self.radio_mutation = ttk.Radiobutton(self.frame_disposition, text="Harmful", variable=self.vars['Disposition'], value='Harmful')
@@ -593,6 +607,7 @@ class App(ttk.Window):
         ttk.Label(self.frame_var_annot, anchor='center', text="Transcript").grid(column=2, row=0, sticky='news', padx=5)
         self.labels["Variant Annotation: Transcript"] = ttk.Label(self.frame_var_annot, textvariable=self.variant["Variant Annotation: Transcript"], relief='groove', anchor='center')
         self.labels["Variant Annotation: Transcript"].grid(column=2, row=1, sticky='news', padx=5)
+        self.labels["Variant Annotation: Transcript"].bind('<Button-1>', lambda cosmic: ENSTLink(self.variant["Variant Annotation: Transcript"].get()))
         ttk.Label(self.frame_var_annot, anchor='center', text="All Mappings").grid(column=0, row=2, columnspan=3, sticky='news', padx=5)
         self.labels["Variant Annotation: All Mappings"] = ttk.Label(self.frame_var_annot, textvariable=self.variant["Variant Annotation: All Mappings"], relief='groove', anchor='center', wraplength=500)
         self.labels["Variant Annotation: All Mappings"].grid(column=0, columnspan=3, row=3, sticky='news', padx=5, pady=(0,5))
@@ -631,6 +646,7 @@ class App(ttk.Window):
         ttk.Label(self.frame_web_cosmic, text="ID", anchor='center').pack(side='top', expand=False, fill='x', padx=5)
         self.labels["COSMIC: ID"] = ttk.Label(self.frame_web_cosmic, textvariable=self.variant["COSMIC: ID"], relief='groove', anchor='center', width=12)
         self.labels["COSMIC: ID"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
+        self.labels['COSMIC: ID'].bind('<Button-1>', lambda cosmic: CosmicLink(self.variant["COSMIC: ID"].get()))
         ttk.Label(self.frame_web_cosmic, anchor='center', text="Count").pack(side='top', expand=False, fill='x', padx=5)
         self.labels["COSMIC: Variant Count"] = ttk.Label(self.frame_web_cosmic, textvariable=self.variant["COSMIC: Variant Count"], relief='groove', anchor='center')
         self.labels["COSMIC: Variant Count"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
@@ -640,6 +656,7 @@ class App(ttk.Window):
         ttk.Label(self.frame_web_clinvar, anchor='center', text="ID").pack(side='top', expand=False, fill='x', padx=5)
         self.labels["ClinVar: ClinVar ID"] = ttk.Label(self.frame_web_clinvar, textvariable=self.variant["ClinVar: ClinVar ID"], relief='groove', anchor='center')
         self.labels["ClinVar: ClinVar ID"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
+        self.labels['ClinVar: ClinVar ID'].bind('<Button-1>', lambda clinvar: ClinVarLink(self.variant["ClinVar: ClinVar ID"].get()))
         ttk.Label(self.frame_web_clinvar, anchor='center', text="Significance").pack(side='top', expand=False, fill='x', padx=5)
         self.labels["ClinVar: Clinical Significance"] = ttk.Label(self.frame_web_clinvar, textvariable=self.variant["ClinVar: Clinical Significance"], relief='groove', anchor='center')
         self.labels["ClinVar: Clinical Significance"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
@@ -673,12 +690,14 @@ class App(ttk.Window):
         ttk.Label(self.frame_web_dbsnp, anchor='center', text="rsID").pack(side='top', expand=False, fill='both', padx=5)
         self.labels["dbSNP: rsID"] = ttk.Label(self.frame_web_dbsnp, textvariable=self.variant["dbSNP: rsID"], relief='groove', anchor='center')
         self.labels["dbSNP: rsID"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
+        self.labels["dbSNP: rsID"].bind('<Button-1>', lambda clinvar: dbSNPLink(self.variant["dbSNP: rsID"].get()))
         # UniProt Area
         self.frame_web_dbsnp = ttk.LabelFrame(self.frame_bottom_2, text='UniProt (GENE)')
         self.frame_web_dbsnp.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         ttk.Label(self.frame_web_dbsnp, anchor='center', text="Accession Number").pack(side='top', expand=False, fill='both', padx=5)
         self.labels["UniProt (GENE): Accession Number"] = ttk.Label(self.frame_web_dbsnp, textvariable=self.variant["UniProt (GENE): Accession Number"], relief='groove', anchor='center')
         self.labels["UniProt (GENE): Accession Number"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
+        self.labels["UniProt (GENE): Accession Number"].bind('<Button-1>', lambda uniprot: UniProtLink(self.variant["UniProt (GENE): Accession Number"].get()))
         # Create Tooltips
         for key,value in tooltips.items():
             CreateToolTip(self.labels[key], value)
@@ -703,6 +722,8 @@ class App(ttk.Window):
             if x in self.validation['low vaf']:
                 if float(self.variant[x].get()) < 0.02:
                     self.labels[x].configure(bootstyle='danger.inverse.TLabel')
+            if x in self.validation['web links']:
+                self.labels[x].configure(bootstyle = 'info')
         return
 
     def loadCSV(self):
@@ -727,6 +748,7 @@ class App(ttk.Window):
                                 values_list.append(value)
                     self.treeview_variant_list.insert('', tk.END, values=values_list)
                 counter += 1
+        self.treeview_variant_list.selection_set('I001')
         self.count_dispositions()
         return
     
@@ -774,6 +796,36 @@ class App(ttk.Window):
         self.vars['dispo_mutation_count'].set(mutation_count)
         return
 
+    def goto_next_radio(self):
+        if not self.vars['Disposition'].get():
+            pass
+        elif self.vars['Disposition'].get() == 'None':
+            self.radio_low_vaf.invoke()
+            self.vars['Disposition'].set('Low VAF')
+        elif self.vars['Disposition'].get() == 'Low VAF':
+            self.radio_VUS.invoke()
+            self.vars['Disposition'].set('VUS')
+        elif self.vars['Disposition'].get() == 'VUS':
+            self.radio_mutation.invoke()
+            self.vars['Disposition'].set('Harmful')
+        elif self.vars['Disposition'].get() == 'Harmful':
+            self.radio_none.invoke()
+            self.vars['Disposition'].set('None')
+        return
+    
+    def goto_prev_radio(self):
+        if not self.vars['Disposition'].get():
+            pass
+        elif self.vars['Disposition'].get() == 'Harmful':
+            self.radio_VUS.invoke()
+        elif self.vars['Disposition'].get() == 'VUS':
+            self.radio_low_vaf.invoke()
+        elif self.vars['Disposition'].get() == 'Low VAF':
+            self.radio_none.invoke()
+        elif self.vars['Disposition'].get() == 'None':
+            self.radio_mutation.invoke()
+        return
+
 # FUNCTIONS ----------------------------------------------
 
 def CreateToolTip(widget: tk.Widget, text):
@@ -784,6 +836,36 @@ def CreateToolTip(widget: tk.Widget, text):
         toolTip.hidetip()
     widget.bind('<Enter>', enter)
     widget.bind('<Leave>', leave)
+
+def CosmicLink(ID:str):
+    """Follow a link to COSMIC Database."""
+    link_string = f"https://cancer.sanger.ac.uk/cosmic/mutation/overview?id={ID}"
+    webbrowser.open(link_string)
+    return
+
+def ClinVarLink(ID:str):
+    """Follow a link to COSMIC Database."""
+    link_string = f"https://www.ncbi.nlm.nih.gov/clinvar/variation/{ID}/"
+    webbrowser.open(link_string)
+    return
+
+def dbSNPLink(ID:str):
+    """Follow a link to the dbSNP Database."""
+    link_string = f"https://www.ncbi.nlm.nih.gov/snp/{ID}"
+    webbrowser.open(link_string)
+    return
+
+def UniProtLink(ID:str):
+    """Follow a link to the UniProt Database."""
+    link_string = f"https://www.uniprot.org/uniprotkb/{ID}/entry/"
+    webbrowser.open(link_string)
+    return
+
+def ENSTLink(ID:str):
+    """Follow a link to the UniProt Database."""
+    link_string = f"http://useast.ensembl.org/Homo_sapiens/Transcript/Summary?t={ID}"
+    webbrowser.open(link_string)
+    return
 
 # MAIN LOOP ----------------------------------------------
 
