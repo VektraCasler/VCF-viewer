@@ -27,7 +27,6 @@ small_font = ('roboto',10)
 large_font = ('roboto',24)
 
 vcf_columns = [
-    "Disposition",
     "Original Input: Chrom",
     "Original Input: Pos",
     "Original Input: Reference allele",
@@ -35,6 +34,7 @@ vcf_columns = [
     "Variant Annotation: Gene",
     "Variant Annotation: cDNA change",
     "Variant Annotation: Protein Change",
+    "Variant Annotations: RefSeq",
     "VCF: AF",
     "VCF: FAO",
     "VCF: FDP",
@@ -72,12 +72,14 @@ vcf_columns = [
     "Mpileup Qual: Filtered Variant Binomial P Value",
     "Mpileup Qual: Filtered Variant Fishers Odds Ratio",
     "Mpileup Qual: Filtered Variant Fishers P Value",
+    "Mpileup Qual: Filtered VAF",
     "Mpileup Qual: Unfiltered Variant Forward Read Depth",
     "Mpileup Qual: Unfiltered Variant Reverse Read Depth",
     "Mpileup Qual: Unfiltered Variant Binomial Proportion",
     "Mpileup Qual: Unfiltered Variant Binomial P Value",
     "Mpileup Qual: Unfiltered Variant Fishers Odds Ratio",
     "Mpileup Qual: Unfiltered Variant Fishers P Value",
+    "Mpileup Qual: Unfiltered VAF",
     "VCF: LEN",
     "VCF: QD",
     "VCF: STB",
@@ -94,10 +96,10 @@ vcf_columns = [
     "MDL: Sample Count",
     "MDL: Variant Frequency",
     "MDL: Sample List", # Very long text, needs wordwrap
+    "Disposition",
 ]
 
 tooltips = {
-    "Disposition":'What to call this variant.',
     "Original Input: Chrom":'Chromosome on which this gene is found.',
     "Original Input: Pos":'Base pair position of the gene on the chromosome.',
     "Original Input: Reference allele":'Expected finding at this base pair location.',
@@ -164,6 +166,7 @@ tooltips = {
     "MDL: Sample Count":"Instance count of samples with this variant in ",
     "MDL: Variant Frequency":"",
     "MDL: Sample List":"JSON-style dictionary breakdown of tissue types present in ??? knowledgebase for this variant.", # Very long text, needs wordwrap
+    "Disposition":'What to call this variant.',
 }
 
 # CLASSES ------------------------------------------------
@@ -332,21 +335,21 @@ class App(ttk.Window):
         self.frame_file = ttk.Labelframe(self.frame_left, text="VCF File Info", relief='groove')
         self.frame_file.pack(side='top', expand=True, fill='both', padx=5, pady=5)
         #File load button
-        self.labels['filename'] = ttk.Label(self.frame_file, textvariable=self.vars['filename'], relief='groove', anchor='center')
+        self.labels['filename'] = ttk.Label(self.frame_file, textvariable=self.vars['filename'], relief='groove', anchor='center', justify='right', width=10)
         self.labels['filename'].pack(side='top', expand=False, fill='x',ipady=5, padx=5, pady=5)
-        self.buttons['open_file'] = ttk.Button(self.frame_file, text="Load an XLSX", command=self.open_xlsx_file)
+        self.buttons['open_file'] = ttk.Button(self.frame_file, text="Load an XLSX", command=self.open_file)
         self.buttons['open_file'].pack(side='top', expand=False, fill='x', ipady=5, padx=5, pady=5)
         # Treeview Frame
         self.frame_treeview = ttk.Frame(self.frame_file)
         self.frame_treeview.pack(side='top',expand=True,fill='both', padx=5, pady=5)
         # Treeview list
-        self.treeview_variant_list = ttk.Treeview(self.frame_treeview, columns=vcf_columns, displaycolumns=[5,0], selectmode='browse', show='headings')
+        self.treeview_variant_list = ttk.Treeview(self.frame_treeview, columns=vcf_columns, displaycolumns=[4,69], selectmode='browse', show='headings')
         for x in vcf_columns:
             self.treeview_variant_list.heading(x, text=x, anchor='center')
-        self.treeview_variant_list.heading(5, text='Variant')
-        self.treeview_variant_list.heading(0, text='Disposition')
-        self.treeview_variant_list.column(column=0, width=100, anchor='center')
-        self.treeview_variant_list.column(column=5, width=100, anchor='center')
+        self.treeview_variant_list.heading(4, text='Variant')
+        self.treeview_variant_list.heading(69, text='Disposition')
+        self.treeview_variant_list.column(column=69, width=100, anchor='center')
+        self.treeview_variant_list.column(column=4, width=100, anchor='center')
         self.treeview_variant_list.pack(side='left', expand=True, fill='both')
         self.treeview_variant_list.bind('<<TreeviewSelect>>', self.item_selected)
         # Treeview Scrollbar
@@ -359,14 +362,6 @@ class App(ttk.Window):
         self.treeview_variant_list.tag_configure('Low VAF', background="blue")
         self.treeview_variant_list.tag_configure('Harmful', background="red")
         self.treeview_variant_list.tag_configure('FLT3 ITD', background="purple")
-
-
-
-
-
-
-
-
 
         # Disposition Frame
         self.frame_disposition = ttk.Labelframe(self.frame_left, text="Variant Disposition")
@@ -805,9 +800,9 @@ class App(ttk.Window):
         csv_dict = dict()
         self.vars['filename'].set(str(fd.askopenfilename(filetypes=[('CSV','*.csv')])))
         with open(self.vars['filename'].get(), 'r') as csv_file:
-            counter = 0
+            counter = 0 # need to use a counter here to skip the headers row
             for row in csv.DictReader(csv_file, fieldnames=vcf_columns, delimiter='\t'):
-                if counter != 0:
+                if counter != 0: # second and later file lines only
                     csv_dict[counter] = row
                     values_list = list()
                     values_list.append("None")
@@ -825,49 +820,54 @@ class App(ttk.Window):
         self.count_dispositions()
         return
     
-    def open_xlsx_file(self):
+    def open_file(self):
+
+        # Clear the treeview to prevent duplicate file loading.  Entries are not auto cleared.
         for item in self.treeview_variant_list.get_children():
             self.treeview_variant_list.delete(item)
-        self.vars['filename'].set(str(fd.askopenfilename(filetypes=[('XLSX','*.xlsx')])))
+        self.vars['filename'].set(str(fd.askopenfilename(filetypes=[('XLSX','*.xlsx'), ('CSV','*.csv')])))
+        # update the title of the app to help show long filenames
+        title = 'VCF Result Viewer - ' + self.vars['filename'].get()
+        self.title(title)
+        # portion for working with the xlsx file format
+        if 'xlsx' in self.vars['filename'].get():
+            try:
+                xlsx = pd.ExcelFile(self.vars['filename'].get())
+                self.DF = pd.DataFrame()
+                for sheet in xlsx.sheet_names:
+                    DF_sheet = xlsx.parse(sheet)
+                    if sheet == "Hotspot Exceptions":
+                        DF_sheet['Disposition'] = "Hotspot"
+                    elif sheet == "FLT3 ITDs":
+                        DF_sheet['Disposition'] = "FLT3 ITD"
+                    elif sheet == "Low VAF Variants":
+                        DF_sheet['Disposition'] = "Low VAF"
+                    else:
+                        DF_sheet['Disposition'] = "None"
+                    if self.DF.empty:
+                        self.DF = DF_sheet
+                    else:
+                        self.DF = pd.concat([self.DF, DF_sheet], axis=0)
+                print("Excel file successfully loaded.")
+            except:
+                print("Excel file format not detected.")
+                return
+        else: # portion for working with .CSV files
+            try:
+                self.DF = pd.read_csv(self.vars['filename'].get())
+                print("CSV file successfully loaded.")
+            except:
+                print("CSV file format not detected.")
+                return
 
-        try:
-            xlsx = pd.ExcelFile(self.vars['filename'])
-            self.DF = pd.DataFrame()
-            for sheet in xlsx.sheet_names:
-                self.DF_sheet = xlsx.parse(sheet)
-                if sheet == "Hotspots":
-                    self.DF_sheet['Disposition'] = "Hotspot"
-                elif sheet == "FLT3 ITD":
-                    self.DF_sheet['Disposition'] = "FLT3 ITD"
-                elif sheet == "Low VAF":
-                    self.DF_sheet['Disposition'] = "Low VAF"
-                else:
-                    self.DF_sheet['Disposition'] = "None"
-                if self.DF.empty:
-                    self.DF = self.DF_sheet
-                else:
-                    self.DF = pd.concat([self.DF, self.DF_sheet], axis=0)
-        except:
-            print("Excel file format not detected.")
-            return
-
-        # for row in self.DF.iterrows():
-        #     if counter != 0:
-        #         csv_dict[counter] = row
-        #         values_list = list()
-        #         values_list.append("None")
-        #         for key, value in csv_dict[counter].items():
-        #             try:
-        #                 values_list.append(int(value))
-        #             except:
-        #                 try:
-        #                     values_list.append(round(float(value),3))
-        #                 except:
-        #                     values_list.append(value)
-        #         self.treeview_variant_list.insert('', tk.END, values=values_list)
-        #     counter += 1
-        # self.treeview_variant_list.selection_set('I001')
-        # self.count_dispositions()
+        for row in self.DF.iterrows():
+            self.treeview_variant_list
+            values_list = list()
+            for col in self.DF.columns:
+                values_list.append(row[1][col])
+            self.treeview_variant_list.insert('', tk.END, values=values_list)
+        self.treeview_variant_list.selection_set('I001')
+        self.count_dispositions()
         return
 
     def item_selected(self, event):

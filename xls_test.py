@@ -1,7 +1,7 @@
 import pandas as pd
 
 self_vars = dict()
-self_vars['filename'] = "test_data.xlsx"
+self_vars['filename'] = "test_data/481-20_J3316158.final.report.xlsx"
 
 
 try:
