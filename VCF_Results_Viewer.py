@@ -12,6 +12,7 @@ import csv
 import json
 from tkinter.messagebox import showinfo
 import webbrowser
+import pandas as pd
 
 # VARIABLES ----------------------------------------------
 
@@ -333,8 +334,8 @@ class App(ttk.Window):
         #File load button
         self.labels['filename'] = ttk.Label(self.frame_file, textvariable=self.vars['filename'], relief='groove', anchor='center')
         self.labels['filename'].pack(side='top', expand=False, fill='x',ipady=5, padx=5, pady=5)
-        self.buttons['load_csv'] = ttk.Button(self.frame_file, text="Load a CSV File", command=self.loadCSV)
-        self.buttons['load_csv'].pack(side='top', expand=False, fill='x', ipady=5, padx=5, pady=5)
+        self.buttons['open_file'] = ttk.Button(self.frame_file, text="Load an XLSX", command=self.open_xlsx_file)
+        self.buttons['open_file'].pack(side='top', expand=False, fill='x', ipady=5, padx=5, pady=5)
         # Treeview Frame
         self.frame_treeview = ttk.Frame(self.frame_file)
         self.frame_treeview.pack(side='top',expand=True,fill='both', padx=5, pady=5)
@@ -764,7 +765,13 @@ class App(ttk.Window):
         self.labels["UniProt (GENE): Accession Number"] = ttk.Label(self.frame_web_dbsnp, textvariable=self.variant["UniProt (GENE): Accession Number"], relief='groove', anchor='center')
         self.labels["UniProt (GENE): Accession Number"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         self.labels["UniProt (GENE): Accession Number"].bind('<Button-1>', lambda uniprot: UniProtLink(self.variant["UniProt (GENE): Accession Number"].get()))
-        # Create Tooltips
+
+        # self.create_tooltips()
+
+        return
+
+    def create_tooltips(self):
+        """Creates tooltips for labels and widgets."""
         for key,value in tooltips.items():
             CreateToolTip(self.labels[key], value)
         return
@@ -792,7 +799,7 @@ class App(ttk.Window):
                 self.labels[x].configure(bootstyle = 'info.inverse')
         return
 
-    def loadCSV(self):
+    def open_csv_file(self):
         for item in self.treeview_variant_list.get_children():
             self.treeview_variant_list.delete(item)
         csv_dict = dict()
@@ -818,6 +825,51 @@ class App(ttk.Window):
         self.count_dispositions()
         return
     
+    def open_xlsx_file(self):
+        for item in self.treeview_variant_list.get_children():
+            self.treeview_variant_list.delete(item)
+        self.vars['filename'].set(str(fd.askopenfilename(filetypes=[('XLSX','*.xlsx')])))
+
+        try:
+            xlsx = pd.ExcelFile(self.vars['filename'])
+            self.DF = pd.DataFrame()
+            for sheet in xlsx.sheet_names:
+                self.DF_sheet = xlsx.parse(sheet)
+                if sheet == "Hotspots":
+                    self.DF_sheet['Disposition'] = "Hotspot"
+                elif sheet == "FLT3 ITD":
+                    self.DF_sheet['Disposition'] = "FLT3 ITD"
+                elif sheet == "Low VAF":
+                    self.DF_sheet['Disposition'] = "Low VAF"
+                else:
+                    self.DF_sheet['Disposition'] = "None"
+                if self.DF.empty:
+                    self.DF = self.DF_sheet
+                else:
+                    self.DF = pd.concat([self.DF, self.DF_sheet], axis=0)
+        except:
+            print("Excel file format not detected.")
+            return
+
+        # for row in self.DF.iterrows():
+        #     if counter != 0:
+        #         csv_dict[counter] = row
+        #         values_list = list()
+        #         values_list.append("None")
+        #         for key, value in csv_dict[counter].items():
+        #             try:
+        #                 values_list.append(int(value))
+        #             except:
+        #                 try:
+        #                     values_list.append(round(float(value),3))
+        #                 except:
+        #                     values_list.append(value)
+        #         self.treeview_variant_list.insert('', tk.END, values=values_list)
+        #     counter += 1
+        # self.treeview_variant_list.selection_set('I001')
+        # self.count_dispositions()
+        return
+
     def item_selected(self, event):
         for selected_item in self.treeview_variant_list.selection():
             item = self.treeview_variant_list.item(selected_item)
