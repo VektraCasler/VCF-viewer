@@ -105,11 +105,11 @@ tooltips = {
     "Variant Annotation: cDNA change":'Alteration in the DNA at this location.',
     "Variant Annotation: Protein Change":'Resultant alteration in the protein at this location.',
     "VCF: AF":'Allele fraction of reads with this variant.',
-    "VCF: FAO":"Variant read depth at this base pair location, reported by Genexys.",
-    "VCF: FDP":"Total read depth at this base pair location, reported by Genexys",
-    "VCF: HRUN":"Homopolymer run count, reported by Genexys.",
-    "VCF: Filter":"Final filter disposition as given by the Genexys.\n Preferred value: 'PASS'",
-    "VCF: Genotype":"Genotype distinction made by the Genexys analyzer.\n 1/1 = homozygous, 0/1 = heterozygous, 0/0 = ???, ./. = ???",
+    "VCF: FAO":"Variant read depth at this base pair location, reported by Genexus.",
+    "VCF: FDP":"Total read depth at this base pair location, reported by Genexus",
+    "VCF: HRUN":"Homopolymer run count, reported by Genexus.",
+    "VCF: Filter":"Final filter disposition as given by the Genexus.\n Preferred value: 'PASS'",
+    "VCF: Genotype":"Genotype distinction made by the Genexus analyzer.\n 1/1 = homozygous, 0/1 = heterozygous, 0/0 = ???, ./. = ???",
     "COSMIC: ID":"COSMIC website ID for this variant.",
     "COSMIC: Variant Count":"Times this variant has been reported to COSMIC.",
     "COSMIC: Variant Count (Tissue)":"JSON-style dictionary breakdown of tissue types reported to COSMIC for this variant.", # Very long text, needs wordwrap
@@ -120,13 +120,13 @@ tooltips = {
     "CADD: Phred":"Combine Annotation Dependent Depletion score, rating pathogenicity.\nRange: 0 = Benign, 48 = Pathogenic",
     "PolyPhen-2: HDIV Prediction":"Score assessing the possible change in phenotype of the protein structure, based on AA change.",
     "SIFT: Prediction":"SNP mutagenesis prediction score based on AA change, as reported by SIFT website.",
-    "VCF: FSAF":"Forward Variant Read Depth, reported by Genexys\nValid value: > 10",
-    "VCF: FSAR":"Reverse Variant Read Depth, reported by Genexys\nValid value: > 10",
-    "VCF: FSRF":"Forward Reference Read Depth, reported by Genexys.",
-    "VCF: FSRR":"Reverse Reference Read Depth, reported by Genexys.",
-    "VCF: Fisher Odds Ratio":"Fisher's odds ratio calculation, based on Genexys read depth data.",
+    "VCF: FSAF":"Forward Variant Read Depth, reported by Genexus\nValid value: > 10",
+    "VCF: FSAR":"Reverse Variant Read Depth, reported by Genexus\nValid value: > 10",
+    "VCF: FSRF":"Forward Reference Read Depth, reported by Genexus.",
+    "VCF: FSRR":"Reverse Reference Read Depth, reported by Genexus.",
+    "VCF: Fisher Odds Ratio":"Fisher's odds ratio calculation, based on Genexus read depth data.",
     "VCF: Fisher P Value":"Statistical p-value.\nLess than 0.05 is preferred.",
-    "VCF: Binom Proportion":"Binomial proportion caclucation, based on Genexys read depth data.",
+    "VCF: Binom Proportion":"Binomial proportion caclucation, based on Genexus read depth data.",
     "VCF: Binom P Value":"Statistical p-value.\nLess than 0.05 is preferred.",
     "Mpileup Qual: Read Depth":"Total read depth, as reported by M-Pileup data.\nValid: > 500",
     "Mpileup Qual: Start Reads":"Count of read start signals (strand termination), as reported in the M-Pileup data.",
@@ -147,14 +147,14 @@ tooltips = {
     "Mpileup Qual: Unfiltered Variant Binomial P Value":"Statistical p-value.\nLess than 0.05 is preferred.",
     "Mpileup Qual: Unfiltered Variant Fishers Odds Ratio":"Fisher's odds ratio calculation, based on unfiltered M-Pileup read depth data.",
     "Mpileup Qual: Unfiltered Variant Fishers P Value":"Statistical p-value.\nLess than 0.05 is preferred.",
-    "VCF: LEN":"Length of the variant, as reported by Genexys.",
+    "VCF: LEN":"Length of the variant, as reported by Genexus.",
     "VCF: QD":"???",
-    "VCF: STB":"Proprietary strand bias calculation, as reported by Genexys.",
+    "VCF: STB":"Proprietary strand bias calculation, as reported by Genexus.",
     "VCF: STBP":"Statistical p-value.\nLess than 0.05 is preferred.",
-    "VCF: SVTYPE":"Unused data field from the Genexys report.",
-    "VCF: TYPE":"Type of variant, as reported by Genexys.",
-    "VCF: QUAL":"Quality determination tag, as reported by Genexys.",
-    "Variant Annotation: Coding":"Reported coding region variant, as reported by Genexys.",
+    "VCF: SVTYPE":"Unused data field from the Genexus report.",
+    "VCF: TYPE":"Type of variant, as reported by Genexus.",
+    "VCF: QUAL":"Quality determination tag, as reported by Genexus.",
+    "Variant Annotation: Coding":"Reported coding region variant, as reported by Genexus.",
     "Variant Annotation: Sequence Ontology":"Type of variant/mutation encountered.\n Possible Types: MIS, INT, FSI, IND, SYN, SPL ",
     "Variant Annotation: Transcript":"Ensembl transcript designation code.",
     "Variant Annotation: All Mappings":"JSON-style dictionary breakdown of tissue types present in ??? knowledgebase for this variant.", # Very long text, needs wordwrap
@@ -190,10 +190,9 @@ class ToolTip(object):
             tw, 
             text=self.text, 
             justify=ttk.LEFT,
-            # background="#ffffe0", 
             relief=ttk.SOLID, 
             borderwidth=1,
-            font=("tahoma", "8", "normal")
+            # font=("tahoma", "8", "normal")
         )
         label.pack(ipadx=1)
 
@@ -210,11 +209,52 @@ class App(ttk.Window):
 
         # Root Window
         self.title('VCF Result Viewer')
-        self.styleq = ttk.Style(theme='yeti')
+        self.style.theme_use('flatly')
         self.resizable(True, True)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.geometry('800x600')
+
+        # Menu Creation
+        self.menubar = ttk.Menu(self)
+        self.menu_file = ttk.Menu(self.menubar, tearoff=0)
+        self.menu_file.add_command(label="Open", command=donothing)
+        self.menu_file.add_command(label="Clear", command=donothing)
+        self.menu_file.add_command(label="Save", command=donothing)
+        self.menu_file.add_separator()
+        self.menu_file.add_command(label="Exit", command=self.quit)
+        self.menubar.add_cascade(label="File", menu=self.menu_file)
+
+        self.menu_theme = ttk.Menu(self.menubar, tearoff=0)
+        # self.menu_theme.add_command(label='Cerculean', command=lambda: self.style.theme_use('cerculean'))
+        self.menu_theme.add_command(label='Cosmo', command=lambda: self.style.theme_use('cosmo'))
+        self.menu_theme.add_command(label='Flatly', command=lambda: self.style.theme_use('flatly'))
+        self.menu_theme.add_command(label='Journal', command=lambda: self.style.theme_use('journal'))
+        self.menu_theme.add_command(label='Litera', command=lambda: self.style.theme_use('litera'))
+        self.menu_theme.add_command(label='Lumen', command=lambda: self.style.theme_use('lumen'))
+        # self.menu_theme.add_command(label='Minty', command=lambda: self.style.theme_use('minty'))
+        # self.menu_theme.add_command(label='Morph', command=lambda: self.style.theme_use('morph'))
+        self.menu_theme.add_command(label='Pulse', command=lambda: self.style.theme_use('pulse'))
+        self.menu_theme.add_command(label='Sandstone', command=lambda: self.style.theme_use('sandstone'))
+        # self.menu_theme.add_command(label='Simplex', command=lambda: self.style.theme_use('simplex'))
+        self.menu_theme.add_command(label='United', command=lambda: self.style.theme_use('united'))
+        self.menu_theme.add_command(label='Yeti', command=lambda: self.style.theme_use('yeti'))
+        self.menu_theme.add_separator()
+        # self.menu_theme.add_command(label='Solar', command=lambda: self.style.theme_use('solar'))
+        self.menu_theme.add_command(label='Superhero', command=lambda: self.style.theme_use('superhero'))
+        self.menu_theme.add_command(label='Darkly', command=lambda: self.style.theme_use('darkly'))
+        self.menu_theme.add_command(label='Cyborg', command=lambda: self.style.theme_use('cyborg'))
+        # self.menu_theme.add_command(label='Vapor', command=lambda: self.style.theme_use('vapor'))
+        self.menubar.add_cascade(label='Theme', menu=self.menu_theme)
+
+        self.menu_output = ttk.Menu(self.menubar, tearoff=0)
+
+        self.menu_help = ttk.Menu(self.menubar, tearoff=0)
+        self.menu_help.add_command(label="Help Index", command=donothing)
+        self.menu_help.add_command(label="About...", command=donothing)
+        self.menubar.add_cascade(label="Help", menu=self.menu_help)
+
+        self.config(menu=self.menubar)
 
         # Variables
         self.vars = dict()
@@ -226,6 +266,9 @@ class App(ttk.Window):
         self.vars['dispo_low_vaf_count'] = tk.IntVar()
         self.vars['dispo_vus_count'] = tk.IntVar()
         self.vars['dispo_mutation_count'] = tk.IntVar()
+        self.vars['dispo_flt3_count'] = tk.IntVar()
+        self.vars['dispo_hotspot_count'] = tk.IntVar()
+
 
         self.variant = dict()
         for x in vcf_columns:
@@ -309,6 +352,21 @@ class App(ttk.Window):
         self.scrollbar = ttk.Scrollbar(self.frame_treeview, orient=tk.VERTICAL, command=self.treeview_variant_list.yview)
         self.treeview_variant_list.configure(yscroll=self.scrollbar.set)
         self.scrollbar.pack(side='left', expand=False, fill='y')
+        self.treeview_variant_list.tag_configure('None', background="grey")
+        self.treeview_variant_list.tag_configure('Hotspot', background="orange")
+        self.treeview_variant_list.tag_configure('VUS', background="green")
+        self.treeview_variant_list.tag_configure('Low VAF', background="blue")
+        self.treeview_variant_list.tag_configure('Harmful', background="red")
+        self.treeview_variant_list.tag_configure('FLT3 ITD', background="purple")
+
+
+
+
+
+
+
+
+
         # Disposition Frame
         self.frame_disposition = ttk.Labelframe(self.frame_left, text="Variant Disposition")
         self.frame_disposition.pack(side='top', expand=False, fill='x', padx=5, pady=5)
@@ -319,21 +377,29 @@ class App(ttk.Window):
         # Disposition labels
         self.labels['none_count'] = ttk.Label(self.frame_disposition, textvariable=self.vars['dispo_none_count'], width=5, relief='groove', anchor='center')
         self.labels['none_count'].grid(row=0, column=0, sticky='news', padx=5, pady=5)
-        self.labels['low_vaf_count'] = ttk.Label(self.frame_disposition, textvariable=self.vars['dispo_low_vaf_count'], width=5, relief='groove', anchor='center')
-        self.labels['low_vaf_count'].grid(row=1, column=0, sticky='news', padx=5, pady=5)
+        self.labels['mutation_count'] = ttk.Label(self.frame_disposition, textvariable=self.vars['dispo_mutation_count'], width=5, relief='groove', anchor='center')
+        self.labels['mutation_count'].grid(row=1, column=0, sticky='news', padx=5, pady=5)
         self.labels['vus_count'] = ttk.Label(self.frame_disposition, textvariable=self.vars['dispo_vus_count'], width=5, relief='groove', anchor='center')
         self.labels['vus_count'].grid(row=2, column=0, sticky='news', padx=5, pady=5)
-        self.labels['mutation_count'] = ttk.Label(self.frame_disposition, textvariable=self.vars['dispo_mutation_count'], width=5, relief='groove', anchor='center')
-        self.labels['mutation_count'].grid(row=3, column=0, sticky='news', padx=5, pady=5)
+        self.labels['low_vaf_count'] = ttk.Label(self.frame_disposition, textvariable=self.vars['dispo_low_vaf_count'], width=5, relief='groove', anchor='center')
+        self.labels['low_vaf_count'].grid(row=3, column=0, sticky='news', padx=5, pady=5)
+        self.labels['flt3_count'] = ttk.Label(self.frame_disposition, textvariable=self.vars['dispo_flt3_count'], width=5, relief='groove', anchor='center')
+        self.labels['flt3_count'].grid(row=4, column=0, sticky='news', padx=5, pady=5)
+        self.labels['hotspot_count'] = ttk.Label(self.frame_disposition, textvariable=self.vars['dispo_hotspot_count'], width=5, relief='groove', anchor='center')
+        self.labels['hotspot_count'].grid(row=5, column=0, sticky='news', padx=5, pady=5)
         # Radio buttons for disposition
         self.radio_none = ttk.Radiobutton(self.frame_disposition, text="None (Unassigned)", variable=self.vars['Disposition'], value='None')
         self.radio_none.grid(row=0, column=1, sticky='news', padx=5, pady=5)
-        self.radio_low_vaf = ttk.Radiobutton(self.frame_disposition, text="Low VAF", variable=self.vars['Disposition'], value='Low VAF')
-        self.radio_low_vaf.grid(row=1, column=1, sticky='news', padx=5, pady=5)
+        self.radio_mutation = ttk.Radiobutton(self.frame_disposition, text="Harmful", variable=self.vars['Disposition'], value='Harmful')
+        self.radio_mutation.grid(row=1, column=1, sticky='news', padx=5, pady=5)
         self.radio_VUS = ttk.Radiobutton(self.frame_disposition, text="VUS", variable=self.vars['Disposition'], value='VUS')
         self.radio_VUS.grid(row=2, column=1, sticky='news', padx=5, pady=5)
-        self.radio_mutation = ttk.Radiobutton(self.frame_disposition, text="Harmful", variable=self.vars['Disposition'], value='Harmful')
-        self.radio_mutation.grid(row=3, column=1, sticky='news', padx=5, pady=5)
+        self.radio_low_vaf = ttk.Radiobutton(self.frame_disposition, text="Low VAF", variable=self.vars['Disposition'], value='Low VAF')
+        self.radio_low_vaf.grid(row=3, column=1, sticky='news', padx=5, pady=5)
+        self.radio_flt3 = ttk.Radiobutton(self.frame_disposition, text="FLT3 ITD", variable=self.vars['Disposition'], value='FLT3 ITD')
+        self.radio_flt3.grid(row=4, column=1, sticky='news', padx=5, pady=5)
+        self.radio_hotspot = ttk.Radiobutton(self.frame_disposition, text="Hotspot", variable=self.vars['Disposition'], value='Hotspot')
+        self.radio_hotspot.grid(row=5, column=1, sticky='news', padx=5, pady=5)
         # Process output files button
         self.buttons['save_disposition'] = ttk.Button(self.frame_left, text="Save Disposition", command=self.save_disposition, state='disabled')
         self.buttons['save_disposition'].pack(side='top', expand=False, fill='x', padx=5, pady=5, ipady=5)
@@ -383,30 +449,30 @@ class App(ttk.Window):
         self.frame_middle = ttk.Frame(self.frame_right)
         self.frame_middle.pack(side='top',expand=True,fill='both', padx=5, pady=5)
         # Strand Bias Frame
-        self.frame_genexys = ttk.Labelframe(self.frame_middle, text='Strand Bias Data', relief='groove')
-        self.frame_genexys.pack(side='left', expand=False, fill='both', padx=(0,10))
-        self.frame_genexys_sb_calc = ttk.Frame(self.frame_genexys)
-        self.frame_genexys_sb_calc.pack(side='top', expand=False, fill='both', padx=5, pady=5)
-        self.frame_genexys_sb_calc.rowconfigure(0, weight=1)
-        self.frame_genexys_sb_calc.rowconfigure(1, weight=1)
-        self.frame_genexys_sb_calc.columnconfigure(0, weight=0)
-        self.frame_genexys_sb_calc.columnconfigure(1, weight=5)
-        self.frame_genexys_sb_calc.columnconfigure(2, weight=0)
-        self.frame_genexys_sb_calc.columnconfigure(3, weight=1)
-        ttk.Label(self.frame_genexys_sb_calc, text="SB (reported)", anchor='e').grid(column=0, row=0, sticky='news', padx=5)
-        self.labels["VCF: STB"] = ttk.Label(self.frame_genexys_sb_calc, textvariable=self.variant["VCF: STB"], relief='groove', anchor='center')
+        self.frame_genexus = ttk.Labelframe(self.frame_middle, text='Strand Bias Data', relief='groove')
+        self.frame_genexus.pack(side='left', expand=False, fill='both', padx=(0,10))
+        self.frame_genexus_sb_calc = ttk.Frame(self.frame_genexus)
+        self.frame_genexus_sb_calc.pack(side='top', expand=False, fill='both', padx=5, pady=5)
+        self.frame_genexus_sb_calc.rowconfigure(0, weight=1)
+        self.frame_genexus_sb_calc.rowconfigure(1, weight=1)
+        self.frame_genexus_sb_calc.columnconfigure(0, weight=0)
+        self.frame_genexus_sb_calc.columnconfigure(1, weight=5)
+        self.frame_genexus_sb_calc.columnconfigure(2, weight=0)
+        self.frame_genexus_sb_calc.columnconfigure(3, weight=1)
+        ttk.Label(self.frame_genexus_sb_calc, text="SB (reported)", anchor='e').grid(column=0, row=0, sticky='news', padx=5)
+        self.labels["VCF: STB"] = ttk.Label(self.frame_genexus_sb_calc, textvariable=self.variant["VCF: STB"], relief='groove', anchor='center')
         self.labels["VCF: STB"].grid(column=1, row=0, sticky='news')
-        ttk.Label(self.frame_genexys_sb_calc, text="p.", anchor='e').grid(column=2, row=0, sticky='news', padx=5)
-        self.labels["VCF: STBP"] = ttk.Label(self.frame_genexys_sb_calc, textvariable=self.variant["VCF: STBP"], relief='groove', anchor='center', width=5)
+        ttk.Label(self.frame_genexus_sb_calc, text="p.", anchor='e').grid(column=2, row=0, sticky='news', padx=5)
+        self.labels["VCF: STBP"] = ttk.Label(self.frame_genexus_sb_calc, textvariable=self.variant["VCF: STBP"], relief='groove', anchor='center', width=5)
         self.labels["VCF: STBP"].grid(column=3, row=0, sticky='news')
-        # Genexys strand Bias Area
-        self.frame_sb_GX = ttk.Labelframe(self.frame_genexys, text="Genexys (calculated)")
+        # Genexus strand Bias Area
+        self.frame_sb_GX = ttk.Labelframe(self.frame_genexus, text="Genexus (calculated)")
         self.frame_sb_GX.pack(side='top', expand=True, fill='both', padx=5, pady=5)
         for x in range(3):
             self.frame_sb_GX.rowconfigure(x, weight=1)
         for x in range(2,4):
             self.frame_sb_GX.columnconfigure(x, weight=1)
-        ttk.Label(self.frame_sb_GX, anchor='center', text='Genexys', width=8, font=self.big_text).grid(column=0, row=0, rowspan=3, sticky='news', padx=5, pady=5)
+        ttk.Label(self.frame_sb_GX, anchor='center', text='Genexus', width=8, font=self.big_text).grid(column=0, row=0, rowspan=3, sticky='news', padx=5, pady=5)
         ttk.Label(self.frame_sb_GX, anchor='center', text='Fwd').grid(column=2, row=0, sticky='news', pady=(5,0), padx=5)
         ttk.Label(self.frame_sb_GX, anchor='center', text='Rev').grid(column=3, row=0, sticky='news', pady=(5,0), padx=5)
         ttk.Label(self.frame_sb_GX, text='Ref', anchor='e').grid(column=1, row=1, sticky='news', pady=5, padx=5)
@@ -429,7 +495,7 @@ class App(ttk.Window):
         self.frame_sb_GX_results.columnconfigure(1, weight=5)
         self.frame_sb_GX_results.columnconfigure(2, weight=0)
         self.frame_sb_GX_results.columnconfigure(3, weight=1)
-        # Genexys Stats Area
+        # Genexus Stats Area
         ttk.Label(self.frame_sb_GX_results, text="Binom. Prop.", anchor='e').grid(column=0, row=0, sticky='news', padx=5)
         self.labels["VCF: Binom Proportion"] = ttk.Label(self.frame_sb_GX_results, textvariable=self.variant["VCF: Binom Proportion"], relief='groove', anchor='center')
         self.labels["VCF: Binom Proportion"].grid(column=1, row=1, sticky='news', pady=5, padx=5)
@@ -443,7 +509,7 @@ class App(ttk.Window):
         self.labels["VCF: Fisher P Value"] = ttk.Label(self.frame_sb_GX_results, textvariable=self.variant["VCF: Fisher P Value"], relief='groove', anchor='center', width=5)
         self.labels["VCF: Fisher P Value"].grid(column=3, row=0, sticky='news', pady=5, padx=5)
         # Q20 Read Bias Area
-        self.frame_sb_Q20 = ttk.Labelframe(self.frame_genexys, text="Filtered M-Pileup (calculated)")
+        self.frame_sb_Q20 = ttk.Labelframe(self.frame_genexus, text="Filtered M-Pileup (calculated)")
         self.frame_sb_Q20.pack(side='top', expand=True, fill='both', padx=5, pady=5)
         for x in range(3):
             self.frame_sb_Q20.rowconfigure(x, weight=1)
@@ -486,7 +552,7 @@ class App(ttk.Window):
         self.labels["Mpileup Qual: Filtered Variant Fishers P Value"] = ttk.Label(self.frame_sb_Q20_results, textvariable=self.variant["Mpileup Qual: Filtered Variant Fishers P Value"], relief='groove', anchor='center', width=5)
         self.labels["Mpileup Qual: Filtered Variant Fishers P Value"].grid(column=3, row=1, sticky='news', pady=5, padx=5)
         # Q1 Read Bias Area
-        self.frame_sb_Q1 = ttk.Labelframe(self.frame_genexys, text="Unfiltered M-Pileup (calculated)")
+        self.frame_sb_Q1 = ttk.Labelframe(self.frame_genexus, text="Unfiltered M-Pileup (calculated)")
         self.frame_sb_Q1.pack(side='top', expand=True, fill='both', padx=5, pady=5)
         for x in range(3):
             self.frame_sb_Q1.rowconfigure(x, weight=1)
@@ -529,8 +595,8 @@ class App(ttk.Window):
         self.labels["Mpileup Qual: Unfiltered Variant Fishers P Value"] = ttk.Label(self.frame_sb_Q1_results, textvariable=self.variant["Mpileup Qual: Unfiltered Variant Fishers P Value"], relief='groove', anchor='center', width=5)
         self.labels["Mpileup Qual: Unfiltered Variant Fishers P Value"].grid(column=3, row=1, sticky='news', pady=5, padx=5)
 
-        # Genexys info frame
-        self.frame_gx_info = ttk.Labelframe(self.frame_middle, text='Genexys Information')
+        # Genexus info frame
+        self.frame_gx_info = ttk.Labelframe(self.frame_middle, text='Genexus Information')
         self.frame_gx_info.pack(side='top', expand=False, fill='both', pady=(0,5))
         for x in range(1,5,2):
             self.frame_gx_info.rowconfigure(x, weight=1)
@@ -546,7 +612,7 @@ class App(ttk.Window):
         ttk.Label(self.frame_gx_info, anchor='center', text="Genotype").grid(row=0, column=2, sticky='news', padx=5)
         self.labels["VCF: Genotype"] = ttk.Label(self.frame_gx_info, textvariable=self.variant["VCF: Genotype"], relief='groove', anchor='center')
         self.labels["VCF: Genotype"].grid(row=1, column=2, sticky='news', padx=5, pady=5)
-        ttk.Label(self.frame_gx_info, anchor='center', text="Filter (Genexys)").grid(row=0, column=3, sticky='news', padx=5)
+        ttk.Label(self.frame_gx_info, anchor='center', text="Filter (Genexus)").grid(row=0, column=3, sticky='news', padx=5)
         self.labels["VCF: Filter"] = ttk.Label(self.frame_gx_info, textvariable=self.variant["VCF: Filter"], relief='groove', anchor='center')
         self.labels["VCF: Filter"].grid(row=1, column=3, sticky='news', padx=5, pady=5)
         ttk.Label(self.frame_gx_info, anchor='center', text="Quality Score").grid(row=0, column=4, sticky='news', padx=5)
@@ -723,7 +789,7 @@ class App(ttk.Window):
                 if float(self.variant[x].get()) < 0.02:
                     self.labels[x].configure(bootstyle='danger.inverse.TLabel')
             if x in self.validation['web links']:
-                self.labels[x].configure(bootstyle = 'info')
+                self.labels[x].configure(bootstyle = 'info.inverse')
         return
 
     def loadCSV(self):
@@ -771,15 +837,24 @@ class App(ttk.Window):
         return
 
     def count_dispositions(self):
-        item_list = self.treeview_variant_list.get_children(item=None)
+        "Function to inventory the count of dispositions present in the list.  Called whenever a disposition is updated."
+
         self.vars['dispo_none_count'].set(0)
         self.vars['dispo_low_vaf_count'].set(0)
         self.vars['dispo_vus_count'].set(0)
         self.vars['dispo_mutation_count'].set(0)
+        self.vars['dispo_flt3_count'].set(0)
+        self.vars['dispo_hotspot_count'].set(0)
+
         none_count = 0
         low_vaf = 0
         vus_count = 0
         mutation_count = 0
+        flt3_count = 0
+        hotspot_count = 0
+
+        item_list = self.treeview_variant_list.get_children(item=None)
+
         for x in item_list:
             dispo = self.treeview_variant_list.set(x, column='Disposition')
             if dispo == 'Harmful':
@@ -788,12 +863,20 @@ class App(ttk.Window):
                 low_vaf += 1
             elif dispo == 'VUS':
                 vus_count += 1
-            else:
+            elif dispo == 'FLT3 ITD':
+                flt3_count += 1
+            elif dispo == 'Hotspot':
+                hotspot_count += 1
+            else: # "None" disposition
                 none_count += 1
+
         self.vars['dispo_none_count'].set(none_count)
         self.vars['dispo_low_vaf_count'].set(low_vaf)
         self.vars['dispo_vus_count'].set(vus_count)
         self.vars['dispo_mutation_count'].set(mutation_count)
+        self.vars['dispo_flt3_count'].set(flt3_count)
+        self.vars['dispo_hotspot_count'].set(hotspot_count)
+
         return
 
     def goto_next_radio(self):
@@ -824,6 +907,10 @@ class App(ttk.Window):
             self.radio_none.invoke()
         elif self.vars['Disposition'].get() == 'None':
             self.radio_mutation.invoke()
+        return
+
+    def change_theme(self, theme_name:str):
+        self.style.theme_use(theme_name)
         return
 
 # FUNCTIONS ----------------------------------------------
@@ -865,6 +952,10 @@ def ENSTLink(ID:str):
     """Follow a link to the UniProt Database."""
     link_string = f"http://useast.ensembl.org/Homo_sapiens/Transcript/Summary?t={ID}"
     webbrowser.open(link_string)
+    return
+
+def donothing():
+    pass
     return
 
 # MAIN LOOP ----------------------------------------------
