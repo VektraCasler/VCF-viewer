@@ -4,8 +4,12 @@
 # IMPORTS ------------------------------------------------
 
 import ttkbootstrap as tk
+from tkinter import Widget
 import json
 import os
+from tkinter import filedialog as fd
+import csv
+import pandas as pd
 
 
 # VARIABLES ----------------------------------------------
@@ -162,7 +166,7 @@ tooltips = {
 
 # FUNCTIONS ----------------------------------------------
 
-def CreateToolTip(widget: tk.Widget, text):
+def CreateToolTip(widget: Widget, text):
     toolTip = ToolTip(widget)
     def enter(event):
         toolTip.showtip(text)
@@ -210,8 +214,12 @@ class ToolTip(object):
 
 class ViewerWindow(tk.Window):
 
-    def __init__(self) -> None:
+    def __init__(self, parent, model, settings, *args, **kwargs) -> None:
         super().__init__()
+
+        self.model = model
+        self.settings = settings
+        fields = self.model.fields
 
         # Root Window
         self.title('VCF Result Viewer')
@@ -221,7 +229,7 @@ class ViewerWindow(tk.Window):
         self.grid_columnconfigure(0, weight=1)
         self.geometry('800x600')
 
-        self.create_menus()
+        # self.create_menus()
         self.create_frames()
         self.place_widgets()
         self.create_tooltips()
@@ -231,58 +239,6 @@ class ViewerWindow(tk.Window):
     def do_nothing(self) -> None:
         """ Placeholder function that does nothing. """
         pass
-        return
-
-    def create_menus(self) -> None:
-        """ Adds the menus to the application window. """
-        
-        # Menu Creation
-        self.menubar = tk.Menu(self)
-
-        # FILE Menu
-        self.menu_file = tk.Menu(self.menubar, tearoff=0)
-        self.menu_file.add_command(label="Open", command=self.do_nothing)
-        self.menu_file.add_command(label="Clear", command=self.do_nothing)
-        self.menu_file.add_command(label="Save", command=self.do_nothing)
-        self.menu_file.add_separator()
-        self.menu_file.add_command(label="Exit", command=self.quit)
-        self.menubar.add_cascade(label="File", menu=self.menu_file)
-
-        # OUTPUT menu -- for exporting data to text documents and possibly triggering the other reporting script
-        self.menu_output = tk.Menu(self.menubar, tearoff=0)
-        self.menubar.add_cascade(label='Output', menu=self.menu_output)
-
-        # THEMES Menu - Just for fun/aesthetics
-        self.menu_theme = tk.Menu(self.menubar, tearoff=0)
-        # self.menu_theme.add_command(label='Cerculean', command=lambda: self.style.theme_use('cerculean'))
-        self.menu_theme.add_command(label='Cosmo', command=lambda: self.style.theme_use('cosmo'))
-        self.menu_theme.add_command(label='Flatly', command=lambda: self.style.theme_use('flatly'))
-        self.menu_theme.add_command(label='Journal', command=lambda: self.style.theme_use('journal'))
-        self.menu_theme.add_command(label='Litera', command=lambda: self.style.theme_use('litera'))
-        self.menu_theme.add_command(label='Lumen', command=lambda: self.style.theme_use('lumen'))
-        # self.menu_theme.add_command(label='Minty', command=lambda: self.style.theme_use('minty'))
-        # self.menu_theme.add_command(label='Morph', command=lambda: self.style.theme_use('morph'))
-        self.menu_theme.add_command(label='Pulse', command=lambda: self.style.theme_use('pulse'))
-        self.menu_theme.add_command(label='Sandstone', command=lambda: self.style.theme_use('sandstone'))
-        # self.menu_theme.add_command(label='Simplex', command=lambda: self.style.theme_use('simplex'))
-        self.menu_theme.add_command(label='United', command=lambda: self.style.theme_use('united'))
-        self.menu_theme.add_command(label='Yeti', command=lambda: self.style.theme_use('yeti'))
-        self.menu_theme.add_separator()
-        # self.menu_theme.add_command(label='Solar', command=lambda: self.style.theme_use('solar'))
-        self.menu_theme.add_command(label='Superhero', command=lambda: self.style.theme_use('superhero'))
-        self.menu_theme.add_command(label='Darkly', command=lambda: self.style.theme_use('darkly'))
-        self.menu_theme.add_command(label='Cyborg', command=lambda: self.style.theme_use('cyborg'))
-        # self.menu_theme.add_command(label='Vapor', command=lambda: self.style.theme_use('vapor'))
-        self.menubar.add_cascade(label='Theme', menu=self.menu_theme)
-
-        # HELP Menu
-        self.menu_help = tk.Menu(self.menubar, tearoff=0)
-        self.menu_help.add_command(label="About...", command=self.do_nothing)
-        self.menubar.add_cascade(label="Help", menu=self.menu_help)
-
-        # Instances the menu
-        self.config(menu=self.menubar)
-
         return
     
     def create_frames(self) -> None:
@@ -420,7 +376,11 @@ class ViewerWindow(tk.Window):
         self.frame_mpl_info_ends = tk.Frame(self.frame_mpl_info)
         self.frame_mpl_info_ends.pack(side='left', expand=True, fill='both', pady=5, padx=5)
 
-        # MDL Info area
+        # Other Frame
+        self.frame_other = tk.Frame(self.frame_middle)
+        self.frame_other.pack(side='top',expand=True, fill='both')
+
+        # MDL Info Frame
         self.frame_mdl = tk.Labelframe(self.frame_other, text='MDL Info')
         self.frame_mdl.pack(side='left',expand=True, fill='both', padx=(5,0))
         self.frame_mdl.rowconfigure(3, weight=99)
@@ -428,8 +388,6 @@ class ViewerWindow(tk.Window):
         self.frame_mdl.columnconfigure(1, weight=1)
 
         # Variant DB Info Frame
-        self.frame_other = tk.Frame(self.frame_middle)
-        self.frame_other.pack(side='top',expand=True, fill='both')
         self.frame_var_annot = tk.Labelframe(self.frame_other, text='Variant Annotation')
         self.frame_var_annot.pack(side='left',expand=True, fill='both', padx=(0,5))
         for x in range(3):
@@ -1240,35 +1198,6 @@ class ViewerWindow(tk.Window):
 
         return
 
-    def goto_next_radio(self):
-        if not self.vars['Disposition'].get():
-            pass
-        elif self.vars['Disposition'].get() == 'None':
-            self.radio_low_vaf.invoke()
-            self.vars['Disposition'].set('Low VAF')
-        elif self.vars['Disposition'].get() == 'Low VAF':
-            self.radio_VUS.invoke()
-            self.vars['Disposition'].set('VUS')
-        elif self.vars['Disposition'].get() == 'VUS':
-            self.radio_mutation.invoke()
-            self.vars['Disposition'].set('Harmful')
-        elif self.vars['Disposition'].get() == 'Harmful':
-            self.radio_none.invoke()
-            self.vars['Disposition'].set('None')
-        return
-    
-    def goto_prev_radio(self):
-        if not self.vars['Disposition'].get():
-            pass
-        elif self.vars['Disposition'].get() == 'Harmful':
-            self.radio_VUS.invoke()
-        elif self.vars['Disposition'].get() == 'VUS':
-            self.radio_low_vaf.invoke()
-        elif self.vars['Disposition'].get() == 'Low VAF':
-            self.radio_none.invoke()
-        elif self.vars['Disposition'].get() == 'None':
-            self.radio_mutation.invoke()
-        return
 
 # MAIN LOOP ----------------------------------------------
 
