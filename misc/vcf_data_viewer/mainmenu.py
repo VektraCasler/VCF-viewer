@@ -19,9 +19,9 @@ class MainMenu(tk.Menu):
             root.event_generate(sequence)
         return callback
 
-    def __init__(self, parent, settings, **kwargs):
+    def __init__(self, parent, **kwargs):
         super().__init__(parent, **kwargs)
-        self.settings = settings
+        # self.settings = settings
         
         # File Menu --------------------------------
         menu_file = tk.Menu(self, tearoff=False)

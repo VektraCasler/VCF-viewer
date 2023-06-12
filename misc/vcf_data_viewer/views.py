@@ -5,21 +5,10 @@
 
 import ttkbootstrap as tk
 from tkinter import Widget
-import json
-import os
 from tkinter import filedialog as fd
-import csv
-import pandas as pd
 
 
 # VARIABLES ----------------------------------------------
-
-settings_filename = 'settings.json'
-if os.path.exists(settings_filename):
-    SETTINGS = json.load(settings_filename)
-else:
-    SETTINGS = {
-    }
 
 vcf_columns = [
     "Original Input: Chrom",
@@ -218,7 +207,7 @@ class ViewerWindow(tk.Window):
         super().__init__()
 
         self.model = model
-        self.settings = settings
+        # self.settings = settings
         fields = self.model.fields
 
         # Root Window

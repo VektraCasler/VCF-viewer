@@ -486,6 +486,12 @@ class DataModel:
         },
     }
 
+    def __init__(self, filename=None):
+
+        self.vars = dict()
+
+        for key,value in fields.items():
+            self.vars = FT.
 # MAIN LOOP ----------------------------------------------
 
 def main():
