@@ -1,9 +1,9 @@
-# vcf_data_viewer.py
+# VDV.py
 ''' Main script file for the VCF data viewer application. '''
 
 __author__ = "Vektra Casler MD"
 __version__ = "0.2.0"
-__license__ = "Built for use at University of Rochester Medical Center"
+__license__ = "Built for use only at University of Rochester Medical Center in Rochester, NY."
 
 # IMPORTS ------------------------------------------------
 

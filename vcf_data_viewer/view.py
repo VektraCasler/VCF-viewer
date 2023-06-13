@@ -1,470 +1,51 @@
-# CSViewer.py
-''' An application to view a csv file. '''
+# vcf_data_viewer/view.py
+''' The view of the VCF Data Viewer application, comprised of the tkinter portion. '''
 
 # IMPORTS ------------------------------------------------
 
-# import tkinter as tk 
-import ttkbootstrap as tk 
-from tkinter import filedialog as fd
-from tkinter import messagebox as mb
+import ttkbootstrap as tk
 from tkinter import Widget
-import openpyxl
-import os 
-import json
+from tkinter import filedialog as fd
+from .global_variables import *
+from .tool_tip import ToolTip, CreateToolTip
 
 # VARIABLES ----------------------------------------------
 
-settings_filename = 'settings.json'
-if os.path.exists(settings_filename):
-    SETTINGS = json.load(settings_filename)
-else:
-    SETTINGS = {
-    }
-
-VCF_FIELDS = [
-    "Original Input: Chrom",
-    "Original Input: Pos",
-    "Original Input: Reference allele",
-    "Original Input: Alternate allele",
-    "Variant Annotation: Gene",
-    "Variant Annotation: cDNA change",
-    "Variant Annotation: Protein Change",
-    "Variant Annotation: RefSeq",
-    "VCF: AF",
-    "VCF: FAO",
-    "VCF: FDP",
-    "VCF: HRUN",
-    "VCF: Filter",
-    "VCF: Genotype",
-    "COSMIC: ID",
-    "COSMIC: Variant Count",
-    "COSMIC: Variant Count (Tissue)",
-    "ClinVar: ClinVar ID",
-    "ClinVar: Clinical Significance",
-    "gnomAD3: Global AF",
-    "PhyloP: Vert Score",
-    "CADD: Phred",
-    "PolyPhen-2: HDIV Prediction",
-    "SIFT: Prediction",
-    "VCF: FSAF",
-    "VCF: FSAR",
-    "VCF: FSRF",
-    "VCF: FSRR",
-    "VCF: Fisher Odds Ratio",
-    "VCF: Fisher P Value",
-    "VCF: Binom Proportion",
-    "VCF: Binom P Value",
-    "Mpileup Qual: Read Depth",
-    "Mpileup Qual: Start Reads",
-    "Mpileup Qual: Stop Reads",
-    "Mpileup Qual: Filtered Reference Forward Read Depth",
-    "Mpileup Qual: Filtered Reference Reverse Read Depth",
-    "Mpileup Qual: Unfiltered Reference Forward Read Depth",
-    "Mpileup Qual: Unfiltered Reference Reverse Read Depth",
-    "Mpileup Qual: Filtered Variant Forward Read Depth",
-    "Mpileup Qual: Filtered Variant Reverse Read Depth",
-    "Mpileup Qual: Filtered Variant Binomial Proportion",
-    "Mpileup Qual: Filtered Variant Binomial P Value",
-    "Mpileup Qual: Filtered Variant Fishers Odds Ratio",
-    "Mpileup Qual: Filtered Variant Fishers P Value",
-    "Mpileup Qual: Filtered VAF",
-    "Mpileup Qual: Unfiltered Variant Forward Read Depth",
-    "Mpileup Qual: Unfiltered Variant Reverse Read Depth",
-    "Mpileup Qual: Unfiltered Variant Binomial Proportion",
-    "Mpileup Qual: Unfiltered Variant Binomial P Value",
-    "Mpileup Qual: Unfiltered Variant Fishers Odds Ratio",
-    "Mpileup Qual: Unfiltered Variant Fishers P Value",
-    "Mpileup Qual: Unfiltered VAF",
-    "VCF: LEN",
-    "VCF: QD",
-    "VCF: STB",
-    "VCF: STBP",
-    "VCF: SVTYPE",
-    "VCF: TYPE",
-    "VCF: QUAL",
-    "Variant Annotation: Coding",
-    "Variant Annotation: Sequence Ontology",
-    "Variant Annotation: Transcript",
-    "Variant Annotation: All Mappings",
-    "UniProt (GENE): Accession Number",
-    "dbSNP: rsID",
-    "MDL: Sample Count",
-    "MDL: Variant Frequency",
-    "MDL: Sample List",
-    "Disposition",
-]
-
-TOOLTIPS = {
-    "Disposition":'What to call this variant.',
-    "Original Input: Chrom":'Chromosome on which this gene is found.',
-    "Original Input: Pos":'Base pair position of the gene on the chromosome.',
-    "Original Input: Reference allele":'Expected finding at this base pair location.',
-    "Original Input: Alternate allele":'Specimen finding at this base pair location.',
-    "Variant Annotation: Gene":'Gene currently selected from the variant list.',
-    "Variant Annotation: cDNA change":'Alteration in the DNA at this location.',
-    "Variant Annotation: Protein Change":'Resultant alteration in the protein at this location.',
-    "VCF: AF":'Allele fraction of reads with this variant.',
-    "VCF: FAO":"Variant read depth at this base pair location, reported by Genexys.",
-    "VCF: FDP":"Total read depth at this base pair location, reported by Genexys",
-    "VCF: HRUN":"Homopolymer run count, reported by Genexys.",
-    "VCF: Filter":"Final filter disposition as given by the Genexys.\n Preferred value: 'PASS'",
-    "VCF: Genotype":"Genotype distinction made by the Genexys analyzer.\n 1/1 = homozygous, 0/1 = heterozygous, 0/0 = ???, ./. = ???",
-    "COSMIC: ID":"COSMIC website ID for this variant.",
-    "COSMIC: Variant Count":"Times this variant has been reported to COSMIC.",
-    "COSMIC: Variant Count (Tissue)":"JSON-style dictionary breakdown of tissue types reported to COSMIC for this variant.", # Very long text, needs wordwrap
-    "ClinVar: ClinVar ID":"ClinVar website ID for this variant.",
-    "ClinVar: Clinical Significance":"Clinical significance as reported by ClinVar website.",
-    "gnomAD3: Global AF":"Frequency of this variant being found in the human population, as reported by GnomAD website.",
-    "PhyloP: Vert Score":"Vertebrate score for gene conservancy, as reported by web resources.",
-    "CADD: Phred":"Combine Annotation Dependent Depletion score, rating pathogenicity.\nRange: 0 = Benign, 48 = Pathogenic",
-    "PolyPhen-2: HDIV Prediction":"Score assessing the possible change in phenotype of the protein structure, based on AA change.",
-    "SIFT: Prediction":"SNP mutagenesis prediction score based on AA change, as reported by SIFT website.",
-    "VCF: FSAF":"Forward Variant Read Depth, reported by Genexys\nValid value: > 10",
-    "VCF: FSAR":"Reverse Variant Read Depth, reported by Genexys\nValid value: > 10",
-    "VCF: FSRF":"Forward Reference Read Depth, reported by Genexys.",
-    "VCF: FSRR":"Reverse Reference Read Depth, reported by Genexys.",
-    "VCF: Fisher Odds Ratio":"Fisher's odds ratio calculation, based on Genexys read depth data.",
-    "VCF: Fisher P Value":"Statistical p-value.\nLess than 0.05 is preferred.",
-    "VCF: Binom Proportion":"Binomial proportion caclucation, based on Genexys read depth data.",
-    "VCF: Binom P Value":"Statistical p-value.\nLess than 0.05 is preferred.",
-    "Mpileup Qual: Read Depth":"Total read depth, as reported by M-Pileup data.\nValid: > 500",
-    "Mpileup Qual: Start Reads":"Count of read start signals (strand termination), as reported in the M-Pileup data.",
-    "Mpileup Qual: Stop Reads":"Cout of read stop signals (strand initiation), as reported in the M-Pileup data.",
-    "Mpileup Qual: Filtered Reference Forward Read Depth":"Forward Reference Read Depth, reported by M-Pileup, @Q20\nValid value: > 10",
-    "Mpileup Qual: Filtered Reference Reverse Read Depth":"Reverse Reference Read Depth, reported by M-Pileup, @Q20\nValid value: > 10",
-    "Mpileup Qual: Unfiltered Reference Forward Read Depth":"Forward Reference Read Depth, reported by M-Pileup, @Q1\nValid value: > 10",
-    "Mpileup Qual: Unfiltered Reference Reverse Read Depth":"Reverse Reference Read Depth, reported by M-Pileup, @Q1\nValid value: > 10",
-    "Mpileup Qual: Filtered Variant Forward Read Depth":"Forward Variant Read Depth, reported by M-Pileup, @Q20\nValid value: > 10",
-    "Mpileup Qual: Filtered Variant Reverse Read Depth":"Reverse Variant Read Depth, reported by M-Pileup, @Q20\nValid value: > 10",
-    "Mpileup Qual: Filtered Variant Binomial Proportion":"Binomial proportion caclucation, based on filtered M-Pileup read depth data.",
-    "Mpileup Qual: Filtered Variant Binomial P Value":"Statistical p-value.\nLess than 0.05 is preferred.",
-    "Mpileup Qual: Filtered Variant Fishers Odds Ratio":"Fisher's odds ratio calculation, based on filtered M-Pileup read depth data.",
-    "Mpileup Qual: Filtered Variant Fishers P Value":"Statistical p-value.\nLess than 0.05 is preferred.",
-    "Mpileup Qual: Unfiltered Variant Forward Read Depth":"Forward Variant Read Depth, reported by M-Pileup, @Q1\nValid value: > 10",
-    "Mpileup Qual: Unfiltered Variant Reverse Read Depth":"Reverse Variant Read Depth, reported by M-Pileup, @Q1\nValid value: > 10",
-    "Mpileup Qual: Unfiltered Variant Binomial Proportion":"Binomial proportion caclucation, based on unfiltered M-Pileup read depth data.",
-    "Mpileup Qual: Unfiltered Variant Binomial P Value":"Statistical p-value.\nLess than 0.05 is preferred.",
-    "Mpileup Qual: Unfiltered Variant Fishers Odds Ratio":"Fisher's odds ratio calculation, based on unfiltered M-Pileup read depth data.",
-    "Mpileup Qual: Unfiltered Variant Fishers P Value":"Statistical p-value.\nLess than 0.05 is preferred.",
-    "VCF: LEN":"Length of the variant, as reported by Genexys.",
-    "VCF: QD":"???",
-    "VCF: STB":"Proprietary strand bias calculation, as reported by Genexys.",
-    "VCF: STBP":"Statistical p-value.\nLess than 0.05 is preferred.",
-    "VCF: SVTYPE":"Unused data field from the Genexys report.",
-    "VCF: TYPE":"Type of variant, as reported by Genexys.",
-    "VCF: QUAL":"Quality determination tag, as reported by Genexys.",
-    "Variant Annotation: Coding":"Reported coding region variant, as reported by Genexys.",
-    "Variant Annotation: Sequence Ontology":"Type of variant/mutation encountered.\n Possible Types: MIS, INT, FSI, IND, SYN, SPL ",
-    "Variant Annotation: Transcript":"Ensembl transcript designation code.",
-    "Variant Annotation: All Mappings":"JSON-style dictionary breakdown of tissue types present in ??? knowledgebase for this variant.", # Very long text, needs wordwrap
-    "UniProt (GENE): Accession Number":"UniProt web resource for the affected protein and biological functions.",
-    "dbSNP: rsID":"ID number for the free dbSNP web resource listing of this variant.",
-    "MDL: Sample Count":"Instance count of samples with this variant in ",
-    "MDL: Variant Frequency":"",
-    "MDL: Sample List":"JSON-style dictionary breakdown of tissue types present in ??? knowledgebase for this variant.", # Very long text, needs wordwrap
-}
-
-DISPOSITIONS = [
-    "None",
-    "Harmful",
-    "VUS",
-    "Low VAF Variants",
-    "FLT3 ITDs",
-    "Hotspot Exceptions",
-]
-
 # CLASSES ------------------------------------------------
 
-class DataModel():
+class RecordView():
 
-    def __init__(self) -> None:
-        self.filename = str()
-        self.selected = dict()
-        for x in VCF_FIELDS:
-            self.selected[x] = None
-        self.disposition_counts = dict()
-        for x in DISPOSITIONS:
-            self.disposition_counts[x] = 0
-        self.variant_list = dict()
-        return
-    
-    def _select_variant(self, index:int):
-        if index == None:
-            for x in VCF_FIELDS:
-                self.selected[x] = None
-        else:
-            for x in VCF_FIELDS:
-                self.selected[x] = self.variant_list[index][x]
-        
-    def _load_file(self, filename):
-        """ Recieves the filename from the view, attempts to load. """
-        self.filename = filename
-        if ".XLSX" in str(self.filename).upper():
-            try:
-                self._read_excel_file_to_dictionary(self.filename)
-            except:
-                print("File not read correctly.")
-        return
-        
-    def _read_excel_file_to_dictionary(self, filename:str):
-        """ Loads an Excel worksheet, then reads all sheets for variant information. """
-        workbook = openpyxl.load_workbook(filename, data_only=True, read_only=True)
-        self.variant_list = list()
-        for disposition in workbook.sheetnames:
-            sheet = workbook[disposition]
-            for row in sheet.iter_rows(min_row=2):
-                row_dict = dict()
-                for x in range(len(VCF_FIELDS)):
-                    row_dict[VCF_FIELDS[x]] = row[x].value
-                row_dict['Disposition'] = disposition
-                self.variant_list.append(row_dict.copy())
-        return
-    
-    def _count_dispositions(self):
-        for x in DISPOSITIONS:
-            self.disposition_counts[x] = 0
-            for variant in self.variant_list:
-                self.disposition_counts[variant['Disposition']] += 1
-        return
+    def __init__(self, parent, **kwargs) -> None:
+        # super.__init__()
+        # Variables ------------------------------------------------------------------------
 
-
-class MainMenu(tk.Menu):
-    '''The Application's main menu.'''
-
-    def _event(self, sequence):
-        def callback(*_):
-            root = self.master.winfo_toplevel()
-            root.event_generate(sequence)
-        return callback
-
-    def __init__(self, parent, **kwargs):
-        super().__init__(parent, **kwargs)
-        # self.settings = settings
-        
-        # File Menu --------------------------------
-        menu_file = tk.Menu(self, tearoff=False)
-        menu_file.add_command(
-            label="Open", 
-            command=self._event('<<FileSelect>>')
-        )
-        menu_file.add_command(
-            label="Clear", 
-            command=self._event('<<FileClear>>')
-        )
-        menu_file.add_command(
-            label="Save", 
-            command=self._event('<<FileSave>>')
-        )
-        menu_file.add_separator()
-        menu_file.add_command(
-            label="Quit",
-            command=self._event('<<FileQuit>>')
-        )
-        
-        # Go Menu ----------------------------------
-        menu_go = tk.Menu(self, tearoff=False)
-        menu_go.add_command(
-            label = "Export Text Files",
-            command=self._event('<<ExportTextFiles>>')
-        )
-
-        # Themes Menu -------------------------------
-        menu_theme = tk.Menu(self, tearoff=0)
-        menu_theme.add_command(
-            label='Cosmo', 
-            command=self._event('<<ThemeCosmo>>')
-        )
-        menu_theme.add_command(
-            label='Flatly', 
-            command=self._event('<<ThemeFlatly>>')
-        )
-        menu_theme.add_command(
-            label='Journal', 
-            command=self._event('<<ThemeJournal>>')
-        )
-        menu_theme.add_command(
-            label='Litera', 
-            command=self._event('<<ThemeLitera>>')
-        )
-        menu_theme.add_command(
-            label='Lumen', 
-            command=self._event('<<ThemeLumen>>')
-        )
-        menu_theme.add_command(
-            label='Pulse', 
-            command=self._event('<<ThemePulse>>')
-        )
-        menu_theme.add_command(
-            label='Sandstone', 
-            command=self._event('<<ThemeSandstone>>')
-        )
-        menu_theme.add_command(
-            label='United', 
-            command=self._event('<<ThemeUnited>>')
-        )
-        menu_theme.add_command(
-            label='Yeti', 
-            command=self._event('<<ThemeYeti>>')
-        )
-        menu_theme.add_separator()
-        menu_theme.add_command(
-            label='Superhero', 
-            command=self._event('<<ThemeSuperhero>>')
-        )
-        menu_theme.add_command(
-            label='Darkly', 
-            command=self._event('<<ThemeDarkly>>')
-        )
-        menu_theme.add_command(
-            label='Cyborg', 
-            command=self._event('<<ThemeCyborg>>')
-        )
-
-        # Help Menu ----------------------------
-        menu_help = tk.Menu(self, tearoff=False)
-        menu_help.add_command(
-            label='About...',
-            command=self.show_about
-        )
-
-        # Add menus in the right order...
-        self.add_cascade(label='File', menu=menu_file)
-        self.add_cascade(label='Go', menu=menu_go)
-        self.add_cascade(label='Theme', menu=menu_theme)
-        self.add_cascade(label='Help', menu=menu_help)
-
-        return
-
-    def show_about(self):
-        '''Show the about dialog'''
-        
-        about_message = 'VCF Data Viewer'
-        about_detail = (
-            'Written by Vektra Casler MD \n'
-            '\n'
-            'For assistance, please contact \n'
-            'vektra_casler@urmc.rochester.edu'
-        )
-        mb.showinfo(
-            title='About',
-            message=about_message,
-            detail=about_detail
-        )
-
-class ToolTip(object):
-
-    def __init__(self, widget):
-        self.widget = widget
-        self.tipwindow = None
-        self.id = None
-        self.x = self.y = 0
-
-    def showtip(self, text):
-        "Display text in tooltip window"
-        self.text = text
-        if self.tipwindow or not self.text:
-            return
-        x, y, cx, cy = self.widget.bbox("insert")
-        x = x + self.widget.winfo_rootx() + 57
-        y = y + cy + self.widget.winfo_rooty() +27
-        self.tipwindow = tw = tk.Toplevel(self.widget)
-        tw.wm_overrideredirect(1)
-        tw.wm_geometry("+%d+%d" % (x, y))
-        label = tk.Label(
-            tw, 
-            text=self.text, 
-            justify=tk.LEFT,
-            background="#ffffe0", 
-            relief=tk.SOLID, 
-            borderwidth=1,
-            font=("tahoma", "8", "normal")
-        )
-        label.pack(ipadx=1)
-
-    def hidetip(self):
-        tw = self.tipwindow
-        self.tipwindow = None
-        if tw:
-            tw.destroy()
-
-class Application(tk.Window):
-
-    def __init__(self) -> None:
-        super().__init__()
-
-        self.data_model = DataModel()
-
-        # Root Window
-        self.title('VCF Result Viewer')
-        self.resizable(True, True)
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
-        self.geometry('800x600')
-
-        # Menu
-        self.menu = MainMenu(self)
-        self.config(menu=self.menu)
-        event_callbacks={
-            '<<FileSelect>>': self.data_model._load_file(fd),
-            # '<<FileClear>>': self._on_file_select,
-            # '<<FileSave>>': self._on_file_select,
-            '<<FileQuit>>': lambda _: self.quit(),
-            # '<<ExportTextFiles>>': self._export_text_files,
-            '<<ThemeCosmo>>': lambda _: self.style.theme_use('cosmo'),
-            '<<ThemeFlatly>>': lambda _: self.style.theme_use('flatly'),
-            '<<ThemeJournal>>': lambda _: self.style.theme_use('journal'),
-            '<<ThemeLitera>>': lambda _: self.style.theme_use('litera'),
-            '<<ThemeLumen>>': lambda _: self.style.theme_use('lumen'),
-            '<<ThemePulse>>': lambda _: self.style.theme_use('pulse'),
-            '<<ThemeSandstone>>': lambda _: self.style.theme_use('sandstone'),
-            '<<ThemeUnited>>': lambda _: self.style.theme_use('united'),
-            '<<ThemeYeti>>': lambda _: self.style.theme_use('yeti'),
-            '<<ThemeSuperhero>>': lambda _: self.style.theme_use('superhero'),
-            '<<ThemeDarkly>>': lambda _: self.style.theme_use('darkly'),
-            '<<ThemeCyborg>>': lambda _: self.style.theme_use('cyborg'),
-        }
-        for sequence, callback in event_callbacks.items():
-            self.bind(sequence, callback)
-
-        # Variables
-
-        self.labels = dict()
-        self.labels['filename'] = ('No CSV File Loaded')
-        for x in VCF_FIELDS:
-            self.labels[x] = tk.Label()
-
-        self.vars = dict()
-        self.vars['filename'] = tk.StringVar()
-        self.vars['status_text'] = tk.StringVar()
-        self.vars['Disposition'] = dict()
-        for x in DISPOSITIONS:
-            self.vars['Disposition'][x] = tk.IntVar()
-
+        # Holder dictionary for tk variables and widgets to be used by the view.  Variant dict Must match the model's fields. (VCF_FIELDS)
         self.variant = dict()
         for x in VCF_FIELDS:
             self.variant[x] = tk.StringVar()
-            
+        self.variant['Disposition'] = tk.StringVar()
+
+        self.variables = dict()
+        self.variables['filename'] = tk.StringVar()
+        self.variables['status_bar'] = tk.StringVar()
+        self.variables['Disposition'] = dict()
+        for x in DISPOSITIONS:
+            self.variables['Disposition'][x] = tk.IntVar()
+
+        self.labels = dict()
+        for x in VCF_FIELDS:
+            self.labels[x] = tk.Label()
+
         self.buttons = dict()
         self.frames = dict()
         self.radio_buttons = dict()
         self.treeviews = dict()
         self.scrollbars = dict()
 
-        self.validation = dict()
-        self.validation['p-values'] = [
-            "VCF: Binom P Value",
-            "VCF: Fisher P Value",
-            "Mpileup Qual: Filtered Variant Binomial P Value",
-            "Mpileup Qual: Filtered Variant Fishers P Value",
-            "Mpileup Qual: Unfiltered Variant Binomial P Value",
-            "Mpileup Qual: Unfiltered Variant Fishers P Value",
-            "VCF: STBP"
-        ]
-
-        # Widgets ------------------------------------------------------------------------
+        # Frames and Widgets ----------------------------------------------------------
 
         # Base Frame
-        self.frames['base'] = tk.Frame(self)
+        self.frames['base'] = tk.Frame(parent)
         self.frames['base'].pack(expand=True, fill='both',ipadx=10, ipady=10)
 
         # Left Frame
@@ -474,7 +55,7 @@ class Application(tk.Window):
         #File load button
         self.labels['filename'] = tk.Label(self.frames['left'], textvariable=None, relief='groove')
         self.labels['filename'].pack(side='top', expand=False, fill='x',ipady=5, padx=5, pady=5)
-        self.buttons['load_file'] = tk.Button(self.frames['left'], text="Load a File", command=('<<FileSelect>>'))
+        self.buttons['load_file'] = tk.Button(self.frames['left'], text="Load a File", command=self.open_file)
         self.buttons['load_file'].pack(side='top', expand=False, fill='x', ipady=5, padx=5, pady=5)
 
         # Treeview Frame
@@ -514,17 +95,17 @@ class Application(tk.Window):
         self.frames['dispo_6'].pack(side='top', expand=False, fill='x')
 
         # Disposition labels
-        self.labels["None"] = tk.Label(self.frames['dispo_1'], textvariable=self.vars['Disposition']['None'], width=5, relief='groove')
+        self.labels["None"] = tk.Label(self.frames['dispo_1'], textvariable=self.variables['Disposition']['None'], width=5, relief='groove')
         self.labels["None"].pack(side='left', expand=False, fill='y', padx=5, pady=5)
-        self.labels["Low VAF Variants"] = tk.Label(self.frames['dispo_2'], textvariable=self.vars['Disposition']['None'], width=5, relief='groove')
+        self.labels["Low VAF Variants"] = tk.Label(self.frames['dispo_2'], textvariable=self.variables['Disposition']['None'], width=5, relief='groove')
         self.labels["Low VAF Variants"].pack(side='left', expand=False, fill='y', padx=5, pady=5)
-        self.labels["VUS"] = tk.Label(self.frames['dispo_3'], textvariable=self.vars['Disposition']['None'], width=5, relief='groove')
+        self.labels["VUS"] = tk.Label(self.frames['dispo_3'], textvariable=self.variables['Disposition']['None'], width=5, relief='groove')
         self.labels["VUS"].pack(side='left', expand=False, fill='y', padx=5, pady=5)
-        self.labels["Harmful"] = tk.Label(self.frames['dispo_4'], textvariable=self.vars['Disposition']['None'], width=5, relief='groove')
+        self.labels["Harmful"] = tk.Label(self.frames['dispo_4'], textvariable=self.variables['Disposition']['None'], width=5, relief='groove')
         self.labels["Harmful"].pack(side='left', expand=False, fill='y', padx=5, pady=5)
-        self.labels["FLT3 ITDs"] = tk.Label(self.frames['dispo_5'], textvariable=self.vars['Disposition']['None'], width=5, relief='groove')
+        self.labels["FLT3 ITDs"] = tk.Label(self.frames['dispo_5'], textvariable=self.variables['Disposition']['None'], width=5, relief='groove')
         self.labels["FLT3 ITDs"].pack(side='left', expand=False, fill='y', padx=5, pady=5)
-        self.labels["Hotspot Exceptions"] = tk.Label(self.frames['dispo_6'], textvariable=self.vars['Disposition']['None'], width=5, relief='groove')
+        self.labels["Hotspot Exceptions"] = tk.Label(self.frames['dispo_6'], textvariable=self.variables['Disposition']['None'], width=5, relief='groove')
         self.labels["Hotspot Exceptions"].pack(side='left', expand=False, fill='y', padx=5, pady=5)
 
         # Radio buttons for disposition
@@ -585,11 +166,6 @@ class Application(tk.Window):
         tk.Label(self.frames['basic_info_alleles'], text="Variant Allele", anchor='w').pack(side='top',expand=False, fill='x')
         self.labels["Original Input: Alternate allele"] = tk.Label(self.frames['basic_info_alleles'], anchor='w', textvariable=self.variant["Original Input: Alternate allele"], relief='groove')
         self.labels["Original Input: Alternate allele"].pack(side='top',expand=False, fill='x')
-        self.frames['basic_info_misc'] = tk.Frame(self.frames['basic_info'])
-        self.frames['basic_info_misc'].pack(side='left',expand=False,fill='both', padx=5, pady=5)
-        tk.Label(self.frames['basic_info_misc'], text="Length of Variant (BP)").pack(side='top',expand=False, fill='x')
-        self.labels["VCF: LEN"] = tk.Label(self.frames['basic_info_misc'], textvariable=self.variant["VCF: LEN"], relief='groove')
-        self.labels["VCF: LEN"].pack(side='top',expand=True, fill='both')
 
         # middle frame
         self.frames['middle'] = tk.Frame(self.frames['right'])
@@ -756,7 +332,7 @@ class Application(tk.Window):
         self.frames['gx_info'].pack(side='top', expand=False, fill='both', pady=(0,5))
         for x in range(1,5,2):
             self.frames['gx_info'].rowconfigure(x, weight=1)
-        for x in range(5):
+        for x in range(6):
             self.frames['gx_info'].columnconfigure(x, weight=1)
 
         # gx info top area
@@ -766,15 +342,19 @@ class Application(tk.Window):
         tk.Label(self.frames['gx_info'], text="Variant Type").grid(row=0, column=1, sticky='news', padx=5)
         self.labels["VCF: TYPE"] = tk.Label(self.frames['gx_info'], textvariable=self.variant["VCF: TYPE"], relief='groove')
         self.labels["VCF: TYPE"].grid(row=1, column=1, sticky='news', padx=5, pady=5)
-        tk.Label(self.frames['gx_info'], text="Genotype").grid(row=0, column=2, sticky='news', padx=5)
+        tk.Label(self.frames['gx_info'], text="Length of Variant (BP)").grid(row=0, column=2, sticky='news', padx=5)
+        self.labels["VCF: LEN"] = tk.Label(self.frames['gx_info'], textvariable=self.variant["VCF: LEN"], relief='groove')
+        self.labels["VCF: LEN"].grid(row=1, column=2, sticky='news', padx=5, pady=5)
+
+        tk.Label(self.frames['gx_info'], text="Genotype").grid(row=0, column=3, sticky='news', padx=5)
         self.labels["VCF: Genotype"] = tk.Label(self.frames['gx_info'], textvariable=self.variant["VCF: Genotype"], relief='groove')
-        self.labels["VCF: Genotype"].grid(row=1, column=2, sticky='news', padx=5, pady=5)
-        tk.Label(self.frames['gx_info'], text="Filter (Genexys)").grid(row=0, column=3, sticky='news', padx=5)
+        self.labels["VCF: Genotype"].grid(row=1, column=3, sticky='news', padx=5, pady=5)
+        tk.Label(self.frames['gx_info'], text="Filter (Genexys)").grid(row=0, column=4, sticky='news', padx=5)
         self.labels["VCF: Filter"] = tk.Label(self.frames['gx_info'], textvariable=self.variant["VCF: Filter"], relief='groove')
-        self.labels["VCF: Filter"].grid(row=1, column=3, sticky='news', padx=5, pady=5)
-        tk.Label(self.frames['gx_info'], text="Quality Score").grid(row=0, column=4, sticky='news', padx=5)
+        self.labels["VCF: Filter"].grid(row=1, column=4, sticky='news', padx=5, pady=5)
+        tk.Label(self.frames['gx_info'], text="Quality Score").grid(row=0, column=5, sticky='news', padx=5)
         self.labels["VCF: QUAL"] = tk.Label(self.frames['gx_info'], textvariable=self.variant["VCF: QUAL"], relief='groove')
-        self.labels["VCF: QUAL"].grid(row=1, column=4, sticky='news', padx=5, pady=5)
+        self.labels["VCF: QUAL"].grid(row=1, column=5, rowspan=4, sticky='news', padx=5, pady=5)
 
         # Separator
         tk.Separator(self.frames['gx_info'], orient='horizontal').grid(row=2, column=0, columnspan=5, sticky='news')
@@ -799,28 +379,32 @@ class Application(tk.Window):
         # mpileup info frame
         self.frames['mpl_info'] = tk.LabelFrame(self.frames['middle'], text='M-Pileup Information')
         self.frames['mpl_info'].pack(side='top', expand=False, fill='both', pady=5)
-        self.frames['mpl_info_RD'] = tk.Frame(self.frames['mpl_info'])
-        self.frames['mpl_info_RD'].pack(side='left', expand=True, fill='both', pady=5, padx=5)
-        tk.Label(self.frames['mpl_info_RD'], text="Total Read Depth").pack(side='left', expand=False, fill='both')
-        self.labels["Mpileup Qual: Read Depth"] = tk.Label(self.frames['mpl_info_RD'], textvariable=self.variant["Mpileup Qual: Read Depth"], relief='groove')
-        self.labels["Mpileup Qual: Read Depth"].pack(side='left', expand=True, fill='both', pady=5, padx=5)
-        self.frames['mpl_info_starts'] = tk.Frame(self.frames['mpl_info'])
-        self.frames['mpl_info_starts'].pack(side='left', expand=True, fill='both', pady=5, padx=5)
-        tk.Label(self.frames['mpl_info_starts'], text="Count: Read Starts").pack(side='left', expand=False, fill='both', pady=5, padx=5)
-        self.labels["Mpileup Qual: Start Reads"] = tk.Label(self.frames['mpl_info_starts'], textvariable=self.variant["Mpileup Qual: Start Reads"], relief='groove')
-        self.labels["Mpileup Qual: Start Reads"].pack(side='left', expand=True, fill='both', pady=5, padx=5)
-        self.frames['mpl_info_ends'] = tk.Frame(self.frames['mpl_info'])
-        self.frames['mpl_info_ends'].pack(side='left', expand=True, fill='both', pady=5, padx=5)
-        tk.Label(self.frames['mpl_info_ends'], text="Count: Read Ends").pack(side='left', expand=False, fill='both', pady=5, padx=5)
-        self.labels["Mpileup Qual: Stop Reads"] = tk.Label(self.frames['mpl_info_ends'], textvariable=self.variant["Mpileup Qual: Stop Reads"], relief='groove')
-        self.labels["Mpileup Qual: Stop Reads"].pack(side='left', expand=True, fill='both', pady=5, padx=5)
+        for x in [1,2,4]:
+            self.frames['mpl_info'].columnconfigure(x, weight=1)
+        for x in range(2):
+            self.frames['mpl_info'].rowconfigure(x, weight=1)
+        tk.Label(self.frames['mpl_info'], text="Filtered VAF (Q20)", anchor='e').grid(column=0, row=0, sticky='news', padx=5, pady=5)
+        self.labels["Mpileup Qual: Filtered VAF"] = tk.Label(self.frames['mpl_info'], textvariable=self.variant["Mpileup Qual: Filtered VAF"], relief='groove')
+        self.labels["Mpileup Qual: Filtered VAF"].grid(column=1, row=0, sticky='news', padx=5, pady=5)
+        tk.Label(self.frames['mpl_info'], text="Unfiltered VAF (Q1)", anchor='e').grid(column=0, row=1, sticky='news', padx=5, pady=5)
+        self.labels["Mpileup Qual: Unfiltered VAF"] = tk.Label(self.frames['mpl_info'], textvariable=self.variant["Mpileup Qual: Unfiltered VAF"], relief='groove')
+        self.labels["Mpileup Qual: Unfiltered VAF"].grid(column=1, row=1, sticky='news', padx=5, pady=5)
+        tk.Label(self.frames['mpl_info'], text="Total Read Depth", anchor='c').grid(column=2, row=0, sticky='news', padx=5, pady=5)
+        self.labels["Mpileup Qual: Read Depth"] = tk.Label(self.frames['mpl_info'], textvariable=self.variant["Mpileup Qual: Read Depth"], relief='groove')
+        self.labels["Mpileup Qual: Read Depth"].grid(column=2, row=1, sticky='news', padx=5, pady=5)
+        tk.Label(self.frames['mpl_info'], text="Count: Read Starts").grid(column=3, row=0, sticky='news', padx=5, pady=5)
+        self.labels["Mpileup Qual: Start Reads"] = tk.Label(self.frames['mpl_info'], textvariable=self.variant["Mpileup Qual: Start Reads"], relief='groove', anchor='e')
+        self.labels["Mpileup Qual: Start Reads"].grid(column=4, row=0, sticky='news', padx=5, pady=5)
+        tk.Label(self.frames['mpl_info'], text="Count: Read Ends").grid(column=3, row=1, sticky='news', padx=5, pady=5)
+        self.labels["Mpileup Qual: Stop Reads"] = tk.Label(self.frames['mpl_info'], textvariable=self.variant["Mpileup Qual: Stop Reads"], relief='groove', anchor='e')
+        self.labels["Mpileup Qual: Stop Reads"].grid(column=4, row=1, sticky='news', padx=5, pady=5)
 
-        # MPL Info Frame
+        # Variant Annotation Info Frame
         self.frames['other'] = tk.Frame(self.frames['middle'])
         self.frames['other'].pack(side='top',expand=True, fill='both')
         self.frames['var_annot'] = tk.LabelFrame(self.frames['other'], text='Variant Annotation')
         self.frames['var_annot'].pack(side='left',expand=True, fill='both', padx=(0,5))
-        for x in range(3):
+        for x in range(4):
             self.frames['var_annot'].columnconfigure(x, weight=1)
         self.frames['var_annot'].rowconfigure(3, weight=99)
         tk.Label(self.frames['var_annot'], text="Coding Region").grid(column=0, row=0, sticky='news', padx=5)
@@ -832,9 +416,12 @@ class Application(tk.Window):
         tk.Label(self.frames['var_annot'], text="Transcript").grid(column=2, row=0, sticky='news', padx=5)
         self.labels["Variant Annotation: Transcript"] = tk.Label(self.frames['var_annot'], textvariable=self.variant["Variant Annotation: Transcript"], relief='groove')
         self.labels["Variant Annotation: Transcript"].grid(column=2, row=1, sticky='news', padx=5)
+        tk.Label(self.frames['var_annot'], text="RefSeq").grid(column=3, row=0, sticky='news', padx=5)
+        self.labels["Variant Annotation: RefSeq"] = tk.Label(self.frames['var_annot'], textvariable=self.variant["VCF: LEN"], relief='groove')
+        self.labels["Variant Annotation: RefSeq"].grid(column=3, row=1, sticky='news', padx=5)
         tk.Label(self.frames['var_annot'], text="All Mappings").grid(column=0, row=2, columnspan=3, sticky='news', padx=5)
         self.labels["Variant Annotation: All Mappings"] = tk.Label(self.frames['var_annot'], textvariable=self.variant["Variant Annotation: All Mappings"], relief='groove', wraplength=500)
-        self.labels["Variant Annotation: All Mappings"].grid(column=0, columnspan=3, row=3, sticky='news', padx=5, pady=(0,5))
+        self.labels["Variant Annotation: All Mappings"].grid(column=0, columnspan=4, row=3, sticky='news', padx=5, pady=(0,5))
 
         # MDL Info area
         self.frames['mdl'] = tk.LabelFrame(self.frames['other'], text='MDL Info')
@@ -928,79 +515,35 @@ class Application(tk.Window):
         self.labels["UniProt (GENE): Accession Number"] = tk.Label(self.frames['web_dbsnp'], textvariable=self.variant["UniProt (GENE): Accession Number"], relief='groove')
         self.labels["UniProt (GENE): Accession Number"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
 
+        # PhyloP Vertscore Area
+        self.frames['web_dbsnp'] = tk.LabelFrame(self.frames['bottom_2'], text='PhyloP')
+        self.frames['web_dbsnp'].pack(side='left', expand=True, fill='both', padx=5, pady=5)
+        tk.Label(self.frames['web_dbsnp'], text="Vert Score").pack(side='top', expand=False, fill='both', padx=5)
+        self.labels["PhyloP: Vert Score"] = tk.Label(self.frames['web_dbsnp'], textvariable=self.variant["PhyloP: Vert Score"], relief='groove')
+        self.labels["PhyloP: Vert Score"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
+
+        # Status bar
+        self.labels['status_bar'] = tk.Label(self.frames['base'], textvariable=self.variables['status_bar'], relief='sunken').pack(side='bottom', expand=False, fill='x', padx=5, pady=5)
+
         # Create tooltips for labels
         for key,value in TOOLTIPS.items():
-            CreateToolTip(self.labels[key], value)
+            if type(self.labels[key]) is type(dict()):
+                pass
+            else:
+                CreateToolTip(self.labels[key], value)
 
         return
     
-    def load_selected_record(self, variant_dict):
-        for x in VCF_FIELDS:
-            self.variant[x] = self.model.selected[x]
+    def open_file(self):
+        self.variables['filename'].set(str(fd.askopenfilename(filetypes=[('XLSX','*.xlsx')])))
         return
-
-    # def validate_cells(self):
-
-    #     for x in VCF_FIELDS:
-    #         self.labels[x]['bg'] = self.color_enabled
-    #         self.labels[x]['fg'] = self.color_normal
-
-    #         if not self.variant[x].get():
-    #             self.labels[x]['bg'] = self.color_disabled
-    #             continue
-
-    #         if x in self.validation['p-values']:
-    #             if float(self.variant[x].get()) > 0.05:
-    #                 self.labels[x]['fg'] = self.color_warning
-
-    #     return
-
-    # def item_selected(self, event):
-
-    #     for selected_item in self.treeviews['variant_list'].selection():
-    #         item = self.treeviews['variant_list'].item(selected_item)
-    #         record = item['values']
-
-    #         for x in range(len(VCF_FIELDS)):
-    #             self.variant[VCF_FIELDS[x]].set(record[x])
-        
-    #     self.vars['Disposition'].set(self.variant['Disposition'].get())
-    #     if self.vars['Disposition'].get():
-    #         self.buttons['save_disposition']['state'] = 'normal'
-
-    #     self.validate_cells()
-
-    #     return
-    
-    # def save_disposition(self):
-        
-    #     selection = self.treeviews['variant_list'].focus()
-    #     self.treeviews['variant_list'].set(selection, column='Disposition', value=self.vars['Disposition'].get())
-
-    #     self.count_dispositions()
-    
-    #     return
-
-
-# FUNCTIONS ----------------------------------------------
-
-def CreateToolTip(widget: Widget, text):
-    toolTip = ToolTip(widget)
-    def enter(event):
-        toolTip.showtip(text)
-    def leave(event):
-        toolTip.hidetip()
-    widget.bind('<Enter>', enter)
-    widget.bind('<Leave>', leave)
 
 
 # MAIN LOOP ----------------------------------------------
 
 def main():
 
-    # Mainloop
-    root = Application()
-    root.mainloop()    
+    pass
 
     return
 
