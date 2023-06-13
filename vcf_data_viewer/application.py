@@ -27,7 +27,7 @@ class Application(tk.Window):
         self.geometry('800x600')
 
         # Data Model
-        self.data_model = DataModel()
+        self.model = DataModel()
 
         # Menu
         self.menu = MainMenu(self)
@@ -55,6 +55,7 @@ class Application(tk.Window):
             '<<ThemeSuperhero>>': lambda _: self.style.theme_use('superhero'),
             '<<ThemeDarkly>>': lambda _: self.style.theme_use('darkly'),
             '<<ThemeCyborg>>': lambda _: self.style.theme_use('cyborg'),
+            '<<TreeviewSelect>>': None,
         }
         for sequence, callback in event_callbacks.items():
             self.bind(sequence, callback)
@@ -86,10 +87,12 @@ class Application(tk.Window):
         print("Record view cleared.")
         return
 
-    def _load_file(self):
-        self.variables['filename'] = self.view.variables['filename']
-        
-        self.data_model._load_file(filename=self.variables['filename'])
+    def _load_file(self, *args, **kwargs):
+        self.model.variables['filename'] = self.view.variables['filename'].get()
+        self.model._load_file()
+        # for x in VCF_FIELDS:
+        #     self.view.variant[x].set(self.model.variables['selected_variant'][x])
+        self.view._load_treeview(self.model.variables['variant_list'])
         return
 
     # def validate_cells(self):

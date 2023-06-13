@@ -141,8 +141,8 @@ TOOLTIPS = {
     "Mpileup Qual: Unfiltered Variant Binomial P Value":"Statistical p-value.\nLess than 0.05 is preferred.",
     "Mpileup Qual: Unfiltered Variant Fishers Odds Ratio":"Fisher's odds ratio calculation, based on unfiltered M-Pileup read depth data.",
     "Mpileup Qual: Unfiltered Variant Fishers P Value":"Statistical p-value.\nLess than 0.05 is preferred.",
-    # "Mpileup Qual: Filtered VAF":"VAF according to filtered (Q20) mpileup data.",
-    # "Mpileup Qual: Unfiltered VAF":"VAF according to unfiltered (Q1) mpileup data.",
+    "Mpileup Qual: Filtered VAF":"VAF according to filtered (Q20) mpileup data.",
+    "Mpileup Qual: Unfiltered VAF":"VAF according to unfiltered (Q1) mpileup data.",
     "VCF: LEN":"Length of the variant, as reported by Genexys.",
     "VCF: QD":"???",
     "VCF: STB":"Proprietary strand bias calculation, as reported by Genexys.",
@@ -151,7 +151,7 @@ TOOLTIPS = {
     "VCF: TYPE":"Type of variant, as reported by Genexys.",
     "VCF: QUAL":"Quality determination tag, as reported by Genexys.",
     "Variant Annotation: Coding":"Reported coding region variant, as reported by Genexys.",
-    # "Variant Annotation: Sequence Ontology":"Type of variant/mutation encountered.\n Possible Types: MIS, INT, FSI, IND, SYN, SPL ",
+    "Variant Annotation: Sequence Ontology":"Type of variant/mutation encountered.\n Possible Types: MIS, INT, FSI, IND, SYN, SPL ",
     "Variant Annotation: Transcript":"Ensembl transcript designation code.",
     "Variant Annotation: All Mappings":"JSON-style dictionary breakdown of tissue types present in ??? knowledgebase for this variant.", # Very long text, needs wordwrap
     "UniProt (GENE): Accession Number":"UniProt web resource for the affected protein and biological functions.",
@@ -168,4 +168,41 @@ DISPOSITIONS = [
     "Low VAF Variants",
     "FLT3 ITDs",
     "Hotspot Exceptions",
+]
+
+VALIDATION = dict()
+VALIDATION['p-values'] = [
+    "VCF: Binom P Value",
+    "VCF: Fisher P Value",
+    "Mpileup Qual: Filtered Variant Binomial P Value",
+    "Mpileup Qual: Filtered Variant Fishers P Value",
+    "Mpileup Qual: Unfiltered Variant Binomial P Value",
+    "Mpileup Qual: Unfiltered Variant Fishers P Value",
+    "VCF: STBP"
+]
+VALIDATION['read depth 10'] = [
+    "VCF: FSAF",
+    "VCF: FSAR",
+    "Mpileup Qual: Filtered Variant Forward Read Depth",
+    "Mpileup Qual: Filtered Variant Reverse Read Depth",
+    "Mpileup Qual: Unfiltered Variant Forward Read Depth",
+    "Mpileup Qual: Unfiltered Variant Reverse Read Depth",
+    "VCF: FAO",
+]
+VALIDATION['read depth 500'] = [
+    "Mpileup Qual: Read Depth",
+    "VCF: FDP",
+]
+VALIDATION['low vaf']=[
+    'VCF: AF',
+    "Mpileup Qual: Filtered VAF",
+    "Mpileup Qual: Unfiltered VAF",
+]
+VALIDATION['web links'] = [
+    "Variant Annotation: Transcript",
+    "COSMIC: ID",
+    "ClinVar: ClinVar ID",
+    "ClinVar: ClinVar ID",
+    "dbSNP: rsID",
+    "UniProt (GENE): Accession Number",
 ]
