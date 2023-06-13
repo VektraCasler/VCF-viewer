@@ -3,14 +3,16 @@
 
 # IMPORTS ------------------------------------------------
 
-import tkinter as tk 
+# import tkinter as tk 
+import ttkbootstrap as tk 
 from tkinter import filedialog as fd
-# import tkinter.ttk as ttk 
-import ttkbootstrap as ttk 
+from tkinter import messagebox as mb
+from tkinter import Widget
+import pandas as pd
+import openpyxl
 import os 
 import csv
 import json
-from tkinter.messagebox import showinfo
 
 # VARIABLES ----------------------------------------------
 
@@ -21,11 +23,7 @@ else:
     SETTINGS = {
     }
 
-small_font = ('roboto',10)
-large_font = ('roboto',24)
-
-vcf_columns = [
-    "Disposition",
+VCF_FIELDS = [
     "Original Input: Chrom",
     "Original Input: Pos",
     "Original Input: Reference allele",
@@ -33,6 +31,7 @@ vcf_columns = [
     "Variant Annotation: Gene",
     "Variant Annotation: cDNA change",
     "Variant Annotation: Protein Change",
+    "Variant Annotation: RefSeq",
     "VCF: AF",
     "VCF: FAO",
     "VCF: FDP",
@@ -41,7 +40,7 @@ vcf_columns = [
     "VCF: Genotype",
     "COSMIC: ID",
     "COSMIC: Variant Count",
-    "COSMIC: Variant Count (Tissue)", # Very long text, needs wordwrap
+    "COSMIC: Variant Count (Tissue)",
     "ClinVar: ClinVar ID",
     "ClinVar: Clinical Significance",
     "gnomAD3: Global AF",
@@ -70,12 +69,14 @@ vcf_columns = [
     "Mpileup Qual: Filtered Variant Binomial P Value",
     "Mpileup Qual: Filtered Variant Fishers Odds Ratio",
     "Mpileup Qual: Filtered Variant Fishers P Value",
+    "Mpileup Qual: Filtered VAF",
     "Mpileup Qual: Unfiltered Variant Forward Read Depth",
     "Mpileup Qual: Unfiltered Variant Reverse Read Depth",
     "Mpileup Qual: Unfiltered Variant Binomial Proportion",
     "Mpileup Qual: Unfiltered Variant Binomial P Value",
     "Mpileup Qual: Unfiltered Variant Fishers Odds Ratio",
     "Mpileup Qual: Unfiltered Variant Fishers P Value",
+    "Mpileup Qual: Unfiltered VAF",
     "VCF: LEN",
     "VCF: QD",
     "VCF: STB",
@@ -86,12 +87,13 @@ vcf_columns = [
     "Variant Annotation: Coding",
     "Variant Annotation: Sequence Ontology",
     "Variant Annotation: Transcript",
-    "Variant Annotation: All Mappings", # Very long text, needs wordwrap
+    "Variant Annotation: All Mappings",
     "UniProt (GENE): Accession Number",
     "dbSNP: rsID",
     "MDL: Sample Count",
     "MDL: Variant Frequency",
-    "MDL: Sample List", # Very long text, needs wordwrap
+    "MDL: Sample List",
+    "Disposition",
 ]
 
 tooltips = {
@@ -166,6 +168,129 @@ tooltips = {
 
 # CLASSES ------------------------------------------------
 
+class MainMenu(tk.Menu):
+    '''The Application's main menu.'''
+
+    def _event(self, sequence):
+        def callback(*_):
+            root = self.master.winfo_toplevel()
+            root.event_generate(sequence)
+        return callback
+
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent, **kwargs)
+        # self.settings = settings
+        
+        # File Menu --------------------------------
+        menu_file = tk.Menu(self, tearoff=False)
+        menu_file.add_command(
+            label="Open", 
+            command=self._event('<<FileSelect>>')
+        )
+        menu_file.add_command(
+            label="Clear", 
+            command=self._event('<<FileClear>>')
+        )
+        menu_file.add_command(
+            label="Save", 
+            command=self._event('<<FileSave>>')
+        )
+        menu_file.add_separator()
+        menu_file.add_command(
+            label="Quit",
+            command=self._event('<<FileQuit>>')
+        )
+        
+        # Go Menu ----------------------------------
+        menu_go = tk.Menu(self, tearoff=False)
+        menu_go.add_command(
+            label = "Export Text Files",
+            command=self._event('<<ExportTextFiles>>')
+        )
+
+        # Themes Menu -------------------------------
+        menu_theme = tk.Menu(self, tearoff=0)
+        menu_theme.add_command(
+            label='Cosmo', 
+            command=self._event('<<ThemeCosmo>>')
+        )
+        menu_theme.add_command(
+            label='Flatly', 
+            command=self._event('<<ThemeFlatly>>')
+        )
+        menu_theme.add_command(
+            label='Journal', 
+            command=self._event('<<ThemeJournal>>')
+        )
+        menu_theme.add_command(
+            label='Litera', 
+            command=self._event('<<ThemeLitera>>')
+        )
+        menu_theme.add_command(
+            label='Lumen', 
+            command=self._event('<<ThemeLumen>>')
+        )
+        menu_theme.add_command(
+            label='Pulse', 
+            command=self._event('<<ThemePulse>>')
+        )
+        menu_theme.add_command(
+            label='Sandstone', 
+            command=self._event('<<ThemeSandstone>>')
+        )
+        menu_theme.add_command(
+            label='United', 
+            command=self._event('<<ThemeUnited>>')
+        )
+        menu_theme.add_command(
+            label='Yeti', 
+            command=self._event('<<ThemeYeti>>')
+        )
+        menu_theme.add_separator()
+        menu_theme.add_command(
+            label='Superhero', 
+            command=self._event('<<ThemeSuperhero>>')
+        )
+        menu_theme.add_command(
+            label='Darkly', 
+            command=self._event('<<ThemeDarkly>>')
+        )
+        menu_theme.add_command(
+            label='Cyborg', 
+            command=self._event('<<ThemeCyborg>>')
+        )
+
+        # Help Menu ----------------------------
+        menu_help = tk.Menu(self, tearoff=False)
+        menu_help.add_command(
+            label='About...',
+            command=self.show_about
+        )
+
+        # Add menus in the right order...
+        self.add_cascade(label='File', menu=menu_file)
+        self.add_cascade(label='Go', menu=menu_go)
+        self.add_cascade(label='Theme', menu=menu_theme)
+        self.add_cascade(label='Help', menu=menu_help)
+
+        return
+
+    def show_about(self):
+        '''Show the about dialog'''
+        
+        about_message = 'VCF Data Viewer'
+        about_detail = (
+            'Written by Vektra Casler MD \n'
+            '\n'
+            'For assistance, please contact \n'
+            'vektra_casler@urmc.rochester.edu'
+        )
+        mb.showinfo(
+            title='About',
+            message=about_message,
+            detail=about_detail
+        )
+
 class ToolTip(object):
 
     def __init__(self, widget):
@@ -202,7 +327,7 @@ class ToolTip(object):
         if tw:
             tw.destroy()
 
-class App(tk.Tk):
+class Application(tk.Window):
 
     def __init__(self) -> None:
         super().__init__()
@@ -213,11 +338,31 @@ class App(tk.Tk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.geometry('800x600')
-        self.color_warning = '#CC0000'
-        self.color_normal = '#000000'
-        self.color_enabled = '#ffffff'
-        self.color_disabled = '#cccccc'
 
+        # Menu
+        self.menu = MainMenu(self)
+        self.config(menu=self.menu)
+        event_callbacks={
+            # '<<FileSelect>>': self._on_file_select,
+            # '<<FileClear>>': self._on_file_select,
+            # '<<FileSave>>': self._on_file_select,
+            '<<FileQuit>>': lambda _: self.quit(),
+            # '<<ExportTextFiles>>': self._export_text_files,
+            '<<ThemeCosmo>>': lambda _: self.style.theme_use('cosmo'),
+            '<<ThemeFlatly>>': lambda _: self.style.theme_use('flatly'),
+            '<<ThemeJournal>>': lambda _: self.style.theme_use('journal'),
+            '<<ThemeLitera>>': lambda _: self.style.theme_use('litera'),
+            '<<ThemeLumen>>': lambda _: self.style.theme_use('lumen'),
+            '<<ThemePulse>>': lambda _: self.style.theme_use('pulse'),
+            '<<ThemeSandstone>>': lambda _: self.style.theme_use('sandstone'),
+            '<<ThemeUnited>>': lambda _: self.style.theme_use('united'),
+            '<<ThemeYeti>>': lambda _: self.style.theme_use('yeti'),
+            '<<ThemeSuperhero>>': lambda _: self.style.theme_use('superhero'),
+            '<<ThemeDarkly>>': lambda _: self.style.theme_use('darkly'),
+            '<<ThemeCyborg>>': lambda _: self.style.theme_use('cyborg'),
+        }
+        for sequence, callback in event_callbacks.items():
+            self.bind(sequence, callback)
 
         # Variables
         self.vars = dict()
@@ -231,11 +376,11 @@ class App(tk.Tk):
         self.vars['dispo_mutation_count'] = tk.IntVar()
 
         self.variant = dict()
-        for x in vcf_columns:
+        for x in VCF_FIELDS:
             self.variant[x] = tk.StringVar()
 
         self.labels = dict()
-        for x in vcf_columns:
+        for x in VCF_FIELDS:
             self.labels[x] = tk.Label()
             
         self.buttons = dict()
@@ -270,8 +415,8 @@ class App(tk.Tk):
         self.frame_treeview = tk.Frame(self.frame_left)
         self.frame_treeview.pack(side='top',expand=True,fill='both', padx=5)
         # Treeview list
-        self.treeview_variant_list = ttk.Treeview(self.frame_treeview, columns=vcf_columns, displaycolumns=[5,0], selectmode='browse', show='headings')
-        for x in vcf_columns:
+        self.treeview_variant_list = tk.Treeview(self.frame_treeview, columns=VCF_FIELDS, displaycolumns=[5,0], selectmode='browse', show='headings')
+        for x in VCF_FIELDS:
             self.treeview_variant_list.heading(x, text=x, anchor='center')
         self.treeview_variant_list.heading(5, text='Variant')
         self.treeview_variant_list.heading(0, text='Disposition')
@@ -280,7 +425,7 @@ class App(tk.Tk):
         self.treeview_variant_list.pack(side='left', expand=True, fill='both')
         self.treeview_variant_list.bind('<<TreeviewSelect>>', self.item_selected)
         # Treeview Scrollbar
-        self.scrollbar = ttk.Scrollbar(self.frame_treeview, orient=tk.VERTICAL, command=self.treeview_variant_list.yview)
+        self.scrollbar = tk.Scrollbar(self.frame_treeview, orient=tk.VERTICAL, command=self.treeview_variant_list.yview)
         self.treeview_variant_list.configure(yscroll=self.scrollbar.set)
         self.scrollbar.pack(side='left', expand=False, fill='y')
         # Disposition Frame
@@ -304,15 +449,15 @@ class App(tk.Tk):
         self.labels['mutation_count'] = tk.Label(self.frame_dispo_4, textvariable=self.vars['dispo_mutation_count'], width=5, relief='groove')
         self.labels['mutation_count'].pack(side='left', expand=False, fill='y', padx=5, pady=5)
         # Radio buttons for disposition
-        self.radio_none = tk.Radiobutton(self.frame_dispo_1, text="None (Unassigned)", variable=self.vars['Disposition'], anchor='w', value='None')
+        self.radio_none = tk.Radiobutton(self.frame_dispo_1, text="None (Unassigned)", variable=self.vars['Disposition'], value='None')
         self.radio_none.pack(side='left', expand=False, fill='both')
-        self.radio_unknown = tk.Radiobutton(self.frame_dispo_2, text="Low VAF", variable=self.vars['Disposition'], anchor='w', value='Low VAF')
+        self.radio_unknown = tk.Radiobutton(self.frame_dispo_2, text="Low VAF", variable=self.vars['Disposition'], value='Low VAF')
         self.radio_unknown.pack(side='left', expand=False, fill='both')
-        self.radio_VUS = tk.Radiobutton(self.frame_dispo_3, text="VUS", variable=self.vars['Disposition'], anchor='w', value='VUS')
+        self.radio_VUS = tk.Radiobutton(self.frame_dispo_3, text="VUS", variable=self.vars['Disposition'], value='VUS')
         self.radio_VUS.pack(side='left', expand=False, fill='both')
-        self.radio_mutation = tk.Radiobutton(self.frame_dispo_4, text="Harmful", variable=self.vars['Disposition'], anchor='w', value='Harmful')
+        self.radio_mutation = tk.Radiobutton(self.frame_dispo_4, text="Harmful", variable=self.vars['Disposition'], value='Harmful')
         self.radio_mutation.pack(side='left', expand=False, fill='both')
-        self.radio_none.select()
+        # self.radio_none.select()
         # Process output files button
         self.buttons['save_disposition'] = tk.Button(self.frame_left, text="Save Disposition", command=self.save_disposition, state='disabled')
         self.buttons['save_disposition'].pack(side='top', expand=False, fill='x', padx=5, pady=5, ipady=5)
@@ -400,7 +545,7 @@ class App(tk.Tk):
         self.labels['VCF: FSAR'] = tk.Label(self.frame_sb_GX, textvariable=self.variant["VCF: FSAR"], relief='groove')
         self.labels['VCF: FSAR'].grid(column=3, row=2, sticky='news', pady=5, padx=5)
         # Separator
-        ttk.Separator(self.frame_sb_GX, orient='horizontal').grid(column=0, row=4, columnspan=4, sticky='ew', pady=5)
+        tk.Separator(self.frame_sb_GX, orient='horizontal').grid(column=0, row=4, columnspan=4, sticky='ew', pady=5)
         self.frame_sb_GX_results = tk.Frame(self.frame_sb_GX)
         self.frame_sb_GX_results.grid(column=0, row=5, columnspan=4, sticky='news')
         self.frame_sb_GX_results.rowconfigure(0, weight=1)
@@ -443,7 +588,7 @@ class App(tk.Tk):
         self.labels["Mpileup Qual: Filtered Reference Reverse Read Depth"] = tk.Label(self.frame_sb_Q20, textvariable=self.variant["Mpileup Qual: Filtered Reference Reverse Read Depth"], relief='groove')
         self.labels["Mpileup Qual: Filtered Reference Reverse Read Depth"].grid(column=3, row=2, sticky='news', pady=5, padx=5)
         # Separator
-        ttk.Separator(self.frame_sb_Q20, orient='horizontal').grid(column=0, row=4, columnspan=4, sticky='ew', pady=5)
+        tk.Separator(self.frame_sb_Q20, orient='horizontal').grid(column=0, row=4, columnspan=4, sticky='ew', pady=5)
         self.frame_sb_Q20_results = tk.Frame(self.frame_sb_Q20)
         self.frame_sb_Q20_results.grid(column=0, row=5, columnspan=4, sticky='news')
         self.frame_sb_Q20_results.rowconfigure(0, weight=1)
@@ -486,7 +631,7 @@ class App(tk.Tk):
         self.labels["Mpileup Qual: Unfiltered Variant Reverse Read Depth"] = tk.Label(self.frame_sb_Q1, width=5, textvariable=self.variant["Mpileup Qual: Unfiltered Variant Reverse Read Depth"], relief='groove')
         self.labels["Mpileup Qual: Unfiltered Variant Reverse Read Depth"].grid(column=3, row=1, sticky='news', pady=5, padx=5)
         # Separator
-        ttk.Separator(self.frame_sb_Q1, orient='horizontal').grid(column=0, row=4, columnspan=4, sticky='ew', pady=5)
+        tk.Separator(self.frame_sb_Q1, orient='horizontal').grid(column=0, row=4, columnspan=4, sticky='ew', pady=5)
         self.frame_sb_Q1_results = tk.Frame(self.frame_sb_Q1)
         self.frame_sb_Q1_results.grid(column=0, row=5, columnspan=4, sticky='news')
         self.frame_sb_Q1_results.rowconfigure(0, weight=1)
@@ -533,7 +678,7 @@ class App(tk.Tk):
         self.labels["VCF: QUAL"] = tk.Label(self.frame_gx_info, textvariable=self.variant["VCF: QUAL"], relief='groove')
         self.labels["VCF: QUAL"].grid(row=1, column=4, sticky='news', padx=5, pady=5)
         # Separator
-        ttk.Separator(self.frame_gx_info, orient='horizontal').grid(row=2, column=0, columnspan=5, sticky='news')
+        tk.Separator(self.frame_gx_info, orient='horizontal').grid(row=2, column=0, columnspan=5, sticky='news')
         # gx info bottom area
         tk.Label(self.frame_gx_info, text="FAO").grid(row=3, column=0, sticky='news', padx=5)
         self.labels["VCF: FAO"] = tk.Label(self.frame_gx_info, textvariable=self.variant["VCF: FAO"], relief='groove')
@@ -620,7 +765,7 @@ class App(tk.Tk):
         self.labels["COSMIC: Variant Count (Tissue)"] = tk.Label(self.frame_bottom_l, textvariable=self.variant["COSMIC: Variant Count (Tissue)"], relief='groove', wraplength=600)
         self.labels["COSMIC: Variant Count (Tissue)"].pack(side='left', expand=True, fill='both', padx=5, pady=5)
         # COSMIC Area
-        self.frame_web_cosmic = ttk.LabelFrame(self.frame_bottom_2, text='COSMIC')
+        self.frame_web_cosmic = tk.LabelFrame(self.frame_bottom_2, text='COSMIC')
         self.frame_web_cosmic.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_cosmic, text="ID", anchor='center').pack(side='top', expand=False, fill='x', padx=5)
         self.labels["COSMIC: ID"] = tk.Label(self.frame_web_cosmic, textvariable=self.variant["COSMIC: ID"], relief='groove', width=12)
@@ -629,7 +774,7 @@ class App(tk.Tk):
         self.labels["COSMIC: Variant Count"] = tk.Label(self.frame_web_cosmic, textvariable=self.variant["COSMIC: Variant Count"], relief='groove')
         self.labels["COSMIC: Variant Count"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         # Clinvar Area
-        self.frame_web_clinvar = ttk.LabelFrame(self.frame_bottom_2, text='ClinVar')
+        self.frame_web_clinvar = tk.LabelFrame(self.frame_bottom_2, text='ClinVar')
         self.frame_web_clinvar.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_clinvar, text="ID").pack(side='top', expand=False, fill='x', padx=5)
         self.labels["ClinVar: ClinVar ID"] = tk.Label(self.frame_web_clinvar, textvariable=self.variant["ClinVar: ClinVar ID"], relief='groove')
@@ -638,37 +783,37 @@ class App(tk.Tk):
         self.labels["ClinVar: Clinical Significance"] = tk.Label(self.frame_web_clinvar, textvariable=self.variant["ClinVar: Clinical Significance"], relief='groove')
         self.labels["ClinVar: Clinical Significance"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         # Gnomad Area
-        self.frame_web_gnomad = ttk.LabelFrame(self.frame_bottom_2, text='GnomAD')
+        self.frame_web_gnomad = tk.LabelFrame(self.frame_bottom_2, text='GnomAD')
         self.frame_web_gnomad.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_gnomad, text="Global AF").pack(side='top', expand=False, fill='x', padx=5)
         self.labels["gnomAD3: Global AF"] = tk.Label(self.frame_web_gnomad, textvariable=self.variant["gnomAD3: Global AF"], relief='groove')
         self.labels["gnomAD3: Global AF"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         # CADD Area
-        self.frame_web_cadd = ttk.LabelFrame(self.frame_bottom_2, text='CADD')
+        self.frame_web_cadd = tk.LabelFrame(self.frame_bottom_2, text='CADD')
         self.frame_web_cadd.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_cadd, text="Phred Score").pack(side='top', expand=False, fill='x', padx=5)
         self.labels["CADD: Phred"] = tk.Label(self.frame_web_cadd, textvariable=self.variant["CADD: Phred"], relief='groove')
         self.labels["CADD: Phred"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         # PolyPhen Area
-        self.frame_web_polyphen = ttk.LabelFrame(self.frame_bottom_2, text='PolyPhen-2')
+        self.frame_web_polyphen = tk.LabelFrame(self.frame_bottom_2, text='PolyPhen-2')
         self.frame_web_polyphen.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_polyphen, text="HDIV").pack(side='top', expand=False, fill='x', padx=5)
         self.labels["PolyPhen-2: HDIV Prediction"] = tk.Label(self.frame_web_polyphen, textvariable=self.variant["PolyPhen-2: HDIV Prediction"], relief='groove')
         self.labels["PolyPhen-2: HDIV Prediction"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         # SIFT Area
-        self.frame_web_sift = ttk.LabelFrame(self.frame_bottom_2, text='SIFT')
+        self.frame_web_sift = tk.LabelFrame(self.frame_bottom_2, text='SIFT')
         self.frame_web_sift.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_sift, text="Prediction").pack(side='top', expand=False, fill='x', padx=5)
         self.labels["SIFT: Prediction"] = tk.Label(self.frame_web_sift, textvariable=self.variant["SIFT: Prediction"], relief='groove')
         self.labels["SIFT: Prediction"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         # dbSNP Area
-        self.frame_web_dbsnp = ttk.LabelFrame(self.frame_bottom_2, text='dbSNP')
+        self.frame_web_dbsnp = tk.LabelFrame(self.frame_bottom_2, text='dbSNP')
         self.frame_web_dbsnp.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_dbsnp, text="rsID").pack(side='top', expand=False, fill='both', padx=5)
         self.labels["dbSNP: rsID"] = tk.Label(self.frame_web_dbsnp, textvariable=self.variant["dbSNP: rsID"], relief='groove')
         self.labels["dbSNP: rsID"].pack(side='top', expand=True, fill='both', padx=5, pady=5)
         # UniProt Area
-        self.frame_web_dbsnp = ttk.LabelFrame(self.frame_bottom_2, text='UniProt (GENE)')
+        self.frame_web_dbsnp = tk.LabelFrame(self.frame_bottom_2, text='UniProt (GENE)')
         self.frame_web_dbsnp.pack(side='left', expand=True, fill='both', padx=5, pady=5)
         tk.Label(self.frame_web_dbsnp, text="Accession Number").pack(side='top', expand=False, fill='both', padx=5)
         self.labels["UniProt (GENE): Accession Number"] = tk.Label(self.frame_web_dbsnp, textvariable=self.variant["UniProt (GENE): Accession Number"], relief='groove')
@@ -682,7 +827,7 @@ class App(tk.Tk):
     
     def validate_cells(self):
 
-        for x in vcf_columns:
+        for x in VCF_FIELDS:
             self.labels[x]['bg'] = self.color_enabled
             self.labels[x]['fg'] = self.color_normal
 
@@ -702,7 +847,7 @@ class App(tk.Tk):
         self.vars['filename'].set(str(fd.askopenfilename(filetypes=[('CSV','*.csv')])))
         with open(self.vars['filename'].get(), 'r') as csv_file:
             counter = 0
-            for row in csv.DictReader(csv_file, fieldnames=vcf_columns, delimiter='\t'):
+            for row in csv.DictReader(csv_file, fieldnames=VCF_FIELDS, delimiter='\t'):
                 if counter != 0:
                     csv_dict[counter] = row
                     values_list = list()
@@ -728,8 +873,8 @@ class App(tk.Tk):
             item = self.treeview_variant_list.item(selected_item)
             record = item['values']
 
-            for x in range(len(vcf_columns)):
-                self.variant[vcf_columns[x]].set(record[x])
+            for x in range(len(VCF_FIELDS)):
+                self.variant[VCF_FIELDS[x]].set(record[x])
         
         self.vars['Disposition'].set(self.variant['Disposition'].get())
         if self.vars['Disposition'].get():
@@ -784,7 +929,7 @@ class App(tk.Tk):
 
 # FUNCTIONS ----------------------------------------------
 
-def CreateToolTip(widget: tk.Widget, text):
+def CreateToolTip(widget: Widget, text):
     toolTip = ToolTip(widget)
     def enter(event):
         toolTip.showtip(text)
@@ -793,12 +938,26 @@ def CreateToolTip(widget: tk.Widget, text):
     widget.bind('<Enter>', enter)
     widget.bind('<Leave>', leave)
 
+def read_excel_file_to_dictionary(filename:str) -> dict:
+    """ Loads an Excel worksheet, then reads all sheets for variant information. """
+    workbook = openpyxl.load_workbook(filename, data_only=True, read_only=True)
+    variant_list = list()
+    for disposition in workbook.sheetnames:
+        sheet = workbook[disposition]
+        for row in sheet.iter_rows(min_row=2):
+            row_dict = dict()
+            for x in range(len(VCF_FIELDS)):
+                row_dict[VCF_FIELDS[x]] = row[x].value
+            row_dict['Disposition'] = disposition
+            variant_list.append(row_dict.copy())
+    return(variant_list)
+
 # MAIN LOOP ----------------------------------------------
 
 def main():
 
     # Mainloop
-    root = App()
+    root = Application()
     root.mainloop()    
 
     return
