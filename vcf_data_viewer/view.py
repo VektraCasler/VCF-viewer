@@ -17,6 +17,12 @@ from .tool_tip import ToolTip, CreateToolTip
 
 class RecordView(tk.Frame):
 
+    def _event(self, sequence):
+        def callback(*_):
+            root = self.master.winfo_toplevel()
+            root.event_generate(sequence)
+        return callback
+
     def __init__(self, parent, **kwargs) -> None:
         super().__init__()
         # Variables ------------------------------------------------------------------------
@@ -31,6 +37,7 @@ class RecordView(tk.Frame):
         self.variables['filename'] = tk.StringVar()
         self.variables['status_bar'] = tk.StringVar()
         self.variables['Disposition'] = dict()
+        self.variables['selection_index'] = tk.IntVar()
         for x in DISPOSITIONS:
             self.variables['Disposition'][x] = tk.IntVar()
 
@@ -58,7 +65,7 @@ class RecordView(tk.Frame):
         #File load button
         self.labels['filename'] = tk.Label(self.frames['left'], anchor='c', textvariable=self.variables['filename'], relief='groove', width=24, wraplength=220)
         self.labels['filename'].pack(side='top', expand=False, fill='x',ipady=5, padx=5, pady=5)
-        self.buttons['load_file'] = tk.Button(self.frames['left'], text="Load a File", command=self.open_file)
+        self.buttons['load_file'] = tk.Button(self.frames['left'], text="Open a File", command=self._event('<<FileLoad>>'))
         self.buttons['load_file'].pack(side='top', expand=False, fill='x', ipady=5, padx=5, pady=5)
 
         # Treeview Frame
@@ -77,11 +84,11 @@ class RecordView(tk.Frame):
         self.treeviews['variant_list'].pack(side='left', expand=True, fill='both')
         self.treeviews['variant_list'].bind('<<TreeviewSelect>>', self.record_selected)
         self.treeviews['variant_list'].tag_configure('None', background="#c4c4c4")
-        self.treeviews['variant_list'].tag_configure('Hotspot', background="#f92134")
+        self.treeviews['variant_list'].tag_configure('Hotspot_Exceptions', background="#f92134")
         self.treeviews['variant_list'].tag_configure('VUS', background="#f0aa44")
-        self.treeviews['variant_list'].tag_configure('Low VAF Variants', background="#70aaff")
+        self.treeviews['variant_list'].tag_configure('Low_VAF_Variants', background="#70aaff")
         self.treeviews['variant_list'].tag_configure('Harmful', background="#fc6622")
-        self.treeviews['variant_list'].tag_configure('FLT3 ITD', background="#f794fa")
+        self.treeviews['variant_list'].tag_configure('FLT3_ITDs', background="#f794fa")
 
         # Treeview Scrollbar
         self.scrollbars['variant_list'] = tk.Scrollbar(self.frames['treeview'], orient=tk.VERTICAL, command=self.treeviews['variant_list'].yview)
@@ -107,21 +114,21 @@ class RecordView(tk.Frame):
         # Disposition labels
         self.labels["None"] = tk.Label(self.frames['dispo_1'], anchor='c', textvariable=self.variables['Disposition']['None'], width=5, relief='groove')
         self.labels["None"].pack(side='left', expand=False, fill='y', padx=5, pady=5)
-        self.labels["Low VAF Variants"] = tk.Label(self.frames['dispo_2'], anchor='c', textvariable=self.variables['Disposition']['None'], width=5, relief='groove')
+        self.labels["Low VAF Variants"] = tk.Label(self.frames['dispo_2'], anchor='c', textvariable=self.variables['Disposition']['Low VAF Variants'], width=5, relief='groove')
         self.labels["Low VAF Variants"].pack(side='left', expand=False, fill='y', padx=5, pady=5)
-        self.labels["VUS"] = tk.Label(self.frames['dispo_3'], anchor='c', textvariable=self.variables['Disposition']['None'], width=5, relief='groove')
+        self.labels["VUS"] = tk.Label(self.frames['dispo_3'], anchor='c', textvariable=self.variables['Disposition']['VUS'], width=5, relief='groove')
         self.labels["VUS"].pack(side='left', expand=False, fill='y', padx=5, pady=5)
-        self.labels["Harmful"] = tk.Label(self.frames['dispo_4'], anchor='c', textvariable=self.variables['Disposition']['None'], width=5, relief='groove')
+        self.labels["Harmful"] = tk.Label(self.frames['dispo_4'], anchor='c', textvariable=self.variables['Disposition']['Harmful'], width=5, relief='groove')
         self.labels["Harmful"].pack(side='left', expand=False, fill='y', padx=5, pady=5)
-        self.labels["FLT3 ITDs"] = tk.Label(self.frames['dispo_5'], anchor='c', textvariable=self.variables['Disposition']['None'], width=5, relief='groove')
+        self.labels["FLT3 ITDs"] = tk.Label(self.frames['dispo_5'], anchor='c', textvariable=self.variables['Disposition']['FLT3 ITDs'], width=5, relief='groove')
         self.labels["FLT3 ITDs"].pack(side='left', expand=False, fill='y', padx=5, pady=5)
-        self.labels["Hotspot Exceptions"] = tk.Label(self.frames['dispo_6'], anchor='c', textvariable=self.variables['Disposition']['None'], width=5, relief='groove')
+        self.labels["Hotspot Exceptions"] = tk.Label(self.frames['dispo_6'], anchor='c', textvariable=self.variables['Disposition']['Hotspot Exceptions'], width=5, relief='groove')
         self.labels["Hotspot Exceptions"].pack(side='left', expand=False, fill='y', padx=5, pady=5)
 
         # Radio buttons for disposition
         self.radio_buttons["None"] = tk.Radiobutton(self.frames['dispo_1'], text="None (Unassigned)", variable=self.variant['Disposition'], value='None')
         self.radio_buttons["None"].pack(side='left', expand=False, fill='both')
-        self.radio_buttons["Low VAF"] = tk.Radiobutton(self.frames['dispo_2'], text="Low VAF", variable=self.variant['Disposition'], value='Low VAF')
+        self.radio_buttons["Low VAF"] = tk.Radiobutton(self.frames['dispo_2'], text="Low VAF Variants", variable=self.variant['Disposition'], value='Low VAF Variants')
         self.radio_buttons["Low VAF"].pack(side='left', expand=False, fill='both')
         self.radio_buttons["VUS"] = tk.Radiobutton(self.frames['dispo_3'], text="VUS", variable=self.variant['Disposition'], value='VUS')
         self.radio_buttons["VUS"].pack(side='left', expand=False, fill='both')
@@ -129,16 +136,13 @@ class RecordView(tk.Frame):
         self.radio_buttons["Harmful"].pack(side='left', expand=False, fill='both')
         self.radio_buttons["FLT3 ITDs"] = tk.Radiobutton(self.frames['dispo_5'], text="FLT3 ITDs", variable=self.variant['Disposition'], value='FLT3 ITDs')
         self.radio_buttons["FLT3 ITDs"].pack(side='left', expand=False, fill='both')
-        self.radio_buttons["Hotspot Exceptions"] = tk.Radiobutton(self.frames['dispo_6'], text="Hotspot Exception", variable=self.variant['Disposition'], value='Hotspot Exception')
+        self.radio_buttons["Hotspot Exceptions"] = tk.Radiobutton(self.frames['dispo_6'], text="Hotspot Exceptions", variable=self.variant['Disposition'], value='Hotspot Exceptions')
         self.radio_buttons["Hotspot Exceptions"].pack(side='left', expand=False, fill='both')
         # self.radio_buttons["None"].select()
 
         # Process output files button
-        self.buttons['save_disposition'] = tk.Button(self.frames['left'], text="Save Disposition", command=None, state='disabled')
+        self.buttons['save_disposition'] = tk.Button(self.frames['left'], text="Save Disposition", command=self._event('<<DispoSave>>'), state='disabled')
         self.buttons['save_disposition'].pack(side='top', expand=False, fill='x', padx=5, pady=5, ipady=5)
-
-        # Process output files button
-        # tk.Button(self.frames['left'], text="Create Disposition Lists").pack(side='top', expand=False, fill='x', padx=5, pady=5, ipady=5)
 
         # Right Frame
         self.frames['right'] = tk.Frame(self.frames['base'])
@@ -421,8 +425,8 @@ class RecordView(tk.Frame):
         self.labels["Variant Annotation: Coding"] = tk.Label(self.frames['var_annot'], anchor='c', textvariable=self.variant["Variant Annotation: Coding"], relief='groove')
         self.labels["Variant Annotation: Coding"].grid(column=0, row=1, sticky='news', padx=5)
         tk.Label(self.frames['var_annot'], text="Variant Type (Seq. Ontology)").grid(column=1, row=0, sticky='news', padx=5)
-        self.labels["Variant Annotation: Sequence"] = tk.Label(self.frames['var_annot'], anchor='c', textvariable=self.variant["Variant Annotation: Sequence Ontology"], relief='groove')
-        self.labels["Variant Annotation: Sequence"].grid(column=1, row=1, sticky='news', padx=5)
+        self.labels["Variant Annotation: Sequence Ontology"] = tk.Label(self.frames['var_annot'], anchor='c', textvariable=self.variant["Variant Annotation: Sequence Ontology"], relief='groove')
+        self.labels["Variant Annotation: Sequence Ontology"].grid(column=1, row=1, sticky='news', padx=5)
         tk.Label(self.frames['var_annot'], text="Transcript").grid(column=2, row=0, sticky='news', padx=5)
         self.labels["Variant Annotation: Transcript"] = tk.Label(self.frames['var_annot'], anchor='c', textvariable=self.variant["Variant Annotation: Transcript"], relief='groove')
         self.labels["Variant Annotation: Transcript"].grid(column=2, row=1, sticky='news', padx=5)
@@ -544,9 +548,8 @@ class RecordView(tk.Frame):
 
         return
     
-    def open_file(self):
+    def load_file(self):
         self.variables['filename'].set(str(fd.askopenfilename(filetypes=[('XLSX','*.xlsx')])))
-        self.event_generate('<<FileSelect>>')
         return
     
     def load_treeview(self, variant_list):
@@ -563,7 +566,7 @@ class RecordView(tk.Frame):
                         values_list.append(round(float(variant[key]),3))
                 except:
                     values_list.append(variant[key])
-            self.treeviews['variant_list'].insert('', tk.END, values=values_list, tags=(values_list[-1]))
+            self.treeviews['variant_list'].insert('', tk.END, values=values_list, tags=(str(variant['Disposition'])).replace(" ","_"))
         self.treeviews['variant_list'].selection_set(self.treeviews['variant_list'].get_children()[0])
         # self.count_dispositions()
         return
@@ -572,12 +575,12 @@ class RecordView(tk.Frame):
         for item in self.treeviews['variant_list'].get_children():
             self.treeviews['variant_list'].delete(item)
         for x in VCF_FIELDS:
-            self.variant[x].set(None)
+            self.variant[x].set("")
             self.labels[x].configure(bootstyle='normal.TLabel')
         self.variant['Disposition'].set(0)
-        self.variables = dict()
-        self.variables['filename'] = ""
-        self.variables['status_bar'] = "Records view cleared."
+        # self.variables = dict()
+        self.variables['filename'].set("")
+        self.variables['status_bar'].set("Records view cleared.")
         # for x in DISPOSITIONS:
         #     self.variables['Disposition'][x] = 0
         return
@@ -588,13 +591,17 @@ class RecordView(tk.Frame):
             record = item['values']
             for x in range(len(VCF_FIELDS)):
                 self.variant[VCF_FIELDS[x]].set(record[x])
+        self.variables['selection_index'].set(self.treeviews['variant_list'].index(self.treeviews['variant_list'].focus()))
         try:
             self.variant['Disposition'].set(record[-1])  # Disposition needs to always be last
         except:
             pass
         if self.variant['Disposition'].get():
             self.buttons['save_disposition']['state'] = 'normal'
-        self.validate_cells()
+        try:
+            self.validate_cells()
+        except:
+            pass
         return
 
     def validate_cells(self):
@@ -605,8 +612,11 @@ class RecordView(tk.Frame):
                 self.labels[x].configure(bootstyle='inverse.TLabel')
                 continue
             if x in VALIDATION['p_values']:
-                if float(self.variant[x].get()) > VALIDATION['cutoffs']['p_value']:
-                    self.labels[x].configure(bootstyle='danger.inverse.TLabel')
+                try:
+                    if float(self.variant[x].get()) > VALIDATION['cutoffs']['p_value']:
+                        self.labels[x].configure(bootstyle='danger.inverse.TLabel')
+                except:
+                    pass
             if x in VALIDATION['strand_read_depth']:
                 try:
                     if int(self.variant[x].get()) <= VALIDATION['cutoffs']['strand_read_depth']:
@@ -614,11 +624,17 @@ class RecordView(tk.Frame):
                 except:
                     pass
             if x in VALIDATION['locus_read_depth']:
-                if int(self.variant[x].get()) <= VALIDATION['cutoffs']['locus_read_depth']:
-                    self.labels[x].configure(bootstyle='danger.inverse.TLabel')
+                try:
+                    if int(self.variant[x].get()) <= VALIDATION['cutoffs']['locus_read_depth']:
+                        self.labels[x].configure(bootstyle='danger.inverse.TLabel')
+                except:
+                    pass
             if x in VALIDATION['minimum_vaf']:
-                if float(self.variant[x].get()) < VALIDATION['cutoffs']['vaf_threshold']:
-                    self.labels[x].configure(bootstyle='danger.inverse.TLabel')
+                try:
+                    if float(self.variant[x].get()) < VALIDATION['cutoffs']['vaf_threshold']:
+                        self.labels[x].configure(bootstyle='danger.inverse.TLabel')
+                except:
+                    pass
             if x in VALIDATION['web_links']:
                 self.labels[x].configure(bootstyle = 'info.inverse')
         return
@@ -627,9 +643,7 @@ class RecordView(tk.Frame):
 # MAIN LOOP ----------------------------------------------
 
 def main():
-
     pass
-
     return
 
 if __name__ == '__main__':

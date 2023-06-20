@@ -1,23 +1,13 @@
-Feature To do List
+# Feature To-Do List
 
-1. Add tag to save file
-
-2. Save file out to excel with tabs
-
-3. Update dispositions in treeview
-
-4. Count dispositions
-
-5. Use arrow keys to assign dispositions
-
-6. Trigger output script
-
-7.  Validation rules update
-
-8. External setting file
-
-9. Web links
-
-10.  Copyable fields
-
-11. Links to IGV
+- [x] Add tag to save file - DONE
+- [x] Save file out to excel with tabs - DONE
+- [x] Update dispositions in treeview - DONE
+- [x] Count dispositions - DONE
+- [x] External setting file - DONE
+- [ ] Use arrow keys to assign dispositions
+- [ ] Trigger output script
+- [ ] Validation rules update
+- [ ] Web links
+- [ ]  Copyable fields
+- [ ] Links to IGV

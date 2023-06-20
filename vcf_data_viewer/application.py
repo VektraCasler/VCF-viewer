@@ -38,11 +38,13 @@ class Application(tk.Window):
 
         # Event binding
         event_callbacks={
-            '<<FileSelect>>': self.load_file,
+            '<<FileLoad>>': self.load_file,
             '<<FileClear>>': self.clear_view,
             '<<FileSave>>': self.save_file,
             '<<FileQuit>>': lambda _: self.quit(),
-            # '<<ExportTextFiles>>': self._export_text_files,
+            '<<DispoSave>>': self.update_disposition,
+            '<space>': self.update_disposition,
+            # '<<ExportTextFiles>>': self.export_text_files,
             '<<ThemeCosmo>>': lambda _: self.style.theme_use('cosmo'),
             '<<ThemeFlatly>>': lambda _: self.style.theme_use('flatly'),
             '<<ThemeJournal>>': lambda _: self.style.theme_use('journal'),
@@ -83,19 +85,33 @@ class Application(tk.Window):
         return
 
     def clear_view(self, *args):
+        self.model = DataModel()
         self.view.clear_view()
         return
 
     def load_file(self, *args, **kwargs):
+        self.view.load_file()
         self.model.variables['filename'] = self.view.variables['filename'].get()
         self.model.load_file()
-        # for x in VCF_FIELDS:
-        #     self.view.variant[x].set(self.model.variables['selected_variant'][x])
         self.view.load_treeview(self.model.variables['variant_list'])
+        self.transfer_disposition_counts()
         return
 
     def save_file(self, *args, **kwargs):
         self.model.save_file()
+        return
+
+    def update_disposition(self, *args, **kwargs):
+        self.model.variables['selection_index'] = self.view.variables['selection_index'].get()
+        self.model.variables['selection_disposition'] = self.view.variant['Disposition'].get()
+        self.model.change_disposition()
+        self.view.load_treeview(self.model.variables['variant_list'])
+        self.transfer_disposition_counts()
+        return
+    
+    def transfer_disposition_counts(self, *args, **kwargs):
+        for x in DISPOSITIONS:
+            self.view.variables['Disposition'][x].set(self.model.count_dispositions(x))
         return
 
 # MAIN LOOP ----------------------------------------------

@@ -27,7 +27,7 @@ class MainMenu(tk.Menu):
         menu_file = tk.Menu(self, tearoff=False)
         menu_file.add_command(
             label="Open", 
-            command=self._event('<<FileSelect>>')
+            command=self._event('<<FileLoad>>')
         )
         menu_file.add_command(
             label="Clear", 

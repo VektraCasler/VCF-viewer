@@ -1,2 +1,4 @@
 test data/
 demo images/
+__pycache__/
+vcf_data_viewer/__pycache__/
