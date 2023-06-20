@@ -17,7 +17,7 @@ class DataModel():
         self.variables['filename'] = str()
         return
     
-    def _load_file(self, *args, **kwargs):
+    def load_file(self, *args, **kwargs):
         """ Recieves the filename from the view, attempts to load. """
         workbook = openpyxl.load_workbook(self.variables['filename'], data_only=True, read_only=True)
         self.variables['variant_list'] = list()
@@ -25,13 +25,41 @@ class DataModel():
             sheet = workbook[disposition]
             for row in sheet.iter_rows(min_row=2):
                 row_dict = dict()
-                for x in range(len(VCF_FIELDS)-1):  # Have to subtract one here because the disposition field is last, but not in the original file
+                for x in range(len(VCF_FIELDS[:-1])):  # Have to subtract one here because the disposition field is last, but not in the original file
                     row_dict[VCF_FIELDS[x]] = row[x].value
                 if disposition in DISPOSITIONS:
                     row_dict['Disposition'] = disposition
                 else:
                     row_dict['Disposition'] = "None"
                 self.variables['variant_list'].append(row_dict.copy())
+        return
+    
+    def save_file(self, *args, **kwargs):
+        """ Writes the sorted data out to disk with marker on the filename to denote file has been processed. """
+
+        # appending a note to the filename 
+        if SETTINGS['FILE']['filename_addon'] in self.variables['filename']:
+            filename = self.variables['filename']
+        else:
+            filename = self.variables['filename'][:-(len(SETTINGS['FILE']['excel_extension']))] + SETTINGS['FILE']['filename_addon'] + SETTINGS['FILE']['excel_extension']
+
+        # Openpyxl package work
+        wb = openpyxl.Workbook()
+        for tab in SETTINGS['DISPOSITIONS']:
+            wb.create_sheet(tab)
+            wb.active = wb[tab]
+            ws = wb.active
+            row = [column for column in SETTINGS['VCF_FIELDS']]
+            ws.append(row)
+
+            for entry in self.variables['variant_list']:
+                if entry['Disposition'] == tab:
+                    row = [entry[x] for x in SETTINGS['VCF_FIELDS']]
+                    ws.append(row)
+
+        wb.remove_sheet(wb.get_sheet_by_name('Sheet')) # removing the default "Sheet" from openpyxl
+        wb.save(filename)
+
         return
 
 

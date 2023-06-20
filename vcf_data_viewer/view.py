@@ -37,6 +37,7 @@ class RecordView(tk.Frame):
         self.labels = dict()
         for x in VCF_FIELDS:
             self.labels[x] = tk.Label()
+        self.labels['Disposition'] = tk.Label()
 
         self.buttons = dict()
         self.frames = dict()
@@ -65,7 +66,9 @@ class RecordView(tk.Frame):
         self.frames['treeview'].pack(side='top',expand=True,fill='both', padx=5)
 
         # Treeview list
-        self.treeviews['variant_list'] = tk.Treeview(self.frames['treeview'], columns=VCF_FIELDS, displaycolumns=[4,69], selectmode='browse', show='headings')
+        view_columns = VCF_FIELDS
+        view_columns.append('Disposition')
+        self.treeviews['variant_list'] = tk.Treeview(self.frames['treeview'], columns=view_columns, displaycolumns=[4,69], selectmode='browse', show='headings')
         # self.treeviews['variant_list'] = tbv.tableview.Tableview(self.frames['treeview'], coldata=VCF_FIELDS, displaycolumns=[5,0], selectmode='browse', show='headings')
         for x in VCF_FIELDS:
             self.treeviews['variant_list'].heading(x, text=x, anchor='center')
@@ -546,7 +549,7 @@ class RecordView(tk.Frame):
         self.event_generate('<<FileSelect>>')
         return
     
-    def _load_treeview(self, variant_list):
+    def load_treeview(self, variant_list):
         for item in self.treeviews['variant_list'].get_children():
             self.treeviews['variant_list'].delete(item)
         for variant in variant_list:
@@ -565,13 +568,30 @@ class RecordView(tk.Frame):
         # self.count_dispositions()
         return
     
+    def clear_view(self, *args, **kwargs):
+        for item in self.treeviews['variant_list'].get_children():
+            self.treeviews['variant_list'].delete(item)
+        for x in VCF_FIELDS:
+            self.variant[x].set(None)
+            self.labels[x].configure(bootstyle='normal.TLabel')
+        self.variant['Disposition'].set(0)
+        self.variables = dict()
+        self.variables['filename'] = ""
+        self.variables['status_bar'] = "Records view cleared."
+        # for x in DISPOSITIONS:
+        #     self.variables['Disposition'][x] = 0
+        return
+ 
     def record_selected(self, *args, **kwargs):
         for selected_item in self.treeviews['variant_list'].selection():
             item = self.treeviews['variant_list'].item(selected_item)
             record = item['values']
             for x in range(len(VCF_FIELDS)):
                 self.variant[VCF_FIELDS[x]].set(record[x])
-        self.variant['Disposition'].set(record[-1])  # Disposition needs to always be last
+        try:
+            self.variant['Disposition'].set(record[-1])  # Disposition needs to always be last
+        except:
+            pass
         if self.variant['Disposition'].get():
             self.buttons['save_disposition']['state'] = 'normal'
         self.validate_cells()
@@ -584,22 +604,22 @@ class RecordView(tk.Frame):
             if self.variant[x].get() == "None":
                 self.labels[x].configure(bootstyle='inverse.TLabel')
                 continue
-            if x in VALIDATION['p-values']:
-                if float(self.variant[x].get()) > 0.05:
+            if x in VALIDATION['p_values']:
+                if float(self.variant[x].get()) > VALIDATION['cutoffs']['p_value']:
                     self.labels[x].configure(bootstyle='danger.inverse.TLabel')
-            if x in VALIDATION['read depth 10']:
+            if x in VALIDATION['strand_read_depth']:
                 try:
-                    if int(self.variant[x].get()) <= 10:
+                    if int(self.variant[x].get()) <= VALIDATION['cutoffs']['strand_read_depth']:
                         self.labels[x].configure(bootstyle='danger.inverse.TLabel')
                 except:
                     pass
-            if x in VALIDATION['read depth 500']:
-                if int(self.variant[x].get()) <= 500:
+            if x in VALIDATION['locus_read_depth']:
+                if int(self.variant[x].get()) <= VALIDATION['cutoffs']['locus_read_depth']:
                     self.labels[x].configure(bootstyle='danger.inverse.TLabel')
-            if x in VALIDATION['low vaf']:
-                if float(self.variant[x].get()) < 0.02:
+            if x in VALIDATION['minimum_vaf']:
+                if float(self.variant[x].get()) < VALIDATION['cutoffs']['vaf_threshold']:
                     self.labels[x].configure(bootstyle='danger.inverse.TLabel')
-            if x in VALIDATION['web links']:
+            if x in VALIDATION['web_links']:
                 self.labels[x].configure(bootstyle = 'info.inverse')
         return
 
