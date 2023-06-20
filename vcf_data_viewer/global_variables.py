@@ -187,6 +187,10 @@ VALIDATION['read depth 10'] = [
     "Mpileup Qual: Filtered Variant Reverse Read Depth",
     "Mpileup Qual: Unfiltered Variant Forward Read Depth",
     "Mpileup Qual: Unfiltered Variant Reverse Read Depth",
+    "Mpileup Qual: Filtered Reference Forward Read Depth",
+    "Mpileup Qual: Filtered Reference Reverse Read Depth",
+    "Mpileup Qual: Unfiltered Reference Forward Read Depth",
+    "Mpileup Qual: Unfiltered Reference Reverse Read Depth",
     "VCF: FAO",
 ]
 VALIDATION['read depth 500'] = [

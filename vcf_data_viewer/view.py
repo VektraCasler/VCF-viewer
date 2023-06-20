@@ -295,7 +295,7 @@ class RecordView(tk.Frame):
             self.frames['sb_Q_1'].rowconfigure(x, weight=1)
         for x in range(2,4):
             self.frames['sb_Q_1'].columnconfigure(x, weight=1)
-        tk.Label(self.frames['sb_Q_1'], text='Q1', width=8).grid(column=0, row=0, rowspan=3, sticky='news', padx=5, pady=5)
+        tk.Label(self.frames['sb_Q_1'], text='Q1', width=8, anchor='c').grid(column=0, row=0, rowspan=3, sticky='news', padx=5, pady=5)
         tk.Label(self.frames['sb_Q_1'], text='Fwd').grid(column=2, row=0, sticky='news', pady=(5,0), padx=5)
         tk.Label(self.frames['sb_Q_1'], text='Rev').grid(column=3, row=0, sticky='news', pady=(5,0), padx=5)
         tk.Label(self.frames['sb_Q_1'], text='Ref', anchor='e').grid(column=1, row=1, sticky='news', pady=5, padx=5)
