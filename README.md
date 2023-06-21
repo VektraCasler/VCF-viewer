@@ -9,5 +9,5 @@
 - [ ] Trigger output script
 - [ ] Validation rules update
 - [ ] Web links
-- [ ]  Copyable fields
+- [ ] Copyable fields
 - [ ] Links to IGV

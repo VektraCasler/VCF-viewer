@@ -539,15 +539,25 @@ class RecordView(tk.Frame):
         # Status bar
         self.labels['status_bar'] = tk.Label(parent, anchor='c', textvariable=self.variables['status_bar'], relief='sunken').pack(side='bottom', expand=False, fill='x', padx=5, pady=5)
 
+        self.create_tooltips()
+        self.create_weblinks()
+
+        return
+    
+    def create_tooltips(self):
         # Create tooltips for labels
         for key,value in TOOLTIPS.items():
             if type(self.labels[key]) is type(dict()):
                 pass
             else:
                 CreateToolTip(self.labels[key], value)
-
         return
     
+    def create_weblinks(self):
+        for label in VALIDATION['web_links'].keys():
+            self.labels[label].configure(cursor='hand2')
+        return
+
     def load_file(self):
         self.variables['filename'].set(str(fd.askopenfilename(filetypes=[('XLSX','*.xlsx')])))
         return
@@ -635,7 +645,7 @@ class RecordView(tk.Frame):
                         self.labels[x].configure(bootstyle='danger.inverse.TLabel')
                 except:
                     pass
-            if x in VALIDATION['web_links']:
+            if x in VALIDATION['web_links'].keys():
                 self.labels[x].configure(bootstyle = 'info.inverse')
         return
 

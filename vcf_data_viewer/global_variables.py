@@ -58,14 +58,13 @@ else:
                 "Mpileup Qual: Filtered VAF",
                 "Mpileup Qual: Unfiltered VAF",
             ],
-            "web_links": [
-                "Variant Annotation: Transcript",
-                "COSMIC: ID",
-                "ClinVar: ClinVar ID",
-                "ClinVar: ClinVar ID",
-                "dbSNP: rsID",
-                "UniProt (GENE): Accession Number",
-            ],
+            "web_links": {
+                "Variant Annotation: Transcript" : "",
+                "COSMIC: ID" : "https://cancer.sanger.ac.uk/cosmic/gene/analysis?ln=EZH2",
+                "ClinVar: ClinVar ID" : "",
+                "dbSNP: rsID" : "https://www.ncbi.nlm.nih.gov/snp/",
+                "UniProt (GENE): Accession Number" : "",
+            },
         },
         "DISPOSITIONS": [
             "None",
@@ -219,16 +218,28 @@ else:
             "MDL: Sample List",
         ],
     }
+
     with open(settings_filename, 'w') as file_output:
-        json.dump(SETTINGS, file_output)
+        json.dump(SETTINGS, file_output, ensure_ascii=True, indent=4)
+
 
 VCF_FIELDS = SETTINGS['VCF_FIELDS']
 TOOLTIPS = SETTINGS['TOOLTIPS']
 DISPOSITIONS = SETTINGS['DISPOSITIONS']
 VALIDATION = dict()
-VALIDATION['cutoffs'] = SETTINGS['VALIDATION']['cutoffs']
+VALIDATION['cutoffs'] = SETTINGS['VALIDATION']['cutoffs'].copy()
 VALIDATION['p_values'] = SETTINGS['VALIDATION']['p_values']
 VALIDATION['strand_read_depth'] = SETTINGS['VALIDATION']['strand_read_depth']
 VALIDATION['locus_read_depth'] = SETTINGS['VALIDATION']['locus_read_depth']
 VALIDATION['minimum_vaf'] = SETTINGS['VALIDATION']['minimum_vaf']
-VALIDATION['web_links'] = SETTINGS['VALIDATION']['web_links']
+VALIDATION['web_links'] = SETTINGS['VALIDATION']['web_links'].copy()
+
+# MAIN LOOP ----------------------------------------------
+
+def main():
+    print(type(VALIDATION['web_links']))
+    print(VALIDATION['web_links'])
+    return
+
+if __name__ == '__main__':
+    main()
