@@ -217,6 +217,11 @@ else:
             "MDL: Variant Frequency",
             "MDL: Sample List",
         ],
+        "TEXTBOXES": [
+            "MDL: Sample List",
+            "Variant Annotation: All Mappings",
+            "COSMIC: Variant Count (Tissue)",
+        ],
     }
 
     with open(settings_filename, 'w') as file_output:
@@ -225,6 +230,7 @@ else:
 
 VCF_FIELDS = SETTINGS['VCF_FIELDS']
 TOOLTIPS = SETTINGS['TOOLTIPS']
+TEXTBOXES = SETTINGS['TEXTBOXES']
 DISPOSITIONS = SETTINGS['DISPOSITIONS']
 VALIDATION = dict()
 VALIDATION['cutoffs'] = SETTINGS['VALIDATION']['cutoffs'].copy()

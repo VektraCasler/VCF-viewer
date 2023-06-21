@@ -201,5 +201,10 @@
         "MDL: Sample Count",
         "MDL: Variant Frequency",
         "MDL: Sample List"
+    ],
+    "TEXTBOXES": [
+        "MDL: Sample List",
+        "Variant Annotation: All Mappings",
+        "COSMIC: Variant Count (Tissue)"
     ]
 }
