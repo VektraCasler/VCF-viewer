@@ -1,0 +1,12 @@
+ClinVar
+https://www.ncbi.nlm.nih.gov/clinvar/variation/{ClinVar ID}/
+
+Ensembl
+https://useast.ensembl.org/Homo_sapiens/Transcript/Summary?t={ENST Number}
+
+COSMIC
+https://cancer.sanger.ac.uk/cosmic/search?q={COSMIC ID}
+
+UniProt
+https://www.uniprot.org/uniprotkb/{UniProt ID}/entry
+

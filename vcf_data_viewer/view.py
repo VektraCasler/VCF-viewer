@@ -9,6 +9,7 @@ from tkinter import Widget
 from tkinter import filedialog as fd
 from .global_variables import *
 from .tool_tip import ToolTip, CreateToolTip
+import webbrowser
 
 # VARIABLES ----------------------------------------------
 
@@ -430,13 +431,13 @@ class RecordView(tk.Frame):
         self.labels['Variant Annotation: Sequence Ontology'].grid(column=1, row=1, sticky='news', padx=5, pady=5)
         self.entries["Variant Annotation: Sequence Ontology"] = tk.Entry(self.frames['var_annot'], textvariable=self.variant["Variant Annotation: Sequence Ontology"])
         self.entries["Variant Annotation: Sequence Ontology"].grid(column=1, row=2, sticky='news', padx=5, pady=5)
-        self.labels['Variant Annotation: Transcript'] = tk.Label(self.frames['var_annot'], text="Transcript")
+        self.labels['Variant Annotation: Transcript'] = tk.Label(self.frames['var_annot'], text="ENST Transcript")
         self.labels['Variant Annotation: Transcript'].grid(column=2, row=1, sticky='news', padx=5, pady=5)
         self.entries["Variant Annotation: Transcript"] = tk.Entry(self.frames['var_annot'], textvariable=self.variant["Variant Annotation: Transcript"])
         self.entries["Variant Annotation: Transcript"].grid(column=2, row=2, sticky='news', padx=5, pady=5)
         self.labels['Variant Annotation: RefSeq'] = tk.Label(self.frames['var_annot'], text="RefSeq")
         self.labels['Variant Annotation: RefSeq'].grid(column=3, row=1, sticky='news', padx=5, pady=5)
-        self.entries["Variant Annotation: RefSeq"] = tk.Entry(self.frames['var_annot'], textvariable=self.variant["VCF: LEN"])
+        self.entries["Variant Annotation: RefSeq"] = tk.Entry(self.frames['var_annot'], textvariable=self.variant["VCF: LEN"], bootstyle='primary')
         self.entries["Variant Annotation: RefSeq"].grid(column=3, row=2, sticky='news', padx=5, pady=5)
         self.labels['Variant Annotation: All Mappings'] = tk.Label(self.frames['var_annot'], text="All Mappings", anchor='c')
         self.labels['Variant Annotation: All Mappings'].grid(column=0, row=3, columnspan=4, sticky='news', padx=5, pady=5)
@@ -475,10 +476,10 @@ class RecordView(tk.Frame):
         self.labels['web_info_label'].grid(column=0, row=0, columnspan=10, sticky='news', padx=5, pady=5)
 
         # Clinvar Area
-        self.labels['ClinVar:'] = tk.Label(self.frames['bottom'], text="ClinVar:")
-        self.labels['ClinVar:'].grid(column=0, row=1, sticky='news', padx=5, pady=5)
-        self.labels['ClinVar: ClinVar ID'] = tk.Label(self.frames['bottom'], text="ID")
-        self.labels['ClinVar: ClinVar ID'].grid(column=0, row=2, sticky='news', padx=5, pady=5)
+        self.labels['ClinVar: ClinVar ID'] = tk.Label(self.frames['bottom'], text="ClinVar:")
+        self.labels['ClinVar: ClinVar ID'].grid(column=0, row=1, sticky='news', padx=5, pady=5)
+        self.labels['ClinVar ID'] = tk.Label(self.frames['bottom'], text="ID")
+        self.labels['ClinVar ID'].grid(column=0, row=2, sticky='news', padx=5, pady=5)
         self.entries["ClinVar: ClinVar ID"] = tk.Entry(self.frames['bottom'], textvariable=self.variant["ClinVar: ClinVar ID"])
         self.entries["ClinVar: ClinVar ID"].grid(column=0, row=3, sticky='news', padx=5, pady=5)
         self.labels['ClinVar: Clinical Significance'] = tk.Label(self.frames['bottom'], text="Significance")
@@ -487,8 +488,8 @@ class RecordView(tk.Frame):
         self.entries["ClinVar: Clinical Significance"].grid(column=0, row=5, sticky='news', padx=5, pady=5)
 
         # Gnomad Area
-        self.labels['gnomAD3:'] = tk.Label(self.frames['bottom'], text="gnomAD3:")
-        self.labels['gnomAD3:'].grid(column=1, row=1, sticky='news', padx=5, pady=5)
+        self.labels['gnomAD3: Global AF'] = tk.Label(self.frames['bottom'], text="gnomAD3:")
+        self.labels['gnomAD3: Global AF'].grid(column=1, row=1, sticky='news', padx=5, pady=5)
         self.labels['Global AF'] = tk.Label(self.frames['bottom'], text="Global AF")
         self.labels['Global AF'].grid(column=1, row=2, sticky='news', padx=5, pady=5)
         self.entries["gnomAD3: Global AF"] = tk.Entry(self.frames['bottom'], textvariable=self.variant["gnomAD3: Global AF"])
@@ -519,16 +520,16 @@ class RecordView(tk.Frame):
         self.entries["SIFT: Prediction"].grid(column=4, row=3, rowspan=3, sticky='news', padx=5, pady=5)
 
         # dbSNP Area
-        self.labels['dbSNP:'] = tk.Label(self.frames['bottom'], text="dbSNP:")
-        self.labels['dbSNP:'].grid(column=5, row=1, sticky='news', padx=5, pady=5)
+        self.labels['dbSNP: rsID'] = tk.Label(self.frames['bottom'], text="dbSNP:")
+        self.labels['dbSNP: rsID'].grid(column=5, row=1, sticky='news', padx=5, pady=5)
         self.labels['rsID'] = tk.Label(self.frames['bottom'], text="rsID")
         self.labels['rsID'].grid(column=5, row=2, sticky='news', padx=5, pady=5)
         self.entries["dbSNP: rsID"] = tk.Entry(self.frames['bottom'], textvariable=self.variant["dbSNP: rsID"])
         self.entries["dbSNP: rsID"].grid(column=5, row=3, rowspan=3, sticky='news', padx=5, pady=5)
 
         # UniProt Area
-        self.labels['UniProt (GENE):'] = tk.Label(self.frames['bottom'], text="UniProt (Gene):")
-        self.labels['UniProt (GENE):'].grid(column=6, row=1, sticky='news', padx=5, pady=5)
+        self.labels['UniProt (GENE): Accession Number'] = tk.Label(self.frames['bottom'], text="UniProt (Gene):")
+        self.labels['UniProt (GENE): Accession Number'].grid(column=6, row=1, sticky='news', padx=5, pady=5)
         self.labels['Accession Number'] = tk.Label(self.frames['bottom'], text="Accession #")
         self.labels['Accession Number'].grid(column=6, row=2, sticky='news', padx=5, pady=5)
         self.entries["UniProt (GENE): Accession Number"] = tk.Entry(self.frames['bottom'], textvariable=self.variant["UniProt (GENE): Accession Number"])
@@ -543,8 +544,8 @@ class RecordView(tk.Frame):
         self.entries["PhyloP: Vert Score"].grid(column=7, row=3, rowspan=3, sticky='news', padx=5, pady=5)
 
         # COSMIC Area
-        self.labels['COSMIC:'] = tk.Label(self.frames['bottom'], text="COSMIC:", anchor='center')
-        self.labels['COSMIC:'].grid(column=8, row=1, sticky='news', padx=5, pady=5)
+        self.labels['COSMIC: ID'] = tk.Label(self.frames['bottom'], text="COSMIC:", anchor='center')
+        self.labels['COSMIC: ID'].grid(column=8, row=1, sticky='news', padx=5, pady=5)
         self.labels['ID'] = tk.Label(self.frames['bottom'], text="ID", anchor='center')
         self.labels['ID'].grid(column=8, row=2, sticky='news', padx=5, pady=5)
         self.entries["COSMIC: ID"] = tk.Entry(self.frames['bottom'], textvariable=self.variant["COSMIC: ID"], width=12)
@@ -558,6 +559,22 @@ class RecordView(tk.Frame):
         self.textboxes["COSMIC: Variant Count (Tissue)"] = tk.ScrolledText(self.frames['bottom'], height=1)
         self.textboxes["COSMIC: Variant Count (Tissue)"].grid(column=9, row=1, rowspan=5, sticky='news', padx=5, pady=5)
 
+        self.adjust_colors()
+        self.create_tooltips()
+        self.create_weblinks()
+
+        return
+
+    def create_tooltips(self):
+        # Create tooltips for labels
+        for key,value in TOOLTIPS.items():
+            if type(self.labels[key]) is type(dict()):
+                pass
+            else:
+                CreateToolTip(self.labels[key], value)
+        return
+    
+    def adjust_colors(self):
         # Adjust all the widgets.......
         for key,value in self.labels.items():
             value.configure(anchor='c', bootstyle='secondary.inverse')
@@ -574,25 +591,26 @@ class RecordView(tk.Frame):
             'file_info_label',
             'disposition_label',
         ]:
+            self.labels[x].configure(bootstyle='primary.inverse')
+        for x in VALIDATION['web_links'].keys():
             self.labels[x].configure(bootstyle='info.inverse')
-
-        self.create_tooltips()
-        self.create_weblinks()
-
+        for key, value in self.buttons.items():
+            value.configure(bootstyle='success')
         return
 
-    def create_tooltips(self):
-        # Create tooltips for labels
-        for key,value in TOOLTIPS.items():
-            if type(self.labels[key]) is type(dict()):
-                pass
-            else:
-                CreateToolTip(self.labels[key], value)
-        return
-    
     def create_weblinks(self):
-        for label in VALIDATION['web_links'].keys():
-            self.labels[label].configure(cursor='hand2')
+        self.links = dict()
+        for key, value in VALIDATION['web_links'].items():
+            self.labels[key].configure(cursor='hand2')
+            # self.links[key]=value.format(self.entries[key].get())
+            # self.labels[key].bind("<Button-1>", lambda _:print(self.links[key]))
+        self.labels["Variant Annotation: Transcript"].bind("<Button-1>", lambda _:webbrowser.open(f"https://useast.ensembl.org/Homo_sapiens/Transcript/Summary?t={self.entries['Variant Annotation: Transcript'].get()}")),
+        self.labels["COSMIC: ID"].bind("<Button-1>", lambda _:webbrowser.open(f"https://cancer.sanger.ac.uk/cosmic/search?q={self.entries['COSMIC: ID'].get()}")),
+        self.labels["ClinVar: ClinVar ID"].bind("<Button-1>", lambda _:webbrowser.open(f"https://www.ncbi.nlm.nih.gov/clinvar/variation/{self.entries['ClinVar: ClinVar ID'].get()}")),
+        self.labels["dbSNP: rsID"].bind("<Button-1>", lambda _:webbrowser.open(f"https://www.ncbi.nlm.nih.gov/snp/{self.entries['dbSNP: rsID'].get()}")),
+        self.labels["UniProt (GENE): Accession Number"].bind("<Button-1>", lambda _:webbrowser.open(f"https://www.uniprot.org/uniprotkb/{self.entries['UniProt (GENE): Accession Number'].get()}/entry")),
+
+            # self.labels[key].bind("<Button-1>", lambda key:print(value.format(self.entries[key].get())))
         return
 
     def load_file(self):
@@ -622,7 +640,7 @@ class RecordView(tk.Frame):
             self.treeviews['variant_list'].delete(item)
         for x in VCF_FIELDS:
             self.variant[x].set("")
-            self.labels[x].configure(bootstyle='normal.TLabel')
+            self.entries[x].configure(bootstyle='normal.TLabel')
         self.variant['Disposition'].set(0)
         self.variables['filename'].set("")
         self.variables['status_bar'].set("Records view cleared.")
@@ -656,37 +674,79 @@ class RecordView(tk.Frame):
     def validate_cells(self):
 
         for x in VCF_FIELDS:
-            self.entries[x].configure(bootstyle='primary', foreground='black')
+            # Reset all styles to "normal"
+            self.entries[x].configure(bootstyle='primary')
+
+            # Mark empty fields as "dark"
             if self.variant[x].get() == "None" or self.variant[x].get() == "":
                 self.entries[x].configure(bootstyle='dark')
                 continue
+
+            # p-value logic
             if x in VALIDATION['p_values']:
                 try:
-                    if float(self.variant[x].get()) > VALIDATION['cutoffs']['p_value']:
-                        self.entries[x].configure(bootstyle='danger', foreground='#bb0000')
+                    if float(self.variant[x].get()) > VALIDATION['cutoffs']['p_value_max_red']:
+                        self.entries[x].configure(bootstyle='danger')
+                    if float(self.variant[x].get()) < VALIDATION['cutoffs']['p_value_max_green']:
+                        self.entries[x].configure(bootstyle='success')
+                    if float(self.variant[x].get()) < VALIDATION['cutoffs']['p_value_max_gold']:
+                        self.entries[x].configure(bootstyle='warning')
                 except:
                     pass
+
+            # forward and reverse strand read depth needs to meet NYSDOH 10x coverage
             if x in VALIDATION['strand_read_depth']:
                 try:
-                    if int(self.variant[x].get()) <= VALIDATION['cutoffs']['strand_read_depth']:
-                        self.entries[x].configure(bootstyle='danger', foreground='#bb0000')
+                    if int(self.variant[x].get()) <= VALIDATION['cutoffs']['strand_read_depth_min_yellow']:
+                        self.entries[x].configure(bootstyle='warning')
+                    if int(self.variant[x].get()) <= VALIDATION['cutoffs']['strand_read_depth_min_red']:
+                        self.entries[x].configure(bootstyle='danger')
                 except:
                     pass
+    
+            # minimum read depth for locus
             if x in VALIDATION['locus_read_depth']:
                 try:
                     if int(self.variant[x].get()) <= VALIDATION['cutoffs']['locus_read_depth']:
-                        self.entries[x].configure(bootstyle='danger', foreground='#bb0000')
+                        self.entries[x].configure(bootstyle='danger')
                 except:
                     pass
+
+            # VAF cutoffs ('normal', 'low-vaf', 'too-low')
             if x in VALIDATION['minimum_vaf']:
                 try:
-                    if float(self.variant[x].get()) < VALIDATION['cutoffs']['vaf_threshold']:
-                        self.entries[x].configure(bootstyle='danger', foreground='#bb0000')
+                    if float(self.variant[x].get()) < VALIDATION['cutoffs']['vaf_threshold_min_yellow']:
+                        self.entries[x].configure(bootstyle='warning')
+                    if float(self.variant[x].get()) < VALIDATION['cutoffs']['vaf_threshold_min_red']:
+                        self.entries[x].configure(bootstyle='danger')
                 except:
                     pass
+
+            # Odds-Ratio max/min (min is reciprocal of max, 1 is balanced)
+            if x in VALIDATION['fisher_odds_ratios']:
+                try:
+                    if float(self.variant[x].get()) < VALIDATION['cutoffs']['odds_ratio_min']:
+                        self.entries[x].configure(bootstyle='danger')
+                    if float(self.variant[x].get()) > VALIDATION['cutoffs']['odds_ratio_max']:
+                        self.entries[x].configure(bootstyle='danger')
+                except:
+                    pass
+
+            # Binomial Proportion max/min (min is reciprocal of max, 0.5 is balanced)
+            if x in VALIDATION['binomial_proportions']:
+                try:
+                    if float(self.variant[x].get()) < VALIDATION['cutoffs']['bi_prop_min']:
+                        self.entries[x].configure(bootstyle='danger')
+                    if float(self.variant[x].get()) > VALIDATION['cutoffs']['bi_prop_max']:
+                        self.entries[x].configure(bootstyle='danger')
+                except:
+                    pass
+
+            # denoting web links with a blue color
             if x in VALIDATION['web_links'].keys():
-                self.entries[x].configure(bootstyle = 'info', foreground='#003499')
-                # self.entries[x].style.colors.set('inputbg','red')
+                self.labels[x].configure(bootstyle = 'info.inverse')
+                self.entries[x].configure(bootstyle = 'info')
+
         return
 
 

@@ -1,13 +1,19 @@
 # Feature To-Do List
 
-- [x] Add tag to save file - DONE
-- [x] Save file out to excel with tabs - DONE
-- [x] Update dispositions in treeview - DONE
-- [x] Count dispositions - DONE
-- [x] External setting file - DONE
+- [x] Add tag to save file
+- [x] Save file out to excel with tabs
+- [x] Update dispositions in treeview
+- [x] Count dispositions
+- [x] External setting file 
+- [X] Web links
+- [X] Copyable fields
+- [ ] Output text files
 - [ ] Use arrow keys to assign dispositions
 - [ ] Trigger output script
-- [ ] Validation rules update
-- [ ] Web links
-- [ ] Copyable fields
+- [X] Validation rules update
 - [ ] Links to IGV
+
+# Bugs to Fix
+
+- [ ] Fix border on "RefSeq"
+- [ ] Crash on cancelling out of file-open dialog

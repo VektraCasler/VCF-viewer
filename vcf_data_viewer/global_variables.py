@@ -20,12 +20,19 @@ else:
         },
         "VALIDATION": {
             "cutoffs": {
-                "p_value": 0.05,
-                "vaf_threshold": 0.02,
-                "locus_read_depth": 500,
-                "strand_read_depth": 10,
-                "strand_bias_min": 0.25,
-                "strand_bias_max":0.75,
+                "p_value_max_red": 0.05,
+                "p_value_max_green": 0.005,
+                "p_value_max_gold": 0.001,
+                "vaf_threshold_min_yellow": 0.01,
+                "vaf_threshold_min_red": 0.005,
+                "locus_read_depth_min_red": 500,
+                "strand_read_depth_min_yellow": 10,
+                "strand_read_depth_min_red": 2,
+                "odds_ratio_min": 0.2,
+                "odds_ratio_max": 5.0,
+                "bi_prop_min": 0.25,
+                "bi_prop_max": 0.75,
+                "internal_frequency_yellow": 0.15,
             },
             "p_values": [
                 "VCF: Binom P Value",
@@ -59,12 +66,21 @@ else:
                 "Mpileup Qual: Unfiltered VAF",
             ],
             "web_links": {
-                "Variant Annotation: Transcript" : "",
-                "COSMIC: ID" : "https://cancer.sanger.ac.uk/cosmic/gene/analysis?ln=EZH2",
-                "ClinVar: ClinVar ID" : "",
-                "dbSNP: rsID" : "https://www.ncbi.nlm.nih.gov/snp/",
-                "UniProt (GENE): Accession Number" : "",
+                "Variant Annotation: Transcript" : "https://useast.ensembl.org/Homo_sapiens/Transcript/Summary?t={}",
+                "COSMIC: ID" : "https://cancer.sanger.ac.uk/cosmic/search?q={}",
+                "ClinVar: ClinVar ID" : "https://www.ncbi.nlm.nih.gov/clinvar/variation/{}/",
+                "dbSNP: rsID" : "https://www.ncbi.nlm.nih.gov/snp/{}",
+                "UniProt (GENE): Accession Number" : "https://www.uniprot.org/uniprotkb/{}/entry",
             },
+            "binomial_proportions": [
+                'Mpileup Qual: Unfiltered Variant Binomial Proportion',
+                'VCF: STB',
+                'Mpileup Qual: Filtered Variant Binomial Proportion'
+            ],
+            "fisher_odds_ratios": [
+                "VCF: Fisher Odds Ratio",
+                "Mpileup Qual: Filtered Variant Fishers Odds Ratio",
+            ],
         },
         "DISPOSITIONS": [
             "None",
@@ -233,12 +249,16 @@ TOOLTIPS = SETTINGS['TOOLTIPS']
 TEXTBOXES = SETTINGS['TEXTBOXES']
 DISPOSITIONS = SETTINGS['DISPOSITIONS']
 VALIDATION = dict()
-VALIDATION['cutoffs'] = SETTINGS['VALIDATION']['cutoffs'].copy()
-VALIDATION['p_values'] = SETTINGS['VALIDATION']['p_values']
-VALIDATION['strand_read_depth'] = SETTINGS['VALIDATION']['strand_read_depth']
-VALIDATION['locus_read_depth'] = SETTINGS['VALIDATION']['locus_read_depth']
-VALIDATION['minimum_vaf'] = SETTINGS['VALIDATION']['minimum_vaf']
-VALIDATION['web_links'] = SETTINGS['VALIDATION']['web_links'].copy()
+for x in SETTINGS['VALIDATION'].keys():
+    VALIDATION[x] = SETTINGS['VALIDATION'][x]
+# VALIDATION['cutoffs'] = SETTINGS['VALIDATION']['cutoffs'].copy()
+# VALIDATION['p_values'] = SETTINGS['VALIDATION']['p_values']
+# VALIDATION['strand_read_depth'] = SETTINGS['VALIDATION']['strand_read_depth']
+# VALIDATION['locus_read_depth'] = SETTINGS['VALIDATION']['locus_read_depth']
+# VALIDATION['minimum_vaf'] = SETTINGS['VALIDATION']['minimum_vaf']
+# VALIDATION['web_links'] = SETTINGS['VALIDATION']['web_links'].copy()
+# VALIDATION['minimum_vaf'] = SETTINGS['VALIDATION']['minimum_vaf']
+# VALIDATION['fisher_odds_ratios']
 
 # MAIN LOOP ----------------------------------------------
 
