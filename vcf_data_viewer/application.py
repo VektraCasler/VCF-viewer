@@ -45,6 +45,8 @@ class Application(tk.Window):
             '<<FileQuit>>': lambda _: self.quit(),
             '<<DispoSave>>': self.update_disposition,
             '<space>': self.update_disposition,
+            '<Right>': self.treeview_next_focus,
+            '<Left>': self.treeview_prev_focus,
             # '<<ExportTextFiles>>': self.export_text_files,
             '<<ThemeCosmo>>': lambda _: self.change_theme('cosmo'),
             '<<ThemeFlatly>>': lambda _: self.change_theme('flatly'),
@@ -83,6 +85,29 @@ class Application(tk.Window):
             "VCF: STBP"
         ]
 
+        return
+
+    def treeview_next_focus(self, *args):
+    #     focus = self.view.treeviews['variant_list'].focus()
+    #     total_records = len(self.view.treeviews['variant_list'].get_children())
+    #     focus = int(focus[1:], 16)
+    #     focus += 1
+    #     if focus > total_records:
+    #         focus = total_records
+    #     focus = "I" + str(hex(focus))[2:].upper().zfill(3)
+    #     self.view.treeviews['variant_list'].focus(focus)
+        pass
+        return
+
+    def treeview_prev_focus(self, *args):
+    #     focus = self.view.treeviews['variant_list'].focus()
+    #     focus = int(focus[1:], 16)
+    #     focus -= 1
+    #     if focus < 1:
+    #         focus = 1
+    #     focus = "I" + str(hex(focus))[2:].upper().zfill(3)
+    #     self.view.treeviews['variant_list'].focus(focus)
+        pass
         return
 
     def change_theme(self, theme, *args):

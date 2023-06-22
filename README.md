@@ -11,7 +11,7 @@
 - [ ] Use arrow keys to assign dispositions
 - [ ] Trigger output script
 - [X] Validation rules update
-- [ ] Links to IGV
+- [X] Links to IGV
 
 # Bugs to Fix
 

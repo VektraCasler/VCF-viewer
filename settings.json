@@ -1,7 +1,8 @@
 {
     "FILE": {
         "excel_extension": ".xlsx",
-        "filename_addon": "(sorted)"
+        "filename_addon": "(sorted)",
+        "IGV_port": 60151
     },
     "VALIDATION": {
         "cutoffs": {
@@ -55,7 +56,8 @@
             "COSMIC: ID": "https://cancer.sanger.ac.uk/cosmic/search?q={}",
             "ClinVar: ClinVar ID": "https://www.ncbi.nlm.nih.gov/clinvar/variation/{}/",
             "dbSNP: rsID": "https://www.ncbi.nlm.nih.gov/snp/{}",
-            "UniProt (GENE): Accession Number": "https://www.uniprot.org/uniprotkb/{}/entry"
+            "UniProt (GENE): Accession Number": "https://www.uniprot.org/uniprotkb/{}/entry",
+            "Variant Annotation: Gene": ""
         },
         "binomial_proportions": [
             "Mpileup Qual: Unfiltered Variant Binomial Proportion",

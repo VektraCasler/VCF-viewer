@@ -602,15 +602,15 @@ class RecordView(tk.Frame):
         self.links = dict()
         for key, value in VALIDATION['web_links'].items():
             self.labels[key].configure(cursor='hand2')
-            # self.links[key]=value.format(self.entries[key].get())
-            # self.labels[key].bind("<Button-1>", lambda _:print(self.links[key]))
-        self.labels["Variant Annotation: Transcript"].bind("<Button-1>", lambda _:webbrowser.open(f"https://useast.ensembl.org/Homo_sapiens/Transcript/Summary?t={self.entries['Variant Annotation: Transcript'].get()}")),
-        self.labels["COSMIC: ID"].bind("<Button-1>", lambda _:webbrowser.open(f"https://cancer.sanger.ac.uk/cosmic/search?q={self.entries['COSMIC: ID'].get()}")),
-        self.labels["ClinVar: ClinVar ID"].bind("<Button-1>", lambda _:webbrowser.open(f"https://www.ncbi.nlm.nih.gov/clinvar/variation/{self.entries['ClinVar: ClinVar ID'].get()}")),
-        self.labels["dbSNP: rsID"].bind("<Button-1>", lambda _:webbrowser.open(f"https://www.ncbi.nlm.nih.gov/snp/{self.entries['dbSNP: rsID'].get()}")),
-        self.labels["UniProt (GENE): Accession Number"].bind("<Button-1>", lambda _:webbrowser.open(f"https://www.uniprot.org/uniprotkb/{self.entries['UniProt (GENE): Accession Number'].get()}/entry")),
-
-            # self.labels[key].bind("<Button-1>", lambda key:print(value.format(self.entries[key].get())))
+        # Very manual here.  Trying to automate this produced bugs
+        self.labels["Variant Annotation: Transcript"].bind("<Button-1>", lambda _:webbrowser.open(f"https://useast.ensembl.org/Homo_sapiens/Transcript/Summary?t={self.entries['Variant Annotation: Transcript'].get()}"))
+        self.labels["COSMIC: ID"].bind("<Button-1>", lambda _:webbrowser.open(f"https://cancer.sanger.ac.uk/cosmic/search?q={self.entries['COSMIC: ID'].get()}"))
+        self.labels["ClinVar: ClinVar ID"].bind("<Button-1>", lambda _:webbrowser.open(f"https://www.ncbi.nlm.nih.gov/clinvar/variation/{self.entries['ClinVar: ClinVar ID'].get()}"))
+        self.labels["dbSNP: rsID"].bind("<Button-1>", lambda _:webbrowser.open(f"https://www.ncbi.nlm.nih.gov/snp/{self.entries['dbSNP: rsID'].get()}"))
+        self.labels["UniProt (GENE): Accession Number"].bind("<Button-1>", lambda _:webbrowser.open(f"https://www.uniprot.org/uniprotkb/{self.entries['UniProt (GENE): Accession Number'].get()}/entry"))
+        # IGV linked from "Gene" Label
+        self.labels["Variant Annotation: Gene"].bind("<Button-1>", lambda _:webbrowser.open(f"http://localhost:{SETTINGS['FILE']['IGV_port']}/goto?locus={self.entries['Variant Annotation: Gene'].get()}"))
+        # self.labels["Variant Annotation: Gene"].bind("<Button-1>", lambda _:webbrowser.open(f"http://localhost:{SETTINGS['FILE']['IGV_port']}/load?file={URL}&locus={locus}&genome={genome}&merge=false{[true|false|ask]}&name={name}"))
         return
 
     def load_file(self):

@@ -17,6 +17,7 @@ else:
         "FILE": {
             "excel_extension": '.xlsx',
             "filename_addon": "(sorted)",
+            'IGV_port': 60151,
         },
         "VALIDATION": {
             "cutoffs": {
@@ -71,6 +72,7 @@ else:
                 "ClinVar: ClinVar ID" : "https://www.ncbi.nlm.nih.gov/clinvar/variation/{}/",
                 "dbSNP: rsID" : "https://www.ncbi.nlm.nih.gov/snp/{}",
                 "UniProt (GENE): Accession Number" : "https://www.uniprot.org/uniprotkb/{}/entry",
+                "Variant Annotation: Gene": "",
             },
             "binomial_proportions": [
                 'Mpileup Qual: Unfiltered Variant Binomial Proportion',
@@ -251,14 +253,6 @@ DISPOSITIONS = SETTINGS['DISPOSITIONS']
 VALIDATION = dict()
 for x in SETTINGS['VALIDATION'].keys():
     VALIDATION[x] = SETTINGS['VALIDATION'][x]
-# VALIDATION['cutoffs'] = SETTINGS['VALIDATION']['cutoffs'].copy()
-# VALIDATION['p_values'] = SETTINGS['VALIDATION']['p_values']
-# VALIDATION['strand_read_depth'] = SETTINGS['VALIDATION']['strand_read_depth']
-# VALIDATION['locus_read_depth'] = SETTINGS['VALIDATION']['locus_read_depth']
-# VALIDATION['minimum_vaf'] = SETTINGS['VALIDATION']['minimum_vaf']
-# VALIDATION['web_links'] = SETTINGS['VALIDATION']['web_links'].copy()
-# VALIDATION['minimum_vaf'] = SETTINGS['VALIDATION']['minimum_vaf']
-# VALIDATION['fisher_odds_ratios']
 
 # MAIN LOOP ----------------------------------------------
 
