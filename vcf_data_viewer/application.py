@@ -20,8 +20,9 @@ class Application(tk.Window):
         super().__init__()
 
         # Root Window
-        self.title('VCF Result Viewer')
+        self.title('VCF Data Viewer')
         self.resizable(True, True)
+        self.change_theme('flatly')
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.geometry('800x600')
@@ -45,18 +46,18 @@ class Application(tk.Window):
             '<<DispoSave>>': self.update_disposition,
             '<space>': self.update_disposition,
             # '<<ExportTextFiles>>': self.export_text_files,
-            '<<ThemeCosmo>>': lambda _: self.style.theme_use('cosmo'),
-            '<<ThemeFlatly>>': lambda _: self.style.theme_use('flatly'),
-            '<<ThemeJournal>>': lambda _: self.style.theme_use('journal'),
-            '<<ThemeLitera>>': lambda _: self.style.theme_use('litera'),
-            '<<ThemeLumen>>': lambda _: self.style.theme_use('lumen'),
-            '<<ThemePulse>>': lambda _: self.style.theme_use('pulse'),
-            '<<ThemeSandstone>>': lambda _: self.style.theme_use('sandstone'),
-            '<<ThemeUnited>>': lambda _: self.style.theme_use('united'),
-            '<<ThemeYeti>>': lambda _: self.style.theme_use('yeti'),
-            '<<ThemeSuperhero>>': lambda _: self.style.theme_use('superhero'),
-            '<<ThemeDarkly>>': lambda _: self.style.theme_use('darkly'),
-            '<<ThemeCyborg>>': lambda _: self.style.theme_use('cyborg'),
+            '<<ThemeCosmo>>': lambda _: self.change_theme('cosmo'),
+            '<<ThemeFlatly>>': lambda _: self.change_theme('flatly'),
+            '<<ThemeJournal>>': lambda _: self.change_theme('journal'),
+            '<<ThemeLitera>>': lambda _: self.change_theme('litera'),
+            '<<ThemeLumen>>': lambda _: self.change_theme('lumen'),
+            '<<ThemePulse>>': lambda _: self.change_theme('pulse'),
+            '<<ThemeSandstone>>': lambda _: self.change_theme('sandstone'),
+            '<<ThemeUnited>>': lambda _: self.change_theme('united'),
+            '<<ThemeYeti>>': lambda _: self.change_theme('yeti'),
+            '<<ThemeSuperhero>>': lambda _: self.change_theme('superhero'),
+            '<<ThemeDarkly>>': lambda _: self.change_theme('darkly'),
+            '<<ThemeCyborg>>': lambda _: self.change_theme('cyborg'),
             '<<TreeviewSelect>>': None,
         }
         for sequence, callback in event_callbacks.items():
@@ -82,6 +83,11 @@ class Application(tk.Window):
             "VCF: STBP"
         ]
 
+        return
+
+    def change_theme(self, theme, *args):
+        self.style.theme_use(theme)
+        # self.style.configure('custom.TEntry', background='red', foreground='white', font=('Helvetica', 20))
         return
 
     def clear_view(self, *args):

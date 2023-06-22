@@ -243,8 +243,7 @@ VALIDATION['web_links'] = SETTINGS['VALIDATION']['web_links'].copy()
 # MAIN LOOP ----------------------------------------------
 
 def main():
-    print(type(VALIDATION['web_links']))
-    print(VALIDATION['web_links'])
+    pass
     return
 
 if __name__ == '__main__':
