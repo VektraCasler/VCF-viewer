@@ -69,6 +69,10 @@ class DataModel():
             if disposition == row['Disposition']:
                 counter += 1
         return counter
+    
+    def output_text_files(self, *args, **kwargs):
+        pass
+        return
 
 
 # MAIN LOOP ----------------------------------------------

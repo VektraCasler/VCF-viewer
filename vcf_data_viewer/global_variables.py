@@ -18,6 +18,7 @@ else:
             "excel_extension": '.xlsx',
             "filename_addon": "(sorted)",
             'IGV_port': 60151,
+            'text_output_folder':"texts/"
         },
         "VALIDATION": {
             "cutoffs": {
@@ -86,9 +87,9 @@ else:
         },
         "DISPOSITIONS": [
             "None",
-            "Harmful",
-            "VUS",
             "Low VAF Variants",
+            "VUS",
+            "Harmful",
             "FLT3 ITDs",
             "Hotspot Exceptions",
         ],

@@ -119,8 +119,8 @@ class RecordView(tk.Frame):
         # Radio buttons for disposition
         self.radio_buttons["None"] = tk.Radiobutton(self.frames['left'], text="None (Unassigned)", variable=self.variant['Disposition'], value='None', bootstyle='toolbutton')
         self.radio_buttons["None"].grid(row=5, column=1, sticky='news', padx=5, pady=5)
-        self.radio_buttons["Low VAF"] = tk.Radiobutton(self.frames['left'], text="Low VAF Variants", variable=self.variant['Disposition'], value='Low VAF Variants', bootstyle='toolbutton')
-        self.radio_buttons["Low VAF"].grid(row=6, column=1, sticky='news', padx=5, pady=5)
+        self.radio_buttons["Low VAF Variants"] = tk.Radiobutton(self.frames['left'], text="Low VAF Variants", variable=self.variant['Disposition'], value='Low VAF Variants', bootstyle='toolbutton')
+        self.radio_buttons["Low VAF Variants"].grid(row=6, column=1, sticky='news', padx=5, pady=5)
         self.radio_buttons["VUS"] = tk.Radiobutton(self.frames['left'], text="VUS", variable=self.variant['Disposition'], value='VUS', bootstyle='toolbutton')
         self.radio_buttons["VUS"].grid(row=7, column=1, sticky='news', padx=5, pady=5)
         self.radio_buttons["Harmful"] = tk.Radiobutton(self.frames['left'], text="Harmful", variable=self.variant['Disposition'], value='Harmful', bootstyle='toolbutton')

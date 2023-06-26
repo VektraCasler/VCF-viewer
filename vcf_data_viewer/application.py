@@ -44,10 +44,12 @@ class Application(tk.Window):
             '<<FileSave>>': self.save_file,
             '<<FileQuit>>': lambda _: self.quit(),
             '<<DispoSave>>': self.update_disposition,
-            '<space>': self.update_disposition,
-            '<Right>': self.treeview_next_focus,
-            '<Left>': self.treeview_prev_focus,
-            # '<<ExportTextFiles>>': self.export_text_files,
+            # '<space>': self.update_disposition,
+            # '<Right>': self.treeview_next_focus,
+            # '<Left>': self.treeview_prev_focus,
+            # '<Up>': lambda _: self.view.treeviews['variant_list'].focus(),
+            # '<Down>': lambda _: self.view.treeviews['variant_list'].focus(),
+            '<<ExportTextFiles>>': self.model.output_text_files,
             '<<ThemeCosmo>>': lambda _: self.change_theme('cosmo'),
             '<<ThemeFlatly>>': lambda _: self.change_theme('flatly'),
             '<<ThemeJournal>>': lambda _: self.change_theme('journal'),
@@ -87,7 +89,20 @@ class Application(tk.Window):
 
         return
 
-    def treeview_next_focus(self, *args):
+    # def treeview_next_focus(self, *args):
+    #     disposition = self.view.variant['Disposition'].get()
+    #     print(disposition)
+    #     index = DISPOSITIONS.index(disposition)
+    #     print(index)
+    #     index += 1
+    #     print(index)
+    #     if index > len(DISPOSITIONS) - 1:
+    #         index = 0
+    #     print(index)
+    #     print(DISPOSITIONS[index])
+    #     self.focus()
+    #     self.view.radio_buttons[DISPOSITIONS[index]].focus()
+    #     self.view.variant['Disposition'].set(DISPOSITIONS[index])
     #     focus = self.view.treeviews['variant_list'].focus()
     #     total_records = len(self.view.treeviews['variant_list'].get_children())
     #     focus = int(focus[1:], 16)
@@ -96,10 +111,10 @@ class Application(tk.Window):
     #         focus = total_records
     #     focus = "I" + str(hex(focus))[2:].upper().zfill(3)
     #     self.view.treeviews['variant_list'].focus(focus)
-        pass
-        return
+    #     pass
+    #     return
 
-    def treeview_prev_focus(self, *args):
+    # def treeview_prev_focus(self, *args):
     #     focus = self.view.treeviews['variant_list'].focus()
     #     focus = int(focus[1:], 16)
     #     focus -= 1
@@ -107,8 +122,8 @@ class Application(tk.Window):
     #         focus = 1
     #     focus = "I" + str(hex(focus))[2:].upper().zfill(3)
     #     self.view.treeviews['variant_list'].focus(focus)
-        pass
-        return
+    # pass
+    # return
 
     def change_theme(self, theme, *args):
         self.style.theme_use(theme)

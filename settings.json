@@ -71,9 +71,9 @@
     },
     "DISPOSITIONS": [
         "None",
-        "Harmful",
-        "VUS",
         "Low VAF Variants",
+        "VUS",
+        "Harmful",
         "FLT3 ITDs",
         "Hotspot Exceptions"
     ],
