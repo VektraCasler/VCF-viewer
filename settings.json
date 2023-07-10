@@ -2,7 +2,8 @@
     "FILE": {
         "excel_extension": ".xlsx",
         "filename_addon": "(sorted)",
-        "IGV_port": 60151
+        "IGV_port": 60151,
+        "text_output_folder": "texts/"
     },
     "VALIDATION": {
         "cutoffs": {
@@ -73,7 +74,7 @@
         "None",
         "Low VAF Variants",
         "VUS",
-        "Harmful",
+        "Oncogenic",
         "FLT3 ITDs",
         "Hotspot Exceptions"
     ],

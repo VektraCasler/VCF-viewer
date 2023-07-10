@@ -92,7 +92,7 @@ class RecordView(tk.Frame):
         self.treeviews['variant_list'].tag_configure('Hotspot_Exceptions', background="#f92134")
         self.treeviews['variant_list'].tag_configure('VUS', background="#f0aa44")
         self.treeviews['variant_list'].tag_configure('Low_VAF_Variants', background="#70aaff")
-        self.treeviews['variant_list'].tag_configure('Harmful', background="#fc6622")
+        self.treeviews['variant_list'].tag_configure('Oncogenic', background="#fc6622")
         self.treeviews['variant_list'].tag_configure('FLT3_ITDs', background="#f794fa")
 
         # Treeview Scrollbar
@@ -109,8 +109,8 @@ class RecordView(tk.Frame):
         self.entries["Low VAF Variants"].grid(row=6, column=0, sticky='news', padx=5, pady=5)
         self.entries["VUS"] = tk.Entry(self.frames['left'], textvariable=self.variables['Disposition']['VUS'], width=5)
         self.entries["VUS"].grid(row=7, column=0, sticky='news', padx=5, pady=5)
-        self.entries["Harmful"] = tk.Entry(self.frames['left'], textvariable=self.variables['Disposition']['Harmful'], width=5)
-        self.entries["Harmful"].grid(row=8, column=0, sticky='news', padx=5, pady=5)
+        self.entries["Oncogenic"] = tk.Entry(self.frames['left'], textvariable=self.variables['Disposition']['Oncogenic'], width=5)
+        self.entries["Oncogenic"].grid(row=8, column=0, sticky='news', padx=5, pady=5)
         self.entries["FLT3 ITDs"] = tk.Entry(self.frames['left'], textvariable=self.variables['Disposition']['FLT3 ITDs'], width=5)
         self.entries["FLT3 ITDs"].grid(row=9, column=0, sticky='news', padx=5, pady=5)
         self.entries["Hotspot Exceptions"] = tk.Entry(self.frames['left'], textvariable=self.variables['Disposition']['Hotspot Exceptions'], width=5)
@@ -123,8 +123,8 @@ class RecordView(tk.Frame):
         self.radio_buttons["Low VAF Variants"].grid(row=6, column=1, sticky='news', padx=5, pady=5)
         self.radio_buttons["VUS"] = tk.Radiobutton(self.frames['left'], text="VUS", variable=self.variant['Disposition'], value='VUS', bootstyle='toolbutton')
         self.radio_buttons["VUS"].grid(row=7, column=1, sticky='news', padx=5, pady=5)
-        self.radio_buttons["Harmful"] = tk.Radiobutton(self.frames['left'], text="Harmful", variable=self.variant['Disposition'], value='Harmful', bootstyle='toolbutton')
-        self.radio_buttons["Harmful"].grid(row=8, column=1, sticky='news', padx=5, pady=5)
+        self.radio_buttons["Oncogenic"] = tk.Radiobutton(self.frames['left'], text="Oncogenic", variable=self.variant['Disposition'], value='Oncogenic', bootstyle='toolbutton')
+        self.radio_buttons["Oncogenic"].grid(row=8, column=1, sticky='news', padx=5, pady=5)
         self.radio_buttons["FLT3 ITDs"] = tk.Radiobutton(self.frames['left'], text="FLT3 ITDs", variable=self.variant['Disposition'], value='FLT3 ITDs', bootstyle='toolbutton')
         self.radio_buttons["FLT3 ITDs"].grid(row=9, column=1, sticky='news', padx=5, pady=5)
         self.radio_buttons["Hotspot Exceptions"] = tk.Radiobutton(self.frames['left'], text="Hotspot Exceptions", variable=self.variant['Disposition'], value='Hotspot Exceptions', bootstyle='toolbutton')
@@ -618,20 +618,30 @@ class RecordView(tk.Frame):
         return
     
     def load_treeview(self, variant_list):
+        """ Loads the information from the model into the treeview widget. """
+
+        # Clearing the treeview
         for item in self.treeviews['variant_list'].get_children():
             self.treeviews['variant_list'].delete(item)
+
+        # Stepping through all variants and creating treeview entries
         for variant in variant_list:
             values_list = list()
             for key in VCF_FIELDS:
+
+                # trying to sort the data elements into ints first, then floats if they're not ints, and lastly strings if neither.
                 test_me = variant[key]
                 try:
                     if float(test_me) == int(test_me):
                         values_list.append(int(variant[key]))
                     else:
-                        values_list.append(round(float(variant[key]),3))
+                        values_list.append(round(float(variant[key]),3)) # Rounding to 3 decimals to prevent crazy long floats
                 except:
                     values_list.append(variant[key])
+
+            # lastly, add the values list to the treeview
             self.treeviews['variant_list'].insert('', tk.END, values=values_list, tags=(str(variant['Disposition'])).replace(" ","_"))
+
         self.treeviews['variant_list'].selection_set(self.treeviews['variant_list'].get_children()[0])
         return
     
@@ -669,6 +679,10 @@ class RecordView(tk.Frame):
         self.textboxes['MDL: Sample List'].insert(tk.END, self.variant["COSMIC: Variant Count (Tissue)"].get())
         self.textboxes['Variant Annotation: All Mappings'].delete("1.0", tk.END)
         self.textboxes['Variant Annotation: All Mappings'].insert(tk.END, self.variant["COSMIC: Variant Count (Tissue)"].get())
+        return
+
+    def record_updated(self, *args, **kwargs):
+
         return
 
     def validate_cells(self):

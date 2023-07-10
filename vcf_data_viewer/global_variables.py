@@ -89,7 +89,7 @@ else:
             "None",
             "Low VAF Variants",
             "VUS",
-            "Harmful",
+            "Oncogenic",
             "FLT3 ITDs",
             "Hotspot Exceptions",
         ],
