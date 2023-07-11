@@ -1,4 +1,3 @@
-test data/
-demo images/
+test_data/final_report/*
 __pycache__/*
 vcf_data_viewer/__pycache__/*

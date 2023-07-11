@@ -3,7 +3,7 @@
 
 __title__ = "VCF Data Viewer"
 __author__ = "Vektra Casler MD"
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __license__ = "Built for use only at University of Rochester Medical Center in Rochester, NY."
 
 # IMPORTS ------------------------------------------------

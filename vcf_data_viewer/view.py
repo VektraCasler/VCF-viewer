@@ -18,13 +18,19 @@ import webbrowser
 class RecordView(tk.Frame):
 
     def _event(self, sequence):
+        """ A stolen bit of magic that  creates a callback function for view-generated events. """
+
         def callback(*_):
             root = self.master.winfo_toplevel()
             root.event_generate(sequence)
+        
         return callback
 
+
     def __init__(self, parent, **kwargs) -> None:
+
         super().__init__()
+        
         # Variables ------------------------------------------------------------------------
 
         # Holder dictionary for tk variables and widgets to be used by the view.  Variant dict Must match the model's fields. (VCF_FIELDS)
@@ -563,19 +569,26 @@ class RecordView(tk.Frame):
         self.create_tooltips()
         self.create_weblinks()
 
-        return
+        return None 
 
-    def create_tooltips(self):
-        # Create tooltips for labels
+
+    def create_tooltips(self) -> None:
+        """ Create tooltips for labels. """
+
         for key,value in TOOLTIPS.items():
+        
             if type(self.labels[key]) is type(dict()):
                 pass
             else:
                 CreateToolTip(self.labels[key], value)
-        return
+
+        return None
     
-    def adjust_colors(self):
-        # Adjust all the widgets.......
+
+    def adjust_colors(self) -> None:
+        """ Method to update the colors of the widgets. """
+
+        # Adjust all the widgets
         for key,value in self.labels.items():
             value.configure(anchor='c', bootstyle='secondary.inverse')
         for key,value in self.entries.items():
@@ -596,28 +609,40 @@ class RecordView(tk.Frame):
             self.labels[x].configure(bootstyle='info.inverse')
         for key, value in self.buttons.items():
             value.configure(bootstyle='success')
-        return
 
-    def create_weblinks(self):
+        return None
+
+
+    def create_weblinks(self) -> None:
+        """ Method to create links to websites."""
+
         self.links = dict()
+
         for key, value in VALIDATION['web_links'].items():
             self.labels[key].configure(cursor='hand2')
-        # Very manual here.  Trying to automate this produced bugs
+
+        # Very manual here.  Trying to automate this produced bugs.
         self.labels["Variant Annotation: Transcript"].bind("<Button-1>", lambda _:webbrowser.open(f"https://useast.ensembl.org/Homo_sapiens/Transcript/Summary?t={self.entries['Variant Annotation: Transcript'].get()}"))
         self.labels["COSMIC: ID"].bind("<Button-1>", lambda _:webbrowser.open(f"https://cancer.sanger.ac.uk/cosmic/search?q={self.entries['COSMIC: ID'].get()}"))
         self.labels["ClinVar: ClinVar ID"].bind("<Button-1>", lambda _:webbrowser.open(f"https://www.ncbi.nlm.nih.gov/clinvar/variation/{self.entries['ClinVar: ClinVar ID'].get()}"))
         self.labels["dbSNP: rsID"].bind("<Button-1>", lambda _:webbrowser.open(f"https://www.ncbi.nlm.nih.gov/snp/{self.entries['dbSNP: rsID'].get()}"))
         self.labels["UniProt (GENE): Accession Number"].bind("<Button-1>", lambda _:webbrowser.open(f"https://www.uniprot.org/uniprotkb/{self.entries['UniProt (GENE): Accession Number'].get()}/entry"))
-        # IGV linked from "Gene" Label
-        self.labels["Variant Annotation: Gene"].bind("<Button-1>", lambda _:webbrowser.open(f"http://localhost:{SETTINGS['FILE']['IGV_port']}/goto?locus={self.entries['Variant Annotation: Gene'].get()}"))
-        # self.labels["Variant Annotation: Gene"].bind("<Button-1>", lambda _:webbrowser.open(f"http://localhost:{SETTINGS['FILE']['IGV_port']}/load?file={URL}&locus={locus}&genome={genome}&merge=false{[true|false|ask]}&name={name}"))
-        return
 
-    def load_file(self):
+        # IGV linked from "Gene" Label, opens on local machine
+        self.labels["Variant Annotation: Gene"].bind("<Button-1>", lambda _:webbrowser.open(f"http://localhost:{SETTINGS['FILE']['IGV_port']}/goto?locus={self.entries['Variant Annotation: Gene'].get()}"))
+
+        return None
+
+
+    def load_file(self) -> None:
+        """ Simple method to open a filename dialog and store the value. """
+
         self.variables['filename'].set(str(fd.askopenfilename(filetypes=[('XLSX','*.xlsx')])))
-        return
+
+        return None
     
-    def load_treeview(self, variant_list):
+
+    def load_treeview(self, variant_list) -> None:
         """ Loads the information from the model into the treeview widget. """
 
         # Clearing the treeview
@@ -640,128 +665,138 @@ class RecordView(tk.Frame):
                     values_list.append(variant[key])
 
             # lastly, add the values list to the treeview
+            # Note: tags in treeviews cannot have spaces in them, hence the .replace() here
             self.treeviews['variant_list'].insert('', tk.END, values=values_list, tags=(str(variant['Disposition'])).replace(" ","_"))
 
         self.treeviews['variant_list'].selection_set(self.treeviews['variant_list'].get_children()[0])
-        return
+
+        return None
     
-    def clear_view(self, *args, **kwargs):
+
+    def clear_view(self, *args, **kwargs) -> None:
+        """ Method to clear all data from the widgets. """
+        
         for item in self.treeviews['variant_list'].get_children():
             self.treeviews['variant_list'].delete(item)
+        
         for x in VCF_FIELDS:
             self.variant[x].set("")
             self.entries[x].configure(bootstyle='normal.TLabel')
+        
         self.variant['Disposition'].set(0)
         self.variables['filename'].set("")
         self.variables['status_bar'].set("Records view cleared.")
-        return
+
+        return None
  
-    def record_selected(self, *args, **kwargs):
+
+    def record_selected(self, *args, **kwargs) -> None:
+        """ Method for selecting a record from the variant list treeview to display. """
+
+        # technically able to select multiple lines from the treeview...  We only want one
+        # This will cycle through to the final selection.
         for selected_item in self.treeviews['variant_list'].selection():
             item = self.treeviews['variant_list'].item(selected_item)
             record = item['values']
             for x in range(len(VCF_FIELDS)):
                 self.variant[VCF_FIELDS[x]].set(record[x])
+
         self.variables['selection_index'].set(self.treeviews['variant_list'].index(self.treeviews['variant_list'].focus()))
-        try:
-            self.variant['Disposition'].set(record[-1])  # Disposition needs to always be last
-        except:
-            pass
+        self.variant['Disposition'].set(record[-1])  # Disposition needs to always be last in the list
+
+        # deactivating the save dispo button if theres no data
         if self.variant['Disposition'].get():
             self.buttons['save_disposition']['state'] = 'normal'
-        # try:
+
+        # updating the data validation
         self.validate_cells()
-        # except:
-        #     pass
+
+        # Cleaning up the textbox widgets by reloading the text
         self.textboxes['COSMIC: Variant Count (Tissue)'].delete("1.0", tk.END)
         self.textboxes['COSMIC: Variant Count (Tissue)'].insert(tk.END, self.variant["COSMIC: Variant Count (Tissue)"].get())
         self.textboxes['MDL: Sample List'].delete("1.0", tk.END)
         self.textboxes['MDL: Sample List'].insert(tk.END, self.variant["COSMIC: Variant Count (Tissue)"].get())
         self.textboxes['Variant Annotation: All Mappings'].delete("1.0", tk.END)
         self.textboxes['Variant Annotation: All Mappings'].insert(tk.END, self.variant["COSMIC: Variant Count (Tissue)"].get())
-        return
 
-    def record_updated(self, *args, **kwargs):
+        return None
 
-        return
 
-    def validate_cells(self):
+    def record_update(self, *args, **kwargs) -> None:
+        """ Method to return user-entered data into the record, in case things need to be updated. """
+
+        # create an updated record from field widget information (which may have been updated) with disposition
+        self.variables['updated_record'] = dict()
+        for vcf_field in VCF_FIELDS:
+            self.variables['updated_record'][vcf_field] = self.variant[vcf_field].get()
+
+        # now to put the data back into the treeview at the right location
+        selected = self.treeviews['variant_list'].focus()
+        self.treeviews['variant_list'].item(selected, text="", values=self.variables['updated_record'])
+
+        return None
+
+
+    def validate_cells(self) -> None:
+        """ Data validation (lite) method.  Works by simply coloring widget fields appropriate to their validation values. """
 
         for x in VCF_FIELDS:
+
             # Reset all styles to "normal"
             self.entries[x].configure(bootstyle='primary')
 
-            # Mark empty fields as "dark"
+            # Mark all empty fields as "dark"
             if self.variant[x].get() == "None" or self.variant[x].get() == "":
                 self.entries[x].configure(bootstyle='dark')
-                continue
 
             # p-value logic
-            if x in VALIDATION['p_values']:
-                try:
-                    if float(self.variant[x].get()) > VALIDATION['cutoffs']['p_value_max_red']:
-                        self.entries[x].configure(bootstyle='danger')
-                    if float(self.variant[x].get()) < VALIDATION['cutoffs']['p_value_max_green']:
-                        self.entries[x].configure(bootstyle='success')
-                    if float(self.variant[x].get()) < VALIDATION['cutoffs']['p_value_max_gold']:
-                        self.entries[x].configure(bootstyle='warning')
-                except:
-                    pass
+            if x in VALIDATION['p_values'] and self.variant[x].get() != 'None':
+                if float(self.variant[x].get()) > VALIDATION['cutoffs']['p_value_max_red']:
+                    self.entries[x].configure(bootstyle='danger')
+                if float(self.variant[x].get()) < VALIDATION['cutoffs']['p_value_max_green']:
+                    self.entries[x].configure(bootstyle='success')
+                if float(self.variant[x].get()) < VALIDATION['cutoffs']['p_value_max_gold']:
+                    self.entries[x].configure(bootstyle='warning')
 
             # forward and reverse strand read depth needs to meet NYSDOH 10x coverage
-            if x in VALIDATION['strand_read_depth']:
-                try:
-                    if int(self.variant[x].get()) <= VALIDATION['cutoffs']['strand_read_depth_min_yellow']:
-                        self.entries[x].configure(bootstyle='warning')
-                    if int(self.variant[x].get()) <= VALIDATION['cutoffs']['strand_read_depth_min_red']:
-                        self.entries[x].configure(bootstyle='danger')
-                except:
-                    pass
+            if x in VALIDATION['strand_read_depth'] and self.variant[x].get() != 'None':
+                if int(self.variant[x].get()) <= VALIDATION['cutoffs']['strand_read_depth_min_yellow']:
+                    self.entries[x].configure(bootstyle='warning')
+                if int(self.variant[x].get()) <= VALIDATION['cutoffs']['strand_read_depth_min_red']:
+                    self.entries[x].configure(bootstyle='danger')
     
             # minimum read depth for locus
-            if x in VALIDATION['locus_read_depth']:
-                try:
-                    if int(self.variant[x].get()) <= VALIDATION['cutoffs']['locus_read_depth']:
-                        self.entries[x].configure(bootstyle='danger')
-                except:
-                    pass
+            if x in VALIDATION['locus_read_depth'] and self.variant[x].get() != 'None':
+                if int(self.variant[x].get()) <= VALIDATION['cutoffs']['locus_read_depth_min_red']:
+                    self.entries[x].configure(bootstyle='danger')
 
             # VAF cutoffs ('normal', 'low-vaf', 'too-low')
-            if x in VALIDATION['minimum_vaf']:
-                try:
-                    if float(self.variant[x].get()) < VALIDATION['cutoffs']['vaf_threshold_min_yellow']:
-                        self.entries[x].configure(bootstyle='warning')
-                    if float(self.variant[x].get()) < VALIDATION['cutoffs']['vaf_threshold_min_red']:
-                        self.entries[x].configure(bootstyle='danger')
-                except:
-                    pass
+            if x in VALIDATION['minimum_vaf'] and self.variant[x].get() != 'None':
+                if float(self.variant[x].get()) < VALIDATION['cutoffs']['vaf_threshold_min_yellow']:
+                    self.entries[x].configure(bootstyle='warning')
+                if float(self.variant[x].get()) < VALIDATION['cutoffs']['vaf_threshold_min_red']:
+                    self.entries[x].configure(bootstyle='danger')
 
             # Odds-Ratio max/min (min is reciprocal of max, 1 is balanced)
-            if x in VALIDATION['fisher_odds_ratios']:
-                try:
-                    if float(self.variant[x].get()) < VALIDATION['cutoffs']['odds_ratio_min']:
-                        self.entries[x].configure(bootstyle='danger')
-                    if float(self.variant[x].get()) > VALIDATION['cutoffs']['odds_ratio_max']:
-                        self.entries[x].configure(bootstyle='danger')
-                except:
-                    pass
+            if x in VALIDATION['fisher_odds_ratios'] and self.variant[x].get() != 'None':
+                if float(self.variant[x].get()) < VALIDATION['cutoffs']['odds_ratio_min']:
+                    self.entries[x].configure(bootstyle='danger')
+                if float(self.variant[x].get()) > VALIDATION['cutoffs']['odds_ratio_max']:
+                    self.entries[x].configure(bootstyle='danger')
 
             # Binomial Proportion max/min (min is reciprocal of max, 0.5 is balanced)
-            if x in VALIDATION['binomial_proportions']:
-                try:
-                    if float(self.variant[x].get()) < VALIDATION['cutoffs']['bi_prop_min']:
-                        self.entries[x].configure(bootstyle='danger')
-                    if float(self.variant[x].get()) > VALIDATION['cutoffs']['bi_prop_max']:
-                        self.entries[x].configure(bootstyle='danger')
-                except:
-                    pass
+            if x in VALIDATION['binomial_proportions'] and self.variant[x].get() != 'None':
+                if float(self.variant[x].get()) < VALIDATION['cutoffs']['bi_prop_min']:
+                    self.entries[x].configure(bootstyle='danger')
+                if float(self.variant[x].get()) > VALIDATION['cutoffs']['bi_prop_max']:
+                    self.entries[x].configure(bootstyle='danger')
 
             # denoting web links with a blue color
             if x in VALIDATION['web_links'].keys():
                 self.labels[x].configure(bootstyle = 'info.inverse')
                 self.entries[x].configure(bootstyle = 'info')
 
-        return
+        return None
 
 
 # MAIN LOOP ----------------------------------------------

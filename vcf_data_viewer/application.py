@@ -17,12 +17,13 @@ from .view import RecordView
 class Application(tk.Window):
 
     def __init__(self) -> None:
+
         super().__init__()
 
         # Root Window
         self.title('VCF Data Viewer')
         self.resizable(True, True)
-        self.change_theme('flatly')
+        self.style.theme_use('flatly')
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.geometry('800x600')
@@ -37,38 +38,44 @@ class Application(tk.Window):
         # View
         self.view = RecordView(self)
 
-        # Event binding
+        # Event binding, dictionary of event keywords and callbacks
         event_callbacks={
             '<<FileLoad>>': self.load_file,
             '<<FileClear>>': self.clear_view,
             '<<FileSave>>': self.save_file,
             '<<FileQuit>>': lambda _: self.quit(),
+
             '<<DispoSave>>': self.update_disposition,
+
             # '<space>': self.update_disposition,
             # '<Right>': self.treeview_next_focus,
             # '<Left>': self.treeview_prev_focus,
             # '<Up>': lambda _: self.view.treeviews['variant_list'].focus(),
             # '<Down>': lambda _: self.view.treeviews['variant_list'].focus(),
+
             '<<ExportTextFiles>>': self.model.output_text_files,
-            '<<ThemeCosmo>>': lambda _: self.change_theme('cosmo'),
-            '<<ThemeFlatly>>': lambda _: self.change_theme('flatly'),
-            '<<ThemeJournal>>': lambda _: self.change_theme('journal'),
-            '<<ThemeLitera>>': lambda _: self.change_theme('litera'),
-            '<<ThemeLumen>>': lambda _: self.change_theme('lumen'),
-            '<<ThemePulse>>': lambda _: self.change_theme('pulse'),
-            '<<ThemeSandstone>>': lambda _: self.change_theme('sandstone'),
-            '<<ThemeUnited>>': lambda _: self.change_theme('united'),
-            '<<ThemeYeti>>': lambda _: self.change_theme('yeti'),
-            '<<ThemeSuperhero>>': lambda _: self.change_theme('superhero'),
-            '<<ThemeDarkly>>': lambda _: self.change_theme('darkly'),
-            '<<ThemeCyborg>>': lambda _: self.change_theme('cyborg'),
+
+            '<<ThemeCosmo>>': lambda _: self.style.theme_use('cosmo'),
+            '<<ThemeFlatly>>': lambda _: self.style.theme_use('flatly'),
+            '<<ThemeJournal>>': lambda _: self.style.theme_use('journal'),
+            '<<ThemeLitera>>': lambda _: self.style.theme_use('litera'),
+            '<<ThemeLumen>>': lambda _: self.style.theme_use('lumen'),
+            '<<ThemePulse>>': lambda _: self.style.theme_use('pulse'),
+            '<<ThemeSandstone>>': lambda _: self.style.theme_use('sandstone'),
+            '<<ThemeUnited>>': lambda _: self.style.theme_use('united'),
+            '<<ThemeYeti>>': lambda _: self.style.theme_use('yeti'),
+            '<<ThemeSuperhero>>': lambda _: self.style.theme_use('superhero'),
+            '<<ThemeDarkly>>': lambda _: self.style.theme_use('darkly'),
+            '<<ThemeCyborg>>': lambda _: self.style.theme_use('cyborg'),
+
             '<<TreeviewSelect>>': None,
         }
+
+        # Binding all the callbacks and events
         for sequence, callback in event_callbacks.items():
             self.bind(sequence, callback)
 
-        # Variables
-
+        # Variable prep
         self.variables = dict()
         self.variables['filename'] = str()
         self.variables['status_text'] = str()
@@ -87,7 +94,10 @@ class Application(tk.Window):
             "VCF: STBP"
         ]
 
-        return
+        return None
+
+
+    # Tried to get fancy by binding the keyboard for faster navigation.  Treeview caused problems.
 
     # def treeview_next_focus(self, *args):
     #     disposition = self.view.variant['Disposition'].get()
@@ -125,50 +135,103 @@ class Application(tk.Window):
     # pass
     # return
 
-    def change_theme(self, theme, *args):
-        self.style.theme_use(theme)
-        # self.style.configure('custom.TEntry', background='red', foreground='white', font=('Helvetica', 20))
-        return
 
-    def clear_view(self, *args):
+    # def change_theme(self, theme, *args) -> None:
+    #     """Method to update the color theme of the widgets."""
+
+    #     self.style.theme_use(theme)
+
+    #     return None
+
+
+    def clear_view(self, *args) -> None:
+        """ Method to clear the view and loaded data. """
+
+        # nukes the data model and starts anew.
         self.model = DataModel()
+
+        # clear the view widgets.
         self.view.clear_view()
-        return
 
-    def load_file(self, *args, **kwargs):
+        return None
+
+
+    def load_file(self, *args, **kwargs) -> None:
+        """ Method to transfer filenames between view and model, pull in data to model, and transfer data back to view. """
+
+        # gets a file name from a dialog
         self.view.load_file()
+
+        # transfer filename to model
         self.model.variables['filename'] = self.view.variables['filename'].get()
+
+        # Loads data into model
         self.model.load_file()
-        self.view.load_treeview(self.model.variables['variant_list'])
-        self.transfer_disposition_counts()
-        return
 
-    def save_file(self, *args, **kwargs):
+        # transfers data from model to view
+        self.view.load_treeview(self.model.variables['variant_list'])
+
+        # updates disposition counters
+        self.transfer_disposition_counts()
+
+        return None
+
+
+    def save_file(self, *args, **kwargs) -> None:
+        """ Calls the model save method. """
+
         self.model.save_file()
-        return
 
-    def update_disposition(self, *args, **kwargs):
-        self.model.variables['selection_index'] = self.view.variables['selection_index'].get()
-        self.model.variables['selection_disposition'] = self.view.variant['Disposition'].get()
-        self.model.change_disposition()
+        return None
+
+
+    def update_disposition(self, *args, **kwargs) -> None:
+        """ Returns the disposition from the view to the data model for saving. """
+
+        # First, we'll tell the view to save any changes from the field widgets into the treeview data
+        self.view.record_update()
+
+        # now  ensures the model and the view are referencing the same variant
+        selection = self.view.variables['selection_index'].get()
+
+        # creating a dictionary of updated record field data
+        update_dict = dict()
+        for vcf_field in VCF_FIELDS:
+            update_dict[vcf_field] = self.view.variant[vcf_field].get()
+
+        # saving the disposition also
+        disposition = self.view.variant['Disposition'].get()
+
+        # Carry the change through the model's method, which also update dispo counts
+        self.model.change_disposition(selection, disposition, update_dict)
+
+        # Refresh the view
         self.view.load_treeview(self.model.variables['variant_list'])
+
+        # update the disposition counters
         self.transfer_disposition_counts()
-        return
-    
-    def transfer_disposition_counts(self, *args, **kwargs):
+
+        return None
+
+
+    def transfer_disposition_counts(self, *args, **kwargs) -> None:
+        """ Method to move data between model and view for disposition counts. """
+
         for x in DISPOSITIONS:
             self.view.variables['Disposition'][x].set(self.model.count_dispositions(x))
-        return
+
+        return None
+
 
 # MAIN LOOP ----------------------------------------------
 
-def main():
+def main() -> None:
 
     # Mainloop
     root = Application()
     root.mainloop()    
 
-    return
+    return None
 
 if __name__ == '__main__':
     main()
