@@ -1,4 +1,4 @@
- mol_num	sample_name	observed_variant_id	run_id	interpt_id	genes	coding	amino_acid_change	frequency	genotype	allele_coverage	coverage	include_in_report	tier	time_stamp	confirm_status	variant_allele	ref_allele	ref_var_strand_counts	strand	genetic_call	test_tissue
+mol_num	sample_name	observed_variant_id	run_id	interpt_id	genes	coding	amino_acid_change	frequency	genotype	allele_coverage	coverage	include_in_report	tier	time_stamp	confirm_status	variant_allele	ref_allele	ref_var_strand_counts	strand	genetic_call	test_tissue
 1811-21	A_1811-21_K8025786_2	70307	2539	9745	AKT1	c.138C>A	p.Asp46Glu	69.19	G/T	G=677,T=1520	2197	1	Tier III	2021-04-13 16:00:30		T	G	G=341/336, T=793/727			Colon
 2368-21	A_2368-21_K8299090_2	75601	2712	10398	AKT1	c.49G>A	p.Glu17Lys	6.34	C/T	C=6056,T=410	6466	1	Tier I	2021-05-12 09:21:09		T	C	C=3047/3009, T=206/204			Colon
 2746-21	B_2746-21_K9177353_3	80986	2813	10398	AKT1	c.49G>A	p.Glu17Lys	12.02	C/T	C=6912,T=944	7856	1	Tier I	2021-05-26 11:05:58		T	C	C=3546/3366, T=491/453			Colon
