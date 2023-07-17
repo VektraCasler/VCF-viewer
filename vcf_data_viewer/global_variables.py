@@ -9,7 +9,8 @@ import json
 # VARIABLES ----------------------------------------------
 
 settings_filename = 'settings.json'
-if os.path.exists(settings_filename):
+# if os.path.exists(settings_filename):  # Fix this before production!
+if False:
     with open(settings_filename, 'r') as file_input:
         SETTINGS = json.load(file_input)
 else:
@@ -19,50 +20,6 @@ else:
             "filename_addon": "(sorted)",
             'IGV_port': 60151,
             'text_output_folder':"texts/"
-        },
-        "LOOKUP_BED": {
-            "folder": "reference",
-            "filename": "Genexus_bed_working.xlsx",
-            "addon_list": [
-                    'amp_ID',
-                    'N_A',
-                    'amp_info',
-                    'chr',
-                    'Cytoband',
-                    'Refseq (GRCh38)',
-                    'MANE_transcript',
-                    'GX_transcript',
-                    'exons',
-                    'codons',
-                ],
-        },
-        "LOOKUP_INFOTRACK": {
-            "folder": "reference",
-            "filename": "infotrack_data_dump.tsv",
-            "addon_list": [
-                ' mol_num', # Note - there is a leading space on this one for some reason.
-                'sample_name', 
-                'observed_variant_id', 
-                'run_id', 
-                'interpt_id', 
-                'genes', 
-                'coding', 
-                'amino_acid_change', 
-                'frequency', 
-                'genotype', 
-                'allele_coverage', 
-                'coverage', 
-                'include_in_report', 
-                'tier', 
-                'time_stamp', 
-                'confirm_status', 
-                'variant_allele', 
-                'ref_allele', 
-                'ref_var_strand_counts', 
-                'strand', 
-                'genetic_call', 
-                'test_tissue',
-            ],
         },
         "VALIDATION": {
             "cutoffs": {
@@ -292,6 +249,45 @@ else:
 
 
 VCF_FIELDS = SETTINGS['VCF_FIELDS']
+INFOTRACK_REF_COLUMNS = [
+    'mol_num',
+    'sample_name', 
+    'observed_variant_id', 
+    'run_id', 
+    'interpt_id', 
+    'genes', 
+    'coding', 
+    'amino_acid_change', 
+    'frequency', 
+    'genotype', 
+    'allele_coverage', 
+    'coverage', 
+    'include_in_report', 
+    'tier', 
+    'time_stamp', 
+    'confirm_status', 
+    'variant_allele', 
+    'ref_allele', 
+    'ref_var_strand_counts', 
+    'strand', 
+    'genetic_call', 
+    'test_tissue',
+]
+BED_REF_COLUMNS = [
+    'Chrom',
+    'bp_start',
+    'bp_end',
+    'amp_ID',
+    'N_A',
+    'amp_info',
+    'Gene',
+    'Cytoband',
+    'Refseq (GRCh38)',
+    'MANE_transcript (GRCh38)',
+    'Genexus_transcript (GRCh37)',
+    'Genexus_Exon(s)',
+    'Genexus_codons',
+]
 TOOLTIPS = SETTINGS['TOOLTIPS']
 TEXTBOXES = SETTINGS['TEXTBOXES']
 DISPOSITIONS = SETTINGS['DISPOSITIONS']

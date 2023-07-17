@@ -5,22 +5,6 @@
         "IGV_port": 60151,
         "text_output_folder": "texts/"
     },
-    "LOOKUP": {
-        "folder": "reference",
-        "filename": "Genexus_bed_working.xlsx",
-        "addon_list": [
-            "amp_ID",
-            "N_A",
-            "amp_info",
-            "chr",
-            "Cytoband",
-            "Refseq (GRCh38)",
-            "MANE_transcript",
-            "GX_transcript",
-            "exons",
-            "codons"
-        ]
-    },
     "VALIDATION": {
         "cutoffs": {
             "p_value_max_red": 0.05,

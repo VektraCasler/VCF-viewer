@@ -4,9 +4,23 @@
 # IMPORTS ------------------------------------------------
 
 from .global_variables import *
+from .infotrack_db import *
+from .bed_db import *
 import openpyxl
 
 # VARIABLES ----------------------------------------------
+
+ADDON_LIST = [
+    'amp_ID', 
+    'Cytoband', 
+    'MANE_transcript (GRCh38)', 
+    'Genexus_transcript (GRCh37)', 
+    'Genexus_Exon(s)', 
+    'Genexus_codons',
+    'tier',
+    'test_tissue',
+]
+TEST_FILE = 'test_data/50-22.final.report.xlsx'
 
 # CLASSES ------------------------------------------------
 
@@ -19,17 +33,26 @@ class DataModel():
         self.variables['selection_disposition'] = "None"
         self.variables['selection_index'] = 0
 
-        self.load_bed_lookup_table()
-        self.load_infotrack_lookup_table()
+        self.bdb = BedLookupTable()
+        self.idb = InfotrackLookupTable()
         
+        self.DATA_FIELDS = list()
+
         return None
 
+    def determine_data_fields(self, excel_columns) -> None:
+        """ Method to determine if this is an already annotated excel file, or if it is an original one.  Sets the data field (columns) list appropriately. """
+
+        return None
 
     def load_file(self, *args, **kwargs) -> None:
         """ Recieves the filename from the view, attempts to load. """
 
         workbook = openpyxl.load_workbook(self.variables['filename'], data_only=True, read_only=True)
         self.variables['variant_list'] = list()
+
+        column_list = [cell.value for cell in workbook[1]]
+        print(column_list)
 
         # capturing the workbook sheet names as dispositions 
         for disposition in workbook.sheetnames:
@@ -53,39 +76,24 @@ class DataModel():
                 else:
                     row_dict['Disposition'] = "None"
 
-                # Now reference the lookup table to include the missing pieces of information
+                # ANNOTATING FROM THE BED FILE
+
+                # making some temp variables for clarity during coding
                 gene = row_dict['Variant Annotation: Gene']
                 bp = row_dict['Original Input: Pos']
+                c_dot = row_dict["Variant Annotation: cDNA change"]
 
-                # Search all the entries in the lookup dictionary
-                for key, value in self.variables['json_lookup'][gene].items():
-                    if key[0] <= bp <= key[1]:
-                        # copy to a temporary variable for easier code reading
-                        temp = value
-                        break
+                # Now reference the lookup table to include the missing pieces of information
+                for item in ADDON_LIST[:-2]:
+                    row_dict[item] = self.bdb.get_data(gene, bp, item)
 
-                # copying them to the row dictionary
-                for item in SETTINGS['LOOKUP_BED']['addon_list']:
-                    row_dict[item] = temp[item]
-
-                # Now to copy in the 
-                for item in ['tier', 'tissues']:
-                    row_dict[item] = self.variables['infotrack_lookup_data'][(row_dict['Variant Annotation: Gene'],row_dict['Variant Annotation: cDNA change'])][item]
-
-                # changing to the tier list to a 'best guess'
-                best_score = 0
-                tier = None
-                for key,value in row_dict['tier'].items():
-                    if value > best_score:
-                        best_score = value
-                        tier = key
-                row_dict['tier'] = tier
-
-                # collecting all data into the 'variant_list', belonging to model
-                self.variables['variant_list'].append(row_dict.copy())
+                # ANNOTATING FROM THE INFOTRACK DB FILE
+                
+                # Now let's add annotations from the infotrack file
+                row_dict['tier'] = self.idb.recommend_tier(gene, c_dot, 'Blood') # Genexys is just blood samples currently
+                row_dict['infotrack_tissues'] = self.idb.get_tissue_list(gene, c_dot)
 
         return None
-
 
     def save_file(self, *args, **kwargs) -> None:
         """ Writes the sorted data out to disk with marker on the filename to denote file has been processed. """
@@ -114,7 +122,6 @@ class DataModel():
 
         return None
     
-
     def change_disposition(self, selection: str, disposition: str, update_dict: dict, *args, **kwargs) -> None:
         """ Updates the disposition of the selected record. """
 
@@ -124,7 +131,6 @@ class DataModel():
         self.variables['variant_list'][selection]['Disposition'] = disposition
 
         return None
-
 
     def count_dispositions(self, disposition, *args, **kwargs) -> int:
         """ Method to count the number of records in the variant list with the passed disposition. """
@@ -137,7 +143,6 @@ class DataModel():
 
         return counter
 
-
     def output_text_files(self, *args, **kwargs) -> None:
         """ Placeholder method which will eventually output the needed text files for the reporting script. """
 
@@ -145,88 +150,11 @@ class DataModel():
 
         return None
 
-
-    def load_infotrack_lookup_table(self) -> None:
-        """ Brings in the lookup table for finding the most likely Tier of the variant. """
-
-        # read in the file
-        file_path = os.path.join(SETTINGS['LOOKUP_INFOTRACK']['folder'],SETTINGS['LOOKUP_INFOTRACK']['filename'])
-        with open(file_path, 'r', encoding='ascii') as file_input:
-            lines = file_input.readlines()
-
-        # create a blank dictionary
-        self.variables['infotrack_lookup_data'] = dict()
-
-        # time to process the lines individually
-        for line in lines:
-            chunks = line[:-1].split('\t')
-
-            # easier handles for the variables
-            key = (chunks[5], chunks[6])
-            tier = chunks[13]
-            tissue = chunks[21]
-
-            # ensuring the key is in the dictionary
-            if key not in self.variables['infotrack_lookup_data'].keys():
-                self.variables['infotrack_lookup_data'][key] = dict()
-                self.variables['infotrack_lookup_data'][key]['tier'] = dict()
-                self.variables['infotrack_lookup_data'][key]['tissues'] = dict()
-            
-            # adding tier to the dictionary roster
-            if tier not in self.variables['infotrack_lookup_data'][key]['tier']:
-                self.variables['infotrack_lookup_data'][key]['tier'][tier] = 0
-            else:
-                self.variables['infotrack_lookup_data'][key]['tier'][tier] += 1
-
-            # adding tissue to the dictionary roster
-            if tissue not in self.variables['infotrack_lookup_data'][key]['tissues']:
-                self.variables['infotrack_lookup_data'][key]['tissues'][tissue] = 0
-            else:
-                self.variables['infotrack_lookup_data'][key]['tissues'][tissue] += 1
-
-        return None
-
-
-    def load_bed_lookup_table(self) -> None:
-        """ Brings in the lookup table for finding cytoband, amplicon, exon, and codons from the bed file. """
-
-        filename = os.path.join(SETTINGS['LOOKUP_BED']['folder'],SETTINGS['LOOKUP_BED']['filename'])
-        workbook = openpyxl.load_workbook(filename, data_only=True, read_only=True)
-        sheet = workbook['Genexus_bed']
-
-        # prepping a dictionary
-        self.variables['json_lookup'] = dict()
-
-        for row in sheet.iter_rows(min_row=2):
-
-            # Using the gene as the primary lookup value
-            if row[6].value not in self.variables['json_lookup']:
-                self.variables['json_lookup'][row[6].value] = dict()
-
-            # then using the basepair endcaps as a tuple for a secondary key.
-            if (row[1].value, row[2].value) not in self.variables['json_lookup'][row[6].value]:
-                self.variables['json_lookup'][row[6].value][(row[1].value, row[2].value)] = dict()
-
-            # then the rest of the lookup information
-            self.variables['json_lookup'][row[6].value][(row[1].value, row[2].value)]['amp_ID'] = row[3].value
-            self.variables['json_lookup'][row[6].value][(row[1].value, row[2].value)]['N_A'] = row[4].value
-            self.variables['json_lookup'][row[6].value][(row[1].value, row[2].value)]['amp_info'] = row[5].value
-            self.variables['json_lookup'][row[6].value][(row[1].value, row[2].value)]['chr'] = row[0].value
-            self.variables['json_lookup'][row[6].value][(row[1].value, row[2].value)]['Cytoband'] = row[7].value
-            self.variables['json_lookup'][row[6].value][(row[1].value, row[2].value)]['Refseq (GRCh38)'] = row[8].value
-            self.variables['json_lookup'][row[6].value][(row[1].value, row[2].value)]['MANE_transcript'] = row[9].value
-            self.variables['json_lookup'][row[6].value][(row[1].value, row[2].value)]['GX_transcript'] = row[10].value
-            self.variables['json_lookup'][row[6].value][(row[1].value, row[2].value)]['exons'] = row[11].value
-            self.variables['json_lookup'][row[6].value][(row[1].value, row[2].value)]['codons'] = row[12].value
-
-        return None
-
-
 # MAIN LOOP ----------------------------------------------
 
 def main() -> None:
 
-    pass
+    model = DataModel()
 
     return None
 

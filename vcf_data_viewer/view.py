@@ -52,7 +52,9 @@ class RecordView(tk.Frame):
         self.scrollbars = dict()
         self.textboxes = dict()
 
-        for x in VCF_FIELDS:
+        DATA_FIELDS = [*VCF_FIELDS, *BED_REF_COLUMNS, *INFOTRACK_REF_COLUMNS]
+
+        for x in DATA_FIELDS:
             self.variant[x] = tk.StringVar()
             self.entries[x] = tk.Entry()
             self.labels[x] = tk.Label()
@@ -88,7 +90,7 @@ class RecordView(tk.Frame):
         view_columns.append('Disposition')
         self.treeviews['variant_list'] = tk.Treeview(self.frames['left'], columns=view_columns, displaycolumns=[4,69], selectmode='browse', show='headings')
         # self.treeviews['variant_list'] = tk.tableview.Tableview(self.frames['treeview'], coldata=VCF_FIELDS, displaycolumns=[5,0], selectmode='browse', show='headings')
-        for x in VCF_FIELDS:
+        for x in [*VCF_FIELDS, *BED_REF_COLUMNS, *INFOTRACK_REF_COLUMNS]:
             self.treeviews['variant_list'].heading(x, text=x, anchor='center')
         self.treeviews['variant_list'].column(column=4, width=120, anchor='center')
         self.treeviews['variant_list'].column(column=69, width=140, anchor='center')
@@ -147,10 +149,10 @@ class RecordView(tk.Frame):
         # Basic Information Area
         self.frames['basic_info'] = tk.Frame(self.frames['right'], bootstyle='secondary')
         self.frames['basic_info'].pack(side='top', expand=False, fill='x', padx=5, pady=5)
-        for x in range(4):
+        for x in range(6):
             self.frames['basic_info'].columnconfigure(x, weight=1)
         self.labels['basic_info_frame_label'] = tk.Label(self.frames['basic_info'], text="Basic Genetic Information", anchor='c')
-        self.labels['basic_info_frame_label'].grid(row=0, column=0, columnspan=4, sticky='news', padx=5, pady=5)
+        self.labels['basic_info_frame_label'].grid(row=0, column=0, columnspan=6, sticky='news', padx=5, pady=5)
         self.labels["Variant Annotation: Gene"] = tk.Label(self.frames['basic_info'], text="Gene")
         self.labels["Variant Annotation: Gene"].grid(row=1, column=0, rowspan=1, columnspan=1, sticky='news', padx=5, pady=5)
         self.entries["Variant Annotation: Gene"] = tk.Entry(self.frames['basic_info'], width=8, textvariable=self.variant["Variant Annotation: Gene"], font=('bold', 24, 'bold'))
@@ -179,6 +181,22 @@ class RecordView(tk.Frame):
         self.labels['Original Input: Alternate allele'].grid(row=3, column=3, rowspan=1, columnspan=1, sticky='news', padx=5, pady=5)
         self.entries["Original Input: Alternate allele"] = tk.Entry(self.frames['basic_info'], justify=tk.LEFT, textvariable=self.variant["Original Input: Alternate allele"])
         self.entries["Original Input: Alternate allele"].grid(row=4, column=3, rowspan=1, columnspan=1, sticky='news', padx=5, pady=5)
+        self.labels['amp_ID'] = tk.Label(self.frames['basic_info'], text='Amplicon', anchor='nw')
+        self.labels['amp_ID'].grid(row=1, column=4, sticky='news', padx=5, pady=5)
+        self.entries['amp_ID'] = tk.Entry(self.frames['basic_info'], justify=tk.LEFT, textvariable=self.variant['amp_ID'])
+        self.entries['amp_ID'].grid(row=2, column=4, sticky='news', padx=5, pady=5)
+        self.labels['Cytoband'] = tk.Label(self.frames['basic_info'], text='Cytoband', anchor='nw')
+        self.labels['Cytoband'].grid(row=3, column=4, sticky='news', padx=5, pady=5)
+        self.entries['Cytoband'] = tk.Entry(self.frames['basic_info'], justify=tk.LEFT, textvariable=self.variant['Cytoband'])
+        self.entries['Cytoband'].grid(row=4, column=4, sticky='news', padx=5, pady=5)
+        self.labels['MANE_transcript (GRCh38)'] = tk.Label(self.frames['basic_info'], text='MANE Transcript (GRCh38)', anchor='nw')
+        self.labels['MANE_transcript (GRCh38)'].grid(row=1, column=5, sticky='news', padx=5, pady=5)
+        self.entries['MANE_transcript (GRCh38)'] = tk.Entry(self.frames['basic_info'], justify=tk.LEFT, textvariable=self.variant['MANE_transcript (GRCh38)'])
+        self.entries['MANE_transcript (GRCh38)'].grid(row=2, column=5, sticky='news', padx=5, pady=5)
+        self.labels['tier'] = tk.Label(self.frames['basic_info'], text='Proposed Tier', anchor='nw')
+        self.labels['tier'].grid(row=3, column=5, sticky='news', padx=5, pady=5)
+        self.entries['tier'] = tk.Entry(self.frames['basic_info'], justify=tk.LEFT, textvariable=self.variant['tier'])
+        self.entries['tier'].grid(row=4, column=5, sticky='news', padx=5, pady=5)
 
         # middle frame
         self.frames['middle'] = tk.Frame(self.frames['right'])
@@ -334,7 +352,7 @@ class RecordView(tk.Frame):
         # Genexus info frame
         self.frames['gx_info'] = tk.Frame(self.frames['middle'], bootstyle='secondary')
         self.frames['gx_info'].pack(side='top', expand=False, fill='both', padx=5, pady=5)
-        for x in range(5):
+        for x in range(7):
             self.frames['gx_info'].rowconfigure(x, weight=1)
         for x in range(6):
             self.frames['gx_info'].columnconfigure(x, weight=1)
@@ -364,8 +382,8 @@ class RecordView(tk.Frame):
         self.labels['VCF: QUAL'] = tk.Label(self.frames['gx_info'], text="Quality Score")
         self.labels['VCF: QUAL'].grid(row=1, column=5, sticky='news', padx=5, pady=5)
         self.entries["VCF: QUAL"] = tk.Entry(self.frames['gx_info'], textvariable=self.variant["VCF: QUAL"])
-        self.entries["VCF: QUAL"].grid(row=2, column=5, rowspan=4, sticky='news', padx=5, pady=5)
-        # gx info bottom area
+        self.entries["VCF: QUAL"].grid(row=2, column=5, rowspan=3, sticky='news', padx=5, pady=5)
+        # gx info middle row
         self.labels['VCF: FAO'] = tk.Label(self.frames['gx_info'], text="FAO")
         self.labels['VCF: FAO'].grid(row=3, column=0, sticky='news', padx=5, pady=5)
         self.entries["VCF: FAO"] = tk.Entry(self.frames['gx_info'], textvariable=self.variant["VCF: FAO"])
@@ -386,6 +404,19 @@ class RecordView(tk.Frame):
         self.labels['VCF: SVTYPE'].grid(row=3, column=4, sticky='news', padx=5, pady=5)
         self.entries["VCF: SVTYPE"] = tk.Entry(self.frames['gx_info'], textvariable=self.variant["VCF: SVTYPE"])
         self.entries["VCF: SVTYPE"].grid(row=4, column=4, sticky='news', padx=5, pady=5)
+        # GX info bottom row
+        self.labels['Genexus_transcript (GRCh37)'] = tk.Label(self.frames['gx_info'], text="Genexus Transcript (GRCh37)")
+        self.labels['Genexus_transcript (GRCh37)'].grid(row=5, column=0, columnspan=2, sticky='news', padx=5, pady=5)
+        self.entries['Genexus_transcript (GRCh37)'] = tk.Entry(self.frames['gx_info'], textvariable=self.variant['Genexus_transcript (GRCh37)'])
+        self.entries['Genexus_transcript (GRCh37)'].grid(row=6, column=0, columnspan=2, sticky='news', padx=5, pady=5)
+        self.labels['Genexus_Exon(s)'] = tk.Label(self.frames['gx_info'], text="Genexus Exon(s)")
+        self.labels['Genexus_Exon(s)'].grid(row=5, column=2, columnspan=2, sticky='news', padx=5, pady=5)
+        self.entries["Genexus_Exon(s)"] = tk.Entry(self.frames['gx_info'], textvariable=self.variant["Genexus_Exon(s)"])
+        self.entries["Genexus_Exon(s)"].grid(row=6, column=2, columnspan=2, sticky='news', padx=5, pady=5)
+        self.labels['Genexus_codons'] = tk.Label(self.frames['gx_info'], text='Genexus Codons')
+        self.labels['Genexus_codons'].grid(row=5, column=4, columnspan=2, sticky='news', padx=5, pady=5)
+        self.entries['Genexus_codons'] = tk.Entry(self.frames['gx_info'], textvariable=self.variant['Genexus_codons'])
+        self.entries['Genexus_codons'].grid(row=6, column=4, columnspan=2, sticky='news', padx=5, pady=5)
 
         # mpileup info frame
         self.frames['mpl_info'] = tk.Frame(self.frames['middle'], bootstyle='secondary')
