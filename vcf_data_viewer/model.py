@@ -19,10 +19,11 @@ class DataModel():
         self.variables['selection_disposition'] = "None"
         self.variables['selection_index'] = 0
 
-        self.load_lookup_table()
+        self.load_bed_lookup_table()
+        self.load_infotrack_lookup_table()
         
         return None
-    
+
 
     def load_file(self, *args, **kwargs) -> None:
         """ Recieves the filename from the view, attempts to load. """
@@ -64,10 +65,21 @@ class DataModel():
                         break
 
                 # copying them to the row dictionary
-                for item in SETTINGS['LOOKUP']['addon_list']:
+                for item in SETTINGS['LOOKUP_BED']['addon_list']:
                     row_dict[item] = temp[item]
 
-                
+                # Now to copy in the 
+                for item in ['tier', 'tissues']:
+                    row_dict[item] = self.variables['infotrack_lookup_data'][(row_dict['Variant Annotation: Gene'],row_dict['Variant Annotation: cDNA change'])][item]
+
+                # changing to the tier list to a 'best guess'
+                best_score = 0
+                tier = None
+                for key,value in row_dict['tier'].items():
+                    if value > best_score:
+                        best_score = value
+                        tier = key
+                row_dict['tier'] = tier
 
                 # collecting all data into the 'variant_list', belonging to model
                 self.variables['variant_list'].append(row_dict.copy())
@@ -134,10 +146,51 @@ class DataModel():
         return None
 
 
-    def load_lookup_table(self) -> None:
-        """ Brings in the lookup table for finding cytoband, amplicon, exon, and codons. """
+    def load_infotrack_lookup_table(self) -> None:
+        """ Brings in the lookup table for finding the most likely Tier of the variant. """
 
-        filename = os.path.join(SETTINGS['LOOKUP']['folder'],SETTINGS['LOOKUP']['filename'])
+        # read in the file
+        file_path = os.path.join(SETTINGS['LOOKUP_INFOTRACK']['folder'],SETTINGS['LOOKUP_INFOTRACK']['filename'])
+        with open(file_path, 'r', encoding='ascii') as file_input:
+            lines = file_input.readlines()
+
+        # create a blank dictionary
+        self.variables['infotrack_lookup_data'] = dict()
+
+        # time to process the lines individually
+        for line in lines:
+            chunks = line[:-1].split('\t')
+
+            # easier handles for the variables
+            key = (chunks[5], chunks[6])
+            tier = chunks[13]
+            tissue = chunks[21]
+
+            # ensuring the key is in the dictionary
+            if key not in self.variables['infotrack_lookup_data'].keys():
+                self.variables['infotrack_lookup_data'][key] = dict()
+                self.variables['infotrack_lookup_data'][key]['tier'] = dict()
+                self.variables['infotrack_lookup_data'][key]['tissues'] = dict()
+            
+            # adding tier to the dictionary roster
+            if tier not in self.variables['infotrack_lookup_data'][key]['tier']:
+                self.variables['infotrack_lookup_data'][key]['tier'][tier] = 0
+            else:
+                self.variables['infotrack_lookup_data'][key]['tier'][tier] += 1
+
+            # adding tissue to the dictionary roster
+            if tissue not in self.variables['infotrack_lookup_data'][key]['tissues']:
+                self.variables['infotrack_lookup_data'][key]['tissues'][tissue] = 0
+            else:
+                self.variables['infotrack_lookup_data'][key]['tissues'][tissue] += 1
+
+        return None
+
+
+    def load_bed_lookup_table(self) -> None:
+        """ Brings in the lookup table for finding cytoband, amplicon, exon, and codons from the bed file. """
+
+        filename = os.path.join(SETTINGS['LOOKUP_BED']['folder'],SETTINGS['LOOKUP_BED']['filename'])
         workbook = openpyxl.load_workbook(filename, data_only=True, read_only=True)
         sheet = workbook['Genexus_bed']
 

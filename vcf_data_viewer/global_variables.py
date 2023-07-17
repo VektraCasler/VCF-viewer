@@ -20,7 +20,7 @@ else:
             'IGV_port': 60151,
             'text_output_folder':"texts/"
         },
-        "LOOKUP": {
+        "LOOKUP_BED": {
             "folder": "reference",
             "filename": "Genexus_bed_working.xlsx",
             "addon_list": [
@@ -35,6 +35,34 @@ else:
                     'exons',
                     'codons',
                 ],
+        },
+        "LOOKUP_INFOTRACK": {
+            "folder": "reference",
+            "filename": "infotrack_data_dump.tsv",
+            "addon_list": [
+                ' mol_num', # Note - there is a leading space on this one for some reason.
+                'sample_name', 
+                'observed_variant_id', 
+                'run_id', 
+                'interpt_id', 
+                'genes', 
+                'coding', 
+                'amino_acid_change', 
+                'frequency', 
+                'genotype', 
+                'allele_coverage', 
+                'coverage', 
+                'include_in_report', 
+                'tier', 
+                'time_stamp', 
+                'confirm_status', 
+                'variant_allele', 
+                'ref_allele', 
+                'ref_var_strand_counts', 
+                'strand', 
+                'genetic_call', 
+                'test_tissue',
+            ],
         },
         "VALIDATION": {
             "cutoffs": {

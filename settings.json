@@ -7,7 +7,19 @@
     },
     "LOOKUP": {
         "folder": "reference",
-        "filename": "Genexus_bed_working.xlsx"
+        "filename": "Genexus_bed_working.xlsx",
+        "addon_list": [
+            "amp_ID",
+            "N_A",
+            "amp_info",
+            "chr",
+            "Cytoband",
+            "Refseq (GRCh38)",
+            "MANE_transcript",
+            "GX_transcript",
+            "exons",
+            "codons"
+        ]
     },
     "VALIDATION": {
         "cutoffs": {
