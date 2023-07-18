@@ -59,7 +59,7 @@ class InfotrackLookupTable():
         
         # variant not found case
         if temp_DF.shape[0] == 0:
-            return "novel"
+            return "NO DATA"
         
         # count up all the tier counts by type
         tier_types = ['Tier I', 'Tier II', 'Tier III']

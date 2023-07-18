@@ -3,6 +3,7 @@
 
 # IMPORTS ------------------------------------------------
 
+from tkinter import messagebox as mb
 from .global_variables import *
 from .infotrack_db import *
 from .bed_db import *
@@ -19,6 +20,86 @@ ADDON_LIST = [
     'Genexus_codons',
     'tier',
     'test_tissue',
+]
+DATA_FIELDS = [
+    "Original Input: Chrom",
+    "Original Input: Pos",
+    "Original Input: Reference allele",
+    "Original Input: Alternate allele",
+    "Variant Annotation: Gene",
+    "Variant Annotation: cDNA change",
+    "Variant Annotation: Protein Change",
+    "Variant Annotation: RefSeq",
+    "VCF: AF",
+    "VCF: FAO",
+    "VCF: FDP",
+    "VCF: HRUN",
+    "VCF: Filter",
+    "VCF: Genotype",
+    "COSMIC: ID",
+    "COSMIC: Variant Count",
+    "COSMIC: Variant Count (Tissue)",
+    "ClinVar: ClinVar ID",
+    "ClinVar: Clinical Significance",
+    "gnomAD3: Global AF",
+    "PhyloP: Vert Score",
+    "CADD: Phred",
+    "PolyPhen-2: HDIV Prediction",
+    "SIFT: Prediction",
+    "VCF: FSAF",
+    "VCF: FSAR",
+    "VCF: FSRF",
+    "VCF: FSRR",
+    "VCF: Fisher Odds Ratio",
+    "VCF: Fisher P Value",
+    "VCF: Binom Proportion",
+    "VCF: Binom P Value",
+    "Mpileup Qual: Read Depth",
+    "Mpileup Qual: Start Reads",
+    "Mpileup Qual: Stop Reads",
+    "Mpileup Qual: Filtered Reference Forward Read Depth",
+    "Mpileup Qual: Filtered Reference Reverse Read Depth",
+    "Mpileup Qual: Unfiltered Reference Forward Read Depth",
+    "Mpileup Qual: Unfiltered Reference Reverse Read Depth",
+    "Mpileup Qual: Filtered Variant Forward Read Depth",
+    "Mpileup Qual: Filtered Variant Reverse Read Depth",
+    "Mpileup Qual: Filtered Variant Binomial Proportion",
+    "Mpileup Qual: Filtered Variant Binomial P Value",
+    "Mpileup Qual: Filtered Variant Fishers Odds Ratio",
+    "Mpileup Qual: Filtered Variant Fishers P Value",
+    "Mpileup Qual: Filtered VAF",
+    "Mpileup Qual: Unfiltered Variant Forward Read Depth",
+    "Mpileup Qual: Unfiltered Variant Reverse Read Depth",
+    "Mpileup Qual: Unfiltered Variant Binomial Proportion",
+    "Mpileup Qual: Unfiltered Variant Binomial P Value",
+    "Mpileup Qual: Unfiltered Variant Fishers Odds Ratio",
+    "Mpileup Qual: Unfiltered Variant Fishers P Value",
+    "Mpileup Qual: Unfiltered VAF",
+    "VCF: LEN",
+    "VCF: QD",
+    "VCF: STB",
+    "VCF: STBP",
+    "VCF: SVTYPE",
+    "VCF: TYPE",
+    "VCF: QUAL",
+    "Variant Annotation: Coding",
+    "Variant Annotation: Sequence Ontology",
+    "Variant Annotation: Transcript",
+    "Variant Annotation: All Mappings",
+    "UniProt (GENE): Accession Number",
+    "dbSNP: rsID",
+    "MDL: Sample Count",
+    "MDL: Variant Frequency",
+    "MDL: Sample List",
+    'amp_ID',
+    'Cytoband',
+    'MANE_transcript (GRCh38)',
+    'Genexus_transcript (GRCh37)',
+    'Genexus_Exon(s)',
+    'Genexus_codons',
+    'tier',
+    'test_tissue',
+    "Disposition",
 ]
 
 # CLASSES ------------------------------------------------
@@ -68,9 +149,8 @@ class DataModel():
                 # prep a dictionary to hold row data
                 row_dict = dict()
 
-                # Step through all VCF fields
+                # Step through all data fields
                 for x in range(len(self.column_list)):
-                    # print(x, row[x].value)
                     try:
                         row_dict[self.column_list[x]] = row[x].value
                     except:
@@ -95,7 +175,6 @@ class DataModel():
                 else:
                     extended_range = (len(self.column_list), len(self.column_list)+len(ADDON_LIST))
                     for x in range(extended_range[0], extended_range[1]):
-                        # print(x, row[x].value)
                         try:
                             row_dict[self.column_list[x]] = row[x].value
                         except:
@@ -143,7 +222,7 @@ class DataModel():
         """ Updates the disposition of the selected record. """
 
         # Updating all the fields in the model instance of the record
-        for field in self.column_list:
+        for field in DATA_FIELDS:
             self.variant_list[selection][field] = update_dict[field]
         self.variant_list[selection]['Disposition'] = disposition
 
@@ -160,10 +239,71 @@ class DataModel():
 
         return counter
 
-    def output_text_files(self) -> None:
+    def output_text_files(self, *args) -> None:
         """ Placeholder method which will eventually output the needed text files for the reporting script. """
 
-        pass
+        # pull out the MD number from the filename
+        MD_number = (os.path.split(self.filename)[1]).split('.')[0]
+        file_location = os.path.split(self.filename)[0]
+
+        # creating filenames, note that the "XXX" replaces the build version number
+        filenames = [os.path.join(file_location, (MD_number + x)) for x in ['_low_coverage.tsv', '_mutations.tsv', '_vus.tsv']]
+
+        # open all three files at once with a context manager
+        with open(filenames[0], 'w', encoding='ascii') as file_low, open(filenames[1], 'w', encoding='ascii') as file_mut, open(filenames[2], 'w', encoding='ascii') as file_vus:
+
+            # write the headers for the tsvs
+            file_low.write('Gene	Amplicon	Exon	Codon	Depth\n')
+            file_mut.write('Gene	DNA	Protein	VAF^1	COSMIC^2	Tier^3	Cytoband\n')
+            file_vus.write('Gene	DNA	Protein	VAF^1	COSMIC^2	Tier^3	Cytoband\n')
+
+            # now step through the variant list and write each line out to the text files as necessary
+            for variant in self.variant_list:
+                
+                if variant['Disposition'] == 'Low VAF Variants':
+                    text_string = '{}\t{}\t{}\t{}\t{}\n'.format(
+                        variant['Variant Annotation: Gene'],
+                        variant['amp_ID'],
+                        variant['Genexus_Exon(s)'],
+                        variant['Genexus_codons'],
+                        variant['VCF: FDP'],
+                    )
+                    file_low.write(text_string)
+                elif variant['Disposition'] == 'VUS':
+                    text_string = '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
+                        variant['Variant Annotation: Gene'],
+                        variant['Variant Annotation: cDNA change'],
+                        variant['Variant Annotation: Protein Change'],
+                        variant['VCF: AF'],
+                        variant['COSMIC: ID'],
+                        variant['tier'],
+                        variant['Cytoband'],
+                    )
+                    file_vus.write(text_string)
+                elif variant['Disposition'] == 'Oncogenic':
+                    text_string = '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(
+                        variant['Variant Annotation: Gene'],
+                        variant['Variant Annotation: cDNA change'],
+                        variant['Variant Annotation: Protein Change'],
+                        variant['VCF: AF'],
+                        variant['COSMIC: ID'],
+                        variant['tier'],
+                        variant['Cytoband'],
+                    )
+                    file_mut.write(text_string)
+                else:
+                    pass
+
+        message = 'TSV text files exported'
+        detail = (
+            'Text files were successfully written\n'
+            'to the VCF file location.\n'
+        )
+        mb.showinfo(
+            title='Export Complete',
+            message=message,
+            detail=detail
+        )
 
         return None
 

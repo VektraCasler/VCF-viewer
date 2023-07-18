@@ -824,19 +824,19 @@ class RecordView(tk.Frame):
 
         return None
 
-    def record_update(self) -> None:
+    def record_update(self) -> dict:
         """ Method to return user-entered data into the record, in case things need to be updated. """
 
         # create an updated record from field widget information (which may have been updated) with disposition
-        self.updated_record = dict()
-        for vcf_field in DATA_FIELDS:
-            self.updated_record[vcf_field] = self.variant[vcf_field].get()
+        updated_record = dict()
+        for field in DATA_FIELDS:
+            updated_record[field] = self.variant[field].get()
 
         # now to put the data back into the treeview at the right location
         selected = self.treeviews['variant_list'].focus()
-        self.treeviews['variant_list'].item(selected, text="", values=self.updated_record)
+        self.treeviews['variant_list'].item(selected, text="", values=updated_record)
 
-        return None
+        return updated_record
 
     def validate_cells(self) -> None:
         """ Data validation (lite) method.  Works by simply coloring widget fields appropriate to their validation values. """

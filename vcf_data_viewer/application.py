@@ -14,6 +14,86 @@ from .view import RecordView
 
 # VARIABLES ----------------------------------------------
 
+DATA_FIELDS = [
+    "Original Input: Chrom",
+    "Original Input: Pos",
+    "Original Input: Reference allele",
+    "Original Input: Alternate allele",
+    "Variant Annotation: Gene",
+    "Variant Annotation: cDNA change",
+    "Variant Annotation: Protein Change",
+    "Variant Annotation: RefSeq",
+    "VCF: AF",
+    "VCF: FAO",
+    "VCF: FDP",
+    "VCF: HRUN",
+    "VCF: Filter",
+    "VCF: Genotype",
+    "COSMIC: ID",
+    "COSMIC: Variant Count",
+    "COSMIC: Variant Count (Tissue)",
+    "ClinVar: ClinVar ID",
+    "ClinVar: Clinical Significance",
+    "gnomAD3: Global AF",
+    "PhyloP: Vert Score",
+    "CADD: Phred",
+    "PolyPhen-2: HDIV Prediction",
+    "SIFT: Prediction",
+    "VCF: FSAF",
+    "VCF: FSAR",
+    "VCF: FSRF",
+    "VCF: FSRR",
+    "VCF: Fisher Odds Ratio",
+    "VCF: Fisher P Value",
+    "VCF: Binom Proportion",
+    "VCF: Binom P Value",
+    "Mpileup Qual: Read Depth",
+    "Mpileup Qual: Start Reads",
+    "Mpileup Qual: Stop Reads",
+    "Mpileup Qual: Filtered Reference Forward Read Depth",
+    "Mpileup Qual: Filtered Reference Reverse Read Depth",
+    "Mpileup Qual: Unfiltered Reference Forward Read Depth",
+    "Mpileup Qual: Unfiltered Reference Reverse Read Depth",
+    "Mpileup Qual: Filtered Variant Forward Read Depth",
+    "Mpileup Qual: Filtered Variant Reverse Read Depth",
+    "Mpileup Qual: Filtered Variant Binomial Proportion",
+    "Mpileup Qual: Filtered Variant Binomial P Value",
+    "Mpileup Qual: Filtered Variant Fishers Odds Ratio",
+    "Mpileup Qual: Filtered Variant Fishers P Value",
+    "Mpileup Qual: Filtered VAF",
+    "Mpileup Qual: Unfiltered Variant Forward Read Depth",
+    "Mpileup Qual: Unfiltered Variant Reverse Read Depth",
+    "Mpileup Qual: Unfiltered Variant Binomial Proportion",
+    "Mpileup Qual: Unfiltered Variant Binomial P Value",
+    "Mpileup Qual: Unfiltered Variant Fishers Odds Ratio",
+    "Mpileup Qual: Unfiltered Variant Fishers P Value",
+    "Mpileup Qual: Unfiltered VAF",
+    "VCF: LEN",
+    "VCF: QD",
+    "VCF: STB",
+    "VCF: STBP",
+    "VCF: SVTYPE",
+    "VCF: TYPE",
+    "VCF: QUAL",
+    "Variant Annotation: Coding",
+    "Variant Annotation: Sequence Ontology",
+    "Variant Annotation: Transcript",
+    "Variant Annotation: All Mappings",
+    "UniProt (GENE): Accession Number",
+    "dbSNP: rsID",
+    "MDL: Sample Count",
+    "MDL: Variant Frequency",
+    "MDL: Sample List",
+    'amp_ID',
+    'Cytoband',
+    'MANE_transcript (GRCh38)',
+    'Genexus_transcript (GRCh37)',
+    'Genexus_Exon(s)',
+    'Genexus_codons',
+    'tier',
+    'test_tissue',
+    "Disposition",
+]
 
 # CLASSES ------------------------------------------------
 
@@ -140,21 +220,16 @@ class Application(tk.Window):
         """ Returns the disposition from the view to the data model for saving. """
 
         # First, we'll tell the view to save any changes from the field widgets into the treeview data
-        self.view.record_update()
+        updated_record = self.view.record_update()
 
         # now  ensures the model and the view are referencing the same variant
         selection = self.view.selection_index.get()
-
-        # creating a dictionary of updated record field data
-        update_dict = dict()
-        for vcf_field in VCF_FIELDS:
-            update_dict[vcf_field] = self.view.variant[vcf_field].get()
 
         # saving the disposition also
         disposition = self.view.variant['Disposition'].get()
 
         # Carry the change through the model's method, which also update dispo counts
-        self.model.change_disposition(selection, disposition, update_dict)
+        self.model.change_disposition(selection, disposition, updated_record)
 
         # Refresh the view
         self.view.load_treeview(self.model.variant_list)
