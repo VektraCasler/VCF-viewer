@@ -7,13 +7,13 @@
 - [x] External setting file 
 - [X] Web links
 - [X] Copyable fields
-- [ ] Output text files
-- [ ] Use arrow keys to assign dispositions
-- [ ] Trigger output script
+- [X] Output text files
+- [_] Use arrow keys to assign dispositions
+- [_] Trigger output script
 - [X] Validation rules update
 - [X] Links to IGV
 
 # Bugs to Fix
 
-- [ ] Fix border on "RefSeq"
-- [ ] Crash on cancelling out of file-open dialog
+- [X] Fix border on "RefSeq"
+- [X] Crash on cancelling out of file-open dialog

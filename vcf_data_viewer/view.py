@@ -782,12 +782,19 @@ class RecordView(tk.Frame):
         for item in self.treeviews['variant_list'].get_children():
             self.treeviews['variant_list'].delete(item)
         
+        # clearing data fields
         for x in DATA_FIELDS:
             self.variant[x].set("")
             self.entries[x].configure(bootstyle='normal.TLabel')
         
         self.variant['Disposition'].set(0)
         self.filename.set("")
+
+        # Cleaning up the textbox widgets by reloading the text
+        self.textboxes['COSMIC: Variant Count (Tissue)'].delete("1.0", tk.END)
+        self.textboxes['MDL: Sample List'].delete("1.0", tk.END)
+        self.textboxes['Variant Annotation: All Mappings'].delete("1.0", tk.END)
+        self.textboxes["test_tissue"].delete("1.0", tk.END)
 
         return None
  

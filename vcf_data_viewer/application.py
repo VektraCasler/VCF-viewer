@@ -4,7 +4,7 @@
 # IMPORTS ------------------------------------------------
 
 import ttkbootstrap as tk 
-
+import sys
 from .global_variables import *
 from .infotrack_db import *
 from .bed_db import *
@@ -126,7 +126,7 @@ class Application(tk.Window):
             '<<FileLoad>>': self.load_file,
             '<<FileClear>>': self.clear_view,
             '<<FileSave>>': self.save_file,
-            '<<FileQuit>>': lambda _: self.quit(),
+            '<<FileQuit>>': lambda _: sys.exit(),
 
             '<<DispoSave>>': self.update_disposition,
 
