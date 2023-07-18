@@ -1,4 +1,4 @@
-# vcf_data_viewer.py
+# vcf_data_viewer/model.py
 ''' This holds the data model for the vcf-data-viewer application. '''
 
 # IMPORTS ------------------------------------------------
@@ -20,7 +20,6 @@ ADDON_LIST = [
     'tier',
     'test_tissue',
 ]
-TEST_FILE = 'test_data/50-22.final.report.xlsx'
 
 # CLASSES ------------------------------------------------
 
@@ -29,9 +28,9 @@ class DataModel():
     def __init__(self) -> None:
 
         self.variables = dict()
-        self.variables['filename'] = str()
-        self.variables['selection_disposition'] = "None"
-        self.variables['selection_index'] = 0
+        self.filename = str()
+        self.selected_disposistion = "None"
+        self.selection_index = 0
 
         self.bdb = BedLookupTable()
         self.idb = InfotrackLookupTable()
@@ -45,14 +44,18 @@ class DataModel():
 
         return None
 
-    def load_file(self, *args, **kwargs) -> None:
+    def load_file(self) -> None:
         """ Recieves the filename from the view, attempts to load. """
 
-        workbook = openpyxl.load_workbook(self.variables['filename'], data_only=True, read_only=True)
-        self.variables['variant_list'] = list()
+        workbook = openpyxl.load_workbook(self.filename, data_only=True, read_only=True)
+        self.variant_list = list()
 
-        column_list = [cell.value for cell in workbook[1]]
-        print(column_list)
+        # Read in the columns names and make a list, then check the length to see if it's been opened before.
+        self.column_list = [cell.value for cell in workbook.worksheets[0][1]]
+        if len(self.column_list) < 70:
+            self.new_file = True
+        else:
+            self.new_file = False
 
         # capturing the workbook sheet names as dispositions 
         for disposition in workbook.sheetnames:
@@ -66,8 +69,37 @@ class DataModel():
                 row_dict = dict()
 
                 # Step through all VCF fields
-                for x in range(len(VCF_FIELDS[:-1])):  # Have to subtract one here because the disposition field is last, but not in the original file
-                    row_dict[VCF_FIELDS[x]] = row[x].value
+                for x in range(len(self.column_list)):
+                    # print(x, row[x].value)
+                    try:
+                        row_dict[self.column_list[x]] = row[x].value
+                    except:
+                        row_dict[self.column_list[x]] = None
+
+
+                # making some temp variables for clarity during coding
+                gene = row_dict['Variant Annotation: Gene']
+                bp = int(row_dict['Original Input: Pos'])
+                c_dot = row_dict['Variant Annotation: cDNA change']
+
+                # self.column_list = [*self.column_list, *ADDON_LIST]
+
+                if self.new_file:
+                    # ANNOTATING FROM THE BED FILE -----------------------------------------------
+                    for item in ADDON_LIST[:-2]:
+                        row_dict[item] = self.bdb.get_data(gene, bp, item)
+                    # ANNOTATING FROM THE INFOTRACK DB FILE --------------------------------------
+                    row_dict['tier'] = self.idb.recommend_tier(gene, c_dot, 'Blood') # Genexys is just blood samples currently
+                    row_dict['test_tissue'] = self.idb.get_tissue_list(gene, c_dot)
+
+                else:
+                    extended_range = (len(self.column_list), len(self.column_list)+len(ADDON_LIST))
+                    for x in range(extended_range[0], extended_range[1]):
+                        # print(x, row[x].value)
+                        try:
+                            row_dict[self.column_list[x]] = row[x].value
+                        except:
+                            row_dict[self.column_list[x]] = None
 
                 # ignores any sheet names that "non-standard" dispositions.  
                 # The first sheet in the excel file typically has such a name.
@@ -76,45 +108,30 @@ class DataModel():
                 else:
                     row_dict['Disposition'] = "None"
 
-                # ANNOTATING FROM THE BED FILE
-
-                # making some temp variables for clarity during coding
-                gene = row_dict['Variant Annotation: Gene']
-                bp = row_dict['Original Input: Pos']
-                c_dot = row_dict["Variant Annotation: cDNA change"]
-
-                # Now reference the lookup table to include the missing pieces of information
-                for item in ADDON_LIST[:-2]:
-                    row_dict[item] = self.bdb.get_data(gene, bp, item)
-
-                # ANNOTATING FROM THE INFOTRACK DB FILE
-                
-                # Now let's add annotations from the infotrack file
-                row_dict['tier'] = self.idb.recommend_tier(gene, c_dot, 'Blood') # Genexys is just blood samples currently
-                row_dict['infotrack_tissues'] = self.idb.get_tissue_list(gene, c_dot)
+                self.variant_list.append(row_dict.copy())
 
         return None
 
-    def save_file(self, *args, **kwargs) -> None:
+    def save_file(self) -> None:
         """ Writes the sorted data out to disk with marker on the filename to denote file has been processed. """
 
         # appending a "(sorted)" note to the filename, but checking if that note is already there
-        if SETTINGS['FILE']['filename_addon'] in self.variables['filename']:
-            filename = self.variables['filename']
+        if VCF_FILE_SETTINGS['filename_addon'] in self.filename:
+            filename = self.filename
         else:
-            filename = self.variables['filename'][:-(len(SETTINGS['FILE']['excel_extension']))] + SETTINGS['FILE']['filename_addon'] + SETTINGS['FILE']['excel_extension']
+            filename = self.filename[:-(len(VCF_FILE_SETTINGS['excel_extension']))] + VCF_FILE_SETTINGS['filename_addon'] + VCF_FILE_SETTINGS['excel_extension']
 
         # Openpyxl package work
         wb = openpyxl.Workbook()
-        for tab in SETTINGS['DISPOSITIONS']:
+        for tab in DISPOSITIONS:
             wb.create_sheet(tab)
             wb.active = wb[tab]
             ws = wb.active
-            row = [column for column in SETTINGS['VCF_FIELDS']]
+            row = [column for column in self.column_list]
             ws.append(row)
-            for entry in self.variables['variant_list']:
+            for entry in self.variant_list:
                 if entry['Disposition'] == tab:
-                    row = [entry[x] for x in SETTINGS['VCF_FIELDS']]
+                    row = [entry[x] for x in self.column_list]
                     ws.append(row)
 
         wb.remove_sheet(wb.get_sheet_by_name('Sheet')) # removing the default "Sheet" from openpyxl
@@ -122,28 +139,28 @@ class DataModel():
 
         return None
     
-    def change_disposition(self, selection: str, disposition: str, update_dict: dict, *args, **kwargs) -> None:
+    def change_disposition(self, selection: str, disposition: str, update_dict: dict) -> None:
         """ Updates the disposition of the selected record. """
 
         # Updating all the fields in the model instance of the record
-        for vcf_field in VCF_FIELDS:
-            self.variables['variant_list'][selection][vcf_field] = update_dict[vcf_field]
-        self.variables['variant_list'][selection]['Disposition'] = disposition
+        for field in self.column_list:
+            self.variant_list[selection][field] = update_dict[field]
+        self.variant_list[selection]['Disposition'] = disposition
 
         return None
 
-    def count_dispositions(self, disposition, *args, **kwargs) -> int:
+    def count_dispositions(self, disposition) -> int:
         """ Method to count the number of records in the variant list with the passed disposition. """
 
         counter = 0
 
-        for row in self.variables['variant_list']:
+        for row in self.variant_list:
             if disposition == row['Disposition']:
                 counter += 1
 
         return counter
 
-    def output_text_files(self, *args, **kwargs) -> None:
+    def output_text_files(self) -> None:
         """ Placeholder method which will eventually output the needed text files for the reporting script. """
 
         pass

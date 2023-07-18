@@ -4,7 +4,10 @@
 # IMPORTS ------------------------------------------------
 
 import ttkbootstrap as tk 
+
 from .global_variables import *
+from .infotrack_db import *
+from .bed_db import *
 from .model import DataModel
 from .mainmenu import MainMenu
 from .view import RecordView
@@ -76,12 +79,11 @@ class Application(tk.Window):
             self.bind(sequence, callback)
 
         # Variable prep
-        self.variables = dict()
-        self.variables['filename'] = str()
-        self.variables['status_text'] = str()
-        self.variables['Disposition'] = dict()
+        self.filename = str()
+        self.status_text = str()
+        self.disposition = dict()
         for x in DISPOSITIONS:
-            self.variables['Disposition'][x] = int()
+            self.disposition[x] = int()
 
         self.validation = dict()
         self.validation['p-values'] = [
@@ -96,54 +98,6 @@ class Application(tk.Window):
 
         return None
 
-
-    # Tried to get fancy by binding the keyboard for faster navigation.  Treeview caused problems.
-
-    # def treeview_next_focus(self, *args):
-    #     disposition = self.view.variant['Disposition'].get()
-    #     print(disposition)
-    #     index = DISPOSITIONS.index(disposition)
-    #     print(index)
-    #     index += 1
-    #     print(index)
-    #     if index > len(DISPOSITIONS) - 1:
-    #         index = 0
-    #     print(index)
-    #     print(DISPOSITIONS[index])
-    #     self.focus()
-    #     self.view.radio_buttons[DISPOSITIONS[index]].focus()
-    #     self.view.variant['Disposition'].set(DISPOSITIONS[index])
-    #     focus = self.view.treeviews['variant_list'].focus()
-    #     total_records = len(self.view.treeviews['variant_list'].get_children())
-    #     focus = int(focus[1:], 16)
-    #     focus += 1
-    #     if focus > total_records:
-    #         focus = total_records
-    #     focus = "I" + str(hex(focus))[2:].upper().zfill(3)
-    #     self.view.treeviews['variant_list'].focus(focus)
-    #     pass
-    #     return
-
-    # def treeview_prev_focus(self, *args):
-    #     focus = self.view.treeviews['variant_list'].focus()
-    #     focus = int(focus[1:], 16)
-    #     focus -= 1
-    #     if focus < 1:
-    #         focus = 1
-    #     focus = "I" + str(hex(focus))[2:].upper().zfill(3)
-    #     self.view.treeviews['variant_list'].focus(focus)
-    # pass
-    # return
-
-
-    # def change_theme(self, theme, *args) -> None:
-    #     """Method to update the color theme of the widgets."""
-
-    #     self.style.theme_use(theme)
-
-    #     return None
-
-
     def clear_view(self, *args) -> None:
         """ Method to clear the view and loaded data. """
 
@@ -155,7 +109,6 @@ class Application(tk.Window):
 
         return None
 
-
     def load_file(self, *args, **kwargs) -> None:
         """ Method to transfer filenames between view and model, pull in data to model, and transfer data back to view. """
 
@@ -163,19 +116,18 @@ class Application(tk.Window):
         self.view.load_file()
 
         # transfer filename to model
-        self.model.variables['filename'] = self.view.variables['filename'].get()
+        self.model.filename = self.view.filename.get()
 
         # Loads data into model
         self.model.load_file()
 
         # transfers data from model to view
-        self.view.load_treeview(self.model.variables['variant_list'])
+        self.view.load_treeview(self.model.variant_list)
 
         # updates disposition counters
         self.transfer_disposition_counts()
 
         return None
-
 
     def save_file(self, *args, **kwargs) -> None:
         """ Calls the model save method. """
@@ -184,7 +136,6 @@ class Application(tk.Window):
 
         return None
 
-
     def update_disposition(self, *args, **kwargs) -> None:
         """ Returns the disposition from the view to the data model for saving. """
 
@@ -192,7 +143,7 @@ class Application(tk.Window):
         self.view.record_update()
 
         # now  ensures the model and the view are referencing the same variant
-        selection = self.view.variables['selection_index'].get()
+        selection = self.view.selection_index.get()
 
         # creating a dictionary of updated record field data
         update_dict = dict()
@@ -206,22 +157,20 @@ class Application(tk.Window):
         self.model.change_disposition(selection, disposition, update_dict)
 
         # Refresh the view
-        self.view.load_treeview(self.model.variables['variant_list'])
+        self.view.load_treeview(self.model.variant_list)
 
         # update the disposition counters
         self.transfer_disposition_counts()
 
         return None
 
-
     def transfer_disposition_counts(self, *args, **kwargs) -> None:
         """ Method to move data between model and view for disposition counts. """
 
         for x in DISPOSITIONS:
-            self.view.variables['Disposition'][x].set(self.model.count_dispositions(x))
+            self.view.disposition[x].set(self.model.count_dispositions(x))
 
         return None
-
 
 # MAIN LOOP ----------------------------------------------
 

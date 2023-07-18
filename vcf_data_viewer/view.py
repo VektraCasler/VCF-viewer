@@ -4,14 +4,95 @@
 # IMPORTS ------------------------------------------------
 
 import ttkbootstrap as tk
-# from ttkbootstrap import tableview as tbv
-from tkinter import Widget
 from tkinter import filedialog as fd
+
 from .global_variables import *
 from .tool_tip import ToolTip, CreateToolTip
+
 import webbrowser
 
 # VARIABLES ----------------------------------------------
+
+DATA_FIELDS = [
+    "Original Input: Chrom",
+    "Original Input: Pos",
+    "Original Input: Reference allele",
+    "Original Input: Alternate allele",
+    "Variant Annotation: Gene",
+    "Variant Annotation: cDNA change",
+    "Variant Annotation: Protein Change",
+    "Variant Annotation: RefSeq",
+    "VCF: AF",
+    "VCF: FAO",
+    "VCF: FDP",
+    "VCF: HRUN",
+    "VCF: Filter",
+    "VCF: Genotype",
+    "COSMIC: ID",
+    "COSMIC: Variant Count",
+    "COSMIC: Variant Count (Tissue)",
+    "ClinVar: ClinVar ID",
+    "ClinVar: Clinical Significance",
+    "gnomAD3: Global AF",
+    "PhyloP: Vert Score",
+    "CADD: Phred",
+    "PolyPhen-2: HDIV Prediction",
+    "SIFT: Prediction",
+    "VCF: FSAF",
+    "VCF: FSAR",
+    "VCF: FSRF",
+    "VCF: FSRR",
+    "VCF: Fisher Odds Ratio",
+    "VCF: Fisher P Value",
+    "VCF: Binom Proportion",
+    "VCF: Binom P Value",
+    "Mpileup Qual: Read Depth",
+    "Mpileup Qual: Start Reads",
+    "Mpileup Qual: Stop Reads",
+    "Mpileup Qual: Filtered Reference Forward Read Depth",
+    "Mpileup Qual: Filtered Reference Reverse Read Depth",
+    "Mpileup Qual: Unfiltered Reference Forward Read Depth",
+    "Mpileup Qual: Unfiltered Reference Reverse Read Depth",
+    "Mpileup Qual: Filtered Variant Forward Read Depth",
+    "Mpileup Qual: Filtered Variant Reverse Read Depth",
+    "Mpileup Qual: Filtered Variant Binomial Proportion",
+    "Mpileup Qual: Filtered Variant Binomial P Value",
+    "Mpileup Qual: Filtered Variant Fishers Odds Ratio",
+    "Mpileup Qual: Filtered Variant Fishers P Value",
+    "Mpileup Qual: Filtered VAF",
+    "Mpileup Qual: Unfiltered Variant Forward Read Depth",
+    "Mpileup Qual: Unfiltered Variant Reverse Read Depth",
+    "Mpileup Qual: Unfiltered Variant Binomial Proportion",
+    "Mpileup Qual: Unfiltered Variant Binomial P Value",
+    "Mpileup Qual: Unfiltered Variant Fishers Odds Ratio",
+    "Mpileup Qual: Unfiltered Variant Fishers P Value",
+    "Mpileup Qual: Unfiltered VAF",
+    "VCF: LEN",
+    "VCF: QD",
+    "VCF: STB",
+    "VCF: STBP",
+    "VCF: SVTYPE",
+    "VCF: TYPE",
+    "VCF: QUAL",
+    "Variant Annotation: Coding",
+    "Variant Annotation: Sequence Ontology",
+    "Variant Annotation: Transcript",
+    "Variant Annotation: All Mappings",
+    "UniProt (GENE): Accession Number",
+    "dbSNP: rsID",
+    "MDL: Sample Count",
+    "MDL: Variant Frequency",
+    "MDL: Sample List",
+    'amp_ID',
+    'Cytoband',
+    'MANE_transcript (GRCh38)',
+    'Genexus_transcript (GRCh37)',
+    'Genexus_Exon(s)',
+    'Genexus_codons',
+    'tier',
+    'test_tissue',
+    "Disposition",
+]
 
 # CLASSES ------------------------------------------------
 
@@ -26,22 +107,20 @@ class RecordView(tk.Frame):
         
         return callback
 
-
     def __init__(self, parent, **kwargs) -> None:
 
         super().__init__()
         
         # Variables ------------------------------------------------------------------------
 
-        # Holder dictionary for tk variables and widgets to be used by the view.  Variant dict Must match the model's fields. (VCF_FIELDS)
+        # Holder dictionary for tk variables and widgets to be used by the view.  Variant dict Must match the model's fields. (DATA_FIELDS)
 
-        self.variables = dict()
-        self.variables['filename'] = tk.StringVar()
-        self.variables['status_bar'] = tk.StringVar()
-        self.variables['Disposition'] = dict()
-        self.variables['selection_index'] = tk.IntVar()
+        self.filename = tk.StringVar()
+        # self.variables = dict()
+        self.disposition = dict()
+        self.selection_index = tk.IntVar()
         for x in DISPOSITIONS:
-            self.variables['Disposition'][x] = tk.IntVar()
+            self.disposition[x] = tk.IntVar()
 
         self.variant = dict()
         self.labels = dict()
@@ -51,8 +130,6 @@ class RecordView(tk.Frame):
         self.treeviews = dict()
         self.scrollbars = dict()
         self.textboxes = dict()
-
-        DATA_FIELDS = [*VCF_FIELDS, *BED_REF_COLUMNS, *INFOTRACK_REF_COLUMNS]
 
         for x in DATA_FIELDS:
             self.variant[x] = tk.StringVar()
@@ -80,20 +157,17 @@ class RecordView(tk.Frame):
         self.labels['file_info_label'].grid(row=0, column=0, columnspan=2, sticky='news', padx=5, pady=5)
 
         #File load button
-        self.entries['filename'] = tk.Entry(self.frames['left'], textvariable=self.variables['filename'], width=24)
+        self.entries['filename'] = tk.Entry(self.frames['left'], textvariable=self.filename, width=24)
         self.entries['filename'].grid(row=1, column=0, columnspan=2, sticky='news', padx=5, pady=5)
         self.buttons['load_file'] = tk.Button(self.frames['left'], text="Open a File", command=self._event('<<FileLoad>>'))
         self.buttons['load_file'].grid(row=2, column=0, columnspan=2, sticky='news', padx=5, pady=5)
 
         # Treeview list
-        view_columns = VCF_FIELDS
-        view_columns.append('Disposition')
-        self.treeviews['variant_list'] = tk.Treeview(self.frames['left'], columns=view_columns, displaycolumns=[4,69], selectmode='browse', show='headings')
-        # self.treeviews['variant_list'] = tk.tableview.Tableview(self.frames['treeview'], coldata=VCF_FIELDS, displaycolumns=[5,0], selectmode='browse', show='headings')
-        for x in [*VCF_FIELDS, *BED_REF_COLUMNS, *INFOTRACK_REF_COLUMNS]:
+        self.treeviews['variant_list'] = tk.Treeview(self.frames['left'], columns=DATA_FIELDS, displaycolumns=[4,77], selectmode='browse', show='headings')
+        for x in DATA_FIELDS:
             self.treeviews['variant_list'].heading(x, text=x, anchor='center')
         self.treeviews['variant_list'].column(column=4, width=120, anchor='center')
-        self.treeviews['variant_list'].column(column=69, width=140, anchor='center')
+        self.treeviews['variant_list'].column(column=77, width=140, anchor='center')
         self.treeviews['variant_list'].grid(row=3, column=0, columnspan=2, sticky='news', padx=5, pady=5)
         self.treeviews['variant_list'].bind('<<TreeviewSelect>>', self.record_selected)
         self.treeviews['variant_list'].tag_configure('None', background="#c4c4c4")
@@ -111,17 +185,17 @@ class RecordView(tk.Frame):
         # Disposition labels
         self.labels['disposition_label'] = tk.Label(self.frames['left'], text="Assign Disposition", bootstyle='secondary.inverse', anchor='c')
         self.labels['disposition_label'].grid(row=4, column=0, columnspan=2, sticky='news', padx=5, pady=5)
-        self.entries["None"] = tk.Entry(self.frames['left'], textvariable=self.variables['Disposition']['None'], width=5)
+        self.entries["None"] = tk.Entry(self.frames['left'], textvariable=self.disposition['None'], width=5)
         self.entries["None"].grid(row=5, column=0, sticky='news', padx=5, pady=5)
-        self.entries["Low VAF Variants"] = tk.Entry(self.frames['left'], textvariable=self.variables['Disposition']['Low VAF Variants'], width=5)
+        self.entries["Low VAF Variants"] = tk.Entry(self.frames['left'], textvariable=self.disposition['Low VAF Variants'], width=5)
         self.entries["Low VAF Variants"].grid(row=6, column=0, sticky='news', padx=5, pady=5)
-        self.entries["VUS"] = tk.Entry(self.frames['left'], textvariable=self.variables['Disposition']['VUS'], width=5)
+        self.entries["VUS"] = tk.Entry(self.frames['left'], textvariable=self.disposition['VUS'], width=5)
         self.entries["VUS"].grid(row=7, column=0, sticky='news', padx=5, pady=5)
-        self.entries["Oncogenic"] = tk.Entry(self.frames['left'], textvariable=self.variables['Disposition']['Oncogenic'], width=5)
+        self.entries["Oncogenic"] = tk.Entry(self.frames['left'], textvariable=self.disposition['Oncogenic'], width=5)
         self.entries["Oncogenic"].grid(row=8, column=0, sticky='news', padx=5, pady=5)
-        self.entries["FLT3 ITDs"] = tk.Entry(self.frames['left'], textvariable=self.variables['Disposition']['FLT3 ITDs'], width=5)
+        self.entries["FLT3 ITDs"] = tk.Entry(self.frames['left'], textvariable=self.disposition['FLT3 ITDs'], width=5)
         self.entries["FLT3 ITDs"].grid(row=9, column=0, sticky='news', padx=5, pady=5)
-        self.entries["Hotspot Exceptions"] = tk.Entry(self.frames['left'], textvariable=self.variables['Disposition']['Hotspot Exceptions'], width=5)
+        self.entries["Hotspot Exceptions"] = tk.Entry(self.frames['left'], textvariable=self.disposition['Hotspot Exceptions'], width=5)
         self.entries["Hotspot Exceptions"].grid(row=10, column=0, sticky='news', padx=5, pady=5)
 
         # Radio buttons for disposition
@@ -497,10 +571,14 @@ class RecordView(tk.Frame):
         self.labels['MDL: Variant Frequency'].grid(column=1, row=1, sticky='news', padx=5, pady=5)
         self.entries["MDL: Variant Frequency"]  = tk.Entry(self.frames['mdl'], textvariable=self.variant["MDL: Variant Frequency"])
         self.entries["MDL: Variant Frequency"].grid(column=1, row=2, sticky='news', padx=5, pady=5)
-        self.labels['MDL: Sample List'] = tk.Label(self.frames['mdl'], text="Sample List", anchor='c')
-        self.labels['MDL: Sample List'].grid(column=0, columnspan=2, row=3, sticky='news', padx=5, pady=5)
+        self.labels['MDL: Sample List'] = tk.Label(self.frames['mdl'], text="Sample Numbers", anchor='c')
+        self.labels['MDL: Sample List'].grid(column=0, row=3, sticky='news', padx=5, pady=5)
         self.textboxes["MDL: Sample List"] = tk.ScrolledText(self.frames['mdl'], height=1)
-        self.textboxes["MDL: Sample List"].grid(column=0, columnspan=2, row=4, sticky='news', padx=5, pady=5)
+        self.textboxes["MDL: Sample List"].grid(column=0, row=4, sticky='news', padx=5, pady=5)
+        self.labels['test_tissue'] = tk.Label(self.frames['mdl'], text="Sample Tissues", anchor='c')
+        self.labels['test_tissue'].grid(column=1, row=3, sticky='news', padx=5, pady=5)
+        self.textboxes["test_tissue"] = tk.ScrolledText(self.frames['mdl'], height=1)
+        self.textboxes["test_tissue"].grid(column=1, row=4, sticky='news', padx=5, pady=5)
 
         # Web Resources Stats
         self.frames['bottom'] = tk.Frame(self.frames['right'], bootstyle='secondary')
@@ -602,7 +680,6 @@ class RecordView(tk.Frame):
 
         return None 
 
-
     def create_tooltips(self) -> None:
         """ Create tooltips for labels. """
 
@@ -615,7 +692,6 @@ class RecordView(tk.Frame):
 
         return None
     
-
     def adjust_colors(self) -> None:
         """ Method to update the colors of the widgets. """
 
@@ -643,7 +719,6 @@ class RecordView(tk.Frame):
 
         return None
 
-
     def create_weblinks(self) -> None:
         """ Method to create links to websites."""
 
@@ -660,19 +735,17 @@ class RecordView(tk.Frame):
         self.labels["UniProt (GENE): Accession Number"].bind("<Button-1>", lambda _:webbrowser.open(f"https://www.uniprot.org/uniprotkb/{self.entries['UniProt (GENE): Accession Number'].get()}/entry"))
 
         # IGV linked from "Gene" Label, opens on local machine
-        self.labels["Variant Annotation: Gene"].bind("<Button-1>", lambda _:webbrowser.open(f"http://localhost:{SETTINGS['FILE']['IGV_port']}/goto?locus={self.entries['Variant Annotation: Gene'].get()}"))
+        self.labels["Variant Annotation: Gene"].bind("<Button-1>", lambda _:webbrowser.open(f"http://localhost:{60151}/goto?locus={self.entries['Variant Annotation: Gene'].get()}"))
 
         return None
-
 
     def load_file(self) -> None:
         """ Simple method to open a filename dialog and store the value. """
 
-        self.variables['filename'].set(str(fd.askopenfilename(filetypes=[('XLSX','*.xlsx')])))
+        self.filename.set(str(fd.askopenfilename(filetypes=[('XLSX','*.xlsx')])))
 
         return None
     
-
     def load_treeview(self, variant_list) -> None:
         """ Loads the information from the model into the treeview widget. """
 
@@ -683,7 +756,7 @@ class RecordView(tk.Frame):
         # Stepping through all variants and creating treeview entries
         for variant in variant_list:
             values_list = list()
-            for key in VCF_FIELDS:
+            for key in DATA_FIELDS:
 
                 # trying to sort the data elements into ints first, then floats if they're not ints, and lastly strings if neither.
                 test_me = variant[key]
@@ -703,25 +776,22 @@ class RecordView(tk.Frame):
 
         return None
     
-
-    def clear_view(self, *args, **kwargs) -> None:
+    def clear_view(self) -> None:
         """ Method to clear all data from the widgets. """
         
         for item in self.treeviews['variant_list'].get_children():
             self.treeviews['variant_list'].delete(item)
         
-        for x in VCF_FIELDS:
+        for x in DATA_FIELDS:
             self.variant[x].set("")
             self.entries[x].configure(bootstyle='normal.TLabel')
         
         self.variant['Disposition'].set(0)
-        self.variables['filename'].set("")
-        self.variables['status_bar'].set("Records view cleared.")
+        self.filename.set("")
 
         return None
  
-
-    def record_selected(self, *args, **kwargs) -> None:
+    def record_selected(self, *args) -> None:
         """ Method for selecting a record from the variant list treeview to display. """
 
         # technically able to select multiple lines from the treeview...  We only want one
@@ -729,10 +799,10 @@ class RecordView(tk.Frame):
         for selected_item in self.treeviews['variant_list'].selection():
             item = self.treeviews['variant_list'].item(selected_item)
             record = item['values']
-            for x in range(len(VCF_FIELDS)):
-                self.variant[VCF_FIELDS[x]].set(record[x])
+            for x in range(len(DATA_FIELDS)):
+                self.variant[DATA_FIELDS[x]].set(record[x])
 
-        self.variables['selection_index'].set(self.treeviews['variant_list'].index(self.treeviews['variant_list'].focus()))
+        self.selection_index.set(self.treeviews['variant_list'].index(self.treeviews['variant_list'].focus()))
         self.variant['Disposition'].set(record[-1])  # Disposition needs to always be last in the list
 
         # deactivating the save dispo button if theres no data
@@ -746,32 +816,32 @@ class RecordView(tk.Frame):
         self.textboxes['COSMIC: Variant Count (Tissue)'].delete("1.0", tk.END)
         self.textboxes['COSMIC: Variant Count (Tissue)'].insert(tk.END, self.variant["COSMIC: Variant Count (Tissue)"].get())
         self.textboxes['MDL: Sample List'].delete("1.0", tk.END)
-        self.textboxes['MDL: Sample List'].insert(tk.END, self.variant["COSMIC: Variant Count (Tissue)"].get())
+        self.textboxes['MDL: Sample List'].insert(tk.END, self.variant["MDL: Sample List"].get())
         self.textboxes['Variant Annotation: All Mappings'].delete("1.0", tk.END)
-        self.textboxes['Variant Annotation: All Mappings'].insert(tk.END, self.variant["COSMIC: Variant Count (Tissue)"].get())
+        self.textboxes['Variant Annotation: All Mappings'].insert(tk.END, self.variant["Variant Annotation: All Mappings"].get())
+        self.textboxes["test_tissue"].delete("1.0", tk.END)
+        self.textboxes["test_tissue"].insert(tk.END, self.variant["test_tissue"].get())
 
         return None
 
-
-    def record_update(self, *args, **kwargs) -> None:
+    def record_update(self) -> None:
         """ Method to return user-entered data into the record, in case things need to be updated. """
 
         # create an updated record from field widget information (which may have been updated) with disposition
-        self.variables['updated_record'] = dict()
-        for vcf_field in VCF_FIELDS:
-            self.variables['updated_record'][vcf_field] = self.variant[vcf_field].get()
+        self.updated_record = dict()
+        for vcf_field in DATA_FIELDS:
+            self.updated_record[vcf_field] = self.variant[vcf_field].get()
 
         # now to put the data back into the treeview at the right location
         selected = self.treeviews['variant_list'].focus()
-        self.treeviews['variant_list'].item(selected, text="", values=self.variables['updated_record'])
+        self.treeviews['variant_list'].item(selected, text="", values=self.updated_record)
 
         return None
-
 
     def validate_cells(self) -> None:
         """ Data validation (lite) method.  Works by simply coloring widget fields appropriate to their validation values. """
 
-        for x in VCF_FIELDS:
+        for x in DATA_FIELDS:
 
             # Reset all styles to "normal"
             self.entries[x].configure(bootstyle='primary')
@@ -828,7 +898,6 @@ class RecordView(tk.Frame):
                 self.entries[x].configure(bootstyle = 'info')
 
         return None
-
 
 # MAIN LOOP ----------------------------------------------
 

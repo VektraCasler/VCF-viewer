@@ -48,7 +48,7 @@ class InfotrackLookupTable():
         self.columns = self.DF.columns
 
         return None
-    
+
     def recommend_tier(self, gene: str, c_dot: str, tissue:str = 'blood') -> str:
         """ Method to recommend a tier for the variant based on the gene, c-dot number, and tissue type (default is 'blood'). """
 

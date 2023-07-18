@@ -24,7 +24,7 @@ BED_REF_COLUMNS = [
     'Genexus_transcript (GRCh37)',
     'Genexus_Exon(s)',
     'Genexus_codons',
-] # listed here just for convenience while coding
+]
 
 # CLASSES ------------------------------------------------
 
@@ -47,11 +47,10 @@ class BedLookupTable():
 
         # iterate through the rows to compare the bp between start and stop
         for ind in temp_DF.index:
-            if int(temp_DF['bp_start'][ind]) <= bp <= int(temp_DF['bp_end'][ind]):
+            if int(temp_DF['bp_start'][ind]) <= int(bp) <= int(temp_DF['bp_end'][ind]):
                 return str(temp_DF[column][ind])
         
         return ""
-
 
 # MAIN LOOP ----------------------------------------------
 
