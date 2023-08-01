@@ -1,5 +1,5 @@
 test_data/final_report/*
 __pycache__/*
-vcf_data_viewer/__pycache__/*
+variant_data_viewer/__pycache__/*
 output/*
 __pycache__/*
