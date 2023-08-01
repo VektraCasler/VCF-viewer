@@ -1,4 +1,4 @@
-# vcf_data_viewer/global_variables.py
+# variant_data_viewer/global_variables.py
 ''' Holds the large lists of global variable lists and dictionaries. '''
 
 # IMPORTS ------------------------------------------------

@@ -1,4 +1,4 @@
-# reference/infotrack_db.py
+# variant_data_viewer/infotrack_db.py
 ''' This dataclass holds a lookup table for the infotrack information to help annotate the variants. '''
 
 # IMPORTS ------------------------------------------------

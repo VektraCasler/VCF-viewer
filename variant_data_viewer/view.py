@@ -1,5 +1,5 @@
-# vcf_data_viewer/view.py
-''' The view of the VCF Data Viewer application, comprised of the tkinter portion. '''
+# variant_data_viewer/view.py
+''' The view of the variant Data Viewer application, comprised of the tkinter portion. '''
 
 # IMPORTS ------------------------------------------------
 
@@ -153,7 +153,7 @@ class RecordView(tk.Frame):
         self.frames['left'] = tk.Frame(self.frames['base'], bootstyle='secondary')
         self.frames['left'].pack(side='left', expand=False, fill='y', padx=5, pady=5)
         self.frames['left'].rowconfigure(3, weight=99)
-        self.labels['file_info_label'] = tk.Label(self.frames['left'], text="VCF File Information", bootstyle='info.inverse', anchor='c')
+        self.labels['file_info_label'] = tk.Label(self.frames['left'], text="Variant File Information", bootstyle='info.inverse', anchor='c')
         self.labels['file_info_label'].grid(row=0, column=0, columnspan=2, sticky='news', padx=5, pady=5)
 
         #File load button

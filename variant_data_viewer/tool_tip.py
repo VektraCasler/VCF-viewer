@@ -1,4 +1,4 @@
-# vcf_data_viewer/tooltip.py
+# variant_data_viewer/tooltip.py
 ''' Adds tooltips to the application for ease of use. '''
 
 # IMPORTS ------------------------------------------------

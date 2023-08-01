@@ -1,5 +1,5 @@
-# vcf_data_viewer/mainmenu.py
-''' The menu bar of the VCF Data Viewer application. '''
+# variant_data_viewer/mainmenu.py
+''' The menu bar of the variant Data Viewer application. '''
 
 # IMPORTS ------------------------------------------------
 
@@ -120,7 +120,7 @@ class MainMenu(tk.Menu):
     def show_about(self):
         '''Show the about dialog'''
         
-        about_message = 'VCF Data Viewer'
+        about_message = 'Variant Data Viewer'
         about_detail = (
             'Written by Vektra Casler MD \n'
             '\n'

@@ -1,5 +1,5 @@
-# vcf_data_viewer/model.py
-''' This holds the data model for the vcf-data-viewer application. '''
+# variant_data_viewer/model.py
+''' This holds the data model for the variant-data-viewer application. '''
 
 # IMPORTS ------------------------------------------------
 

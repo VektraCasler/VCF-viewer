@@ -1,5 +1,5 @@
-# vcf_data_viewer/application.py
-''' An application to view a VCF data output file in a dashboard. '''
+# variant_data_viewer/application.py
+''' An application to view a variant data output file in a dashboard. '''
 
 # IMPORTS ------------------------------------------------
 
@@ -104,7 +104,7 @@ class Application(tk.Window):
         super().__init__()
 
         # Root Window
-        self.title('VCF Data Viewer')
+        self.title('Variant Data Viewer')
         self.resizable(True, True)
         self.style.theme_use('flatly')
         self.grid_rowconfigure(0, weight=1)
