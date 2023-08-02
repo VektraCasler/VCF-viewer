@@ -1,5 +1,6 @@
 # reference/bed_db.py
-''' Creates a lookup data class to help further annotate variants with some static information. '''
+''' Creates a lookup data class to help further annotate variants with some \
+    static information. '''
 
 # IMPORTS ------------------------------------------------
 
@@ -29,7 +30,8 @@ BED_REF_COLUMNS = [
 # CLASSES ------------------------------------------------
 
 class BedLookupTable():
-    """ Brings in the lookup table for finding the additional pieces of data for the variant from the bed file. """
+    """ Brings in the lookup table for finding the additional pieces of data \
+        for the variant from the bed file. """
 
     def __init__(self) -> None:
 
@@ -47,7 +49,8 @@ class BedLookupTable():
 
         # iterate through the rows to compare the bp between start and stop
         for ind in temp_DF.index:
-            if int(temp_DF['bp_start'][ind]) <= int(bp) <= int(temp_DF['bp_end'][ind]):
+            if int(temp_DF['bp_start'][ind]) <= int(bp) <= \
+                int(temp_DF['bp_end'][ind]):
                 return str(temp_DF[column][ind])
         
         return ""

@@ -128,10 +128,12 @@ class DataModel():
     def load_file(self) -> None:
         """ Recieves the filename from the view, attempts to load. """
 
-        workbook = openpyxl.load_workbook(self.filename, data_only=True, read_only=True)
+        workbook = openpyxl.load_workbook(self.filename, data_only=True, \
+                                          read_only=True)
         self.variant_list = list()
 
-        # Read in the columns names and make a list, then check the length to see if it's been opened before.
+        # Read in the columns names and make a list, then check the length \
+        # to see if it's been opened before.
         self.column_list = [cell.value for cell in workbook.worksheets[0][1]]
         if len(self.column_list) < 70:
             self.new_file = True
@@ -165,15 +167,18 @@ class DataModel():
                 # self.column_list = [*self.column_list, *ADDON_LIST]
 
                 if self.new_file:
-                    # ANNOTATING FROM THE BED FILE -----------------------------------------------
+                    # ANNOTATING FROM THE BED FILE ---------------------------
                     for item in ADDON_LIST[:-2]:
                         row_dict[item] = self.bdb.get_data(gene, bp, item)
-                    # ANNOTATING FROM THE INFOTRACK DB FILE --------------------------------------
-                    row_dict['tier'] = self.idb.recommend_tier(gene, c_dot, 'Blood') # Genexys is just blood samples currently
-                    row_dict['test_tissue'] = self.idb.get_tissue_list(gene, c_dot)
+                    # ANNOTATING FROM THE INFOTRACK DB FILE ------------------
+                    row_dict['tier'] = self.idb.recommend_tier(gene, c_dot, \
+                        'Blood') # Genexys is just blood samples currently
+                    row_dict['test_tissue'] = self.idb.get_tissue_list(gene, \
+                        c_dot)
 
                 else:
-                    extended_range = (len(self.column_list), len(self.column_list)+len(ADDON_LIST))
+                    extended_range = (len(self.column_list), \
+                                      len(self.column_list)+len(ADDON_LIST))
                     for x in range(extended_range[0], extended_range[1]):
                         try:
                             row_dict[self.column_list[x]] = row[x].value
@@ -192,13 +197,17 @@ class DataModel():
         return None
 
     def save_file(self) -> None:
-        """ Writes the sorted data out to disk with marker on the filename to denote file has been processed. """
+        """ Writes the sorted data out to disk with marker on the filename to \
+            denote file has been processed. """
 
-        # appending a "(sorted)" note to the filename, but checking if that note is already there
+        # appending a "(sorted)" note to the filename, but checking if that \
+        # note is already there
         if VCF_FILE_SETTINGS['filename_addon'] in self.filename:
             filename = self.filename
         else:
-            filename = self.filename[:-(len(VCF_FILE_SETTINGS['excel_extension']))] + VCF_FILE_SETTINGS['filename_addon'] + VCF_FILE_SETTINGS['excel_extension']
+            filename = self.filename[:-(len(VCF_FILE_SETTINGS\
+                ['excel_extension']))] + VCF_FILE_SETTINGS['filename_addon'] \
+                + VCF_FILE_SETTINGS['excel_extension']
 
         # Openpyxl package work
         wb = openpyxl.Workbook()
@@ -213,12 +222,14 @@ class DataModel():
                     row = [entry[x] for x in self.column_list]
                     ws.append(row)
 
-        wb.remove_sheet(wb.get_sheet_by_name('Sheet')) # removing the default "Sheet" from openpyxl
+        wb.remove_sheet(wb.get_sheet_by_name('Sheet')) # removing the default \
+            # "Sheet" from openpyxl
         wb.save(filename)
 
         return None
     
-    def change_disposition(self, selection: str, disposition: str, update_dict: dict) -> None:
+    def change_disposition(self, selection: str, disposition: str, \
+                           update_dict: dict) -> None:
         """ Updates the disposition of the selected record. """
 
         # Updating all the fields in the model instance of the record
@@ -229,7 +240,8 @@ class DataModel():
         return None
 
     def count_dispositions(self, disposition) -> int:
-        """ Method to count the number of records in the variant list with the passed disposition. """
+        """ Method to count the number of records in the variant list with \
+            the passed disposition. """
 
         counter = 0
 
@@ -240,24 +252,32 @@ class DataModel():
         return counter
 
     def output_text_files(self, *args) -> None:
-        """ Placeholder method which will eventually output the needed text files for the reporting script. """
+        """ Placeholder method which will eventually output the needed text \
+            files for the reporting script. """
 
         # pull out the MD number from the filename
         MD_number = (os.path.split(self.filename)[1]).split('.')[0]
         file_location = os.path.split(self.filename)[0]
 
-        # creating filenames, note that the "XXX" replaces the build version number
-        filenames = [os.path.join(file_location, (MD_number + x)) for x in ['_low_coverage.tsv', '_mutations.tsv', '_vus.tsv']]
+        # creating filenames, note that the "XXX" replaces the build version \
+        # number
+        filenames = [os.path.join(file_location, (MD_number + x)) for x in \
+                     ['_low_coverage.tsv', '_mutations.tsv', '_vus.tsv']]
 
         # open all three files at once with a context manager
-        with open(filenames[0], 'w', encoding='ascii') as file_low, open(filenames[1], 'w', encoding='ascii') as file_mut, open(filenames[2], 'w', encoding='ascii') as file_vus:
+        with open(filenames[0], 'w', encoding='ascii') as file_low, \
+            open(filenames[1], 'w', encoding='ascii') as file_mut, \
+                open(filenames[2], 'w', encoding='ascii') as file_vus:
 
             # write the headers for the tsvs
             file_low.write('Gene	Amplicon	Exon	Codon	Depth\n')
-            file_mut.write('Gene	DNA	Protein	VAF^1	COSMIC^2	Tier^3	Cytoband\n')
-            file_vus.write('Gene	DNA	Protein	VAF^1	COSMIC^2	Tier^3	Cytoband\n')
+            file_mut.write('Gene	DNA	Protein	VAF^1	COSMIC^2	Tier^3	\
+                           Cytoband\n')
+            file_vus.write('Gene	DNA	Protein	VAF^1	COSMIC^2	Tier^3	\
+                           Cytoband\n')
 
-            # now step through the variant list and write each line out to the text files as necessary
+            # now step through the variant list and write each line out to \
+            # the text files as necessary
             for variant in self.variant_list:
                 
                 if variant['Disposition'] == 'Low VAF Variants':

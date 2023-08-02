@@ -3,8 +3,9 @@
 
 # IMPORTS ------------------------------------------------
 
-import ttkbootstrap as tk 
 import sys
+import ttkbootstrap as tk 
+
 from .global_variables import *
 from .infotrack_db import *
 from .bed_db import *
@@ -190,7 +191,8 @@ class Application(tk.Window):
         return None
 
     def load_file(self, *args, **kwargs) -> None:
-        """ Method to transfer filenames between view and model, pull in data to model, and transfer data back to view. """
+        """ Method to transfer filenames between view and model, pull in data \
+            to model, and transfer data back to view. """
 
         # gets a file name from a dialog
         self.view.load_file()
@@ -217,18 +219,21 @@ class Application(tk.Window):
         return None
 
     def update_disposition(self, *args, **kwargs) -> None:
-        """ Returns the disposition from the view to the data model for saving. """
+        """ Returns the disposition from the view to the data model for \
+            saving. """
 
-        # First, we'll tell the view to save any changes from the field widgets into the treeview data
+        # First, we'll tell the view to save any changes from the field \
+        # widgets into the treeview data
         updated_record = self.view.record_update()
 
-        # now  ensures the model and the view are referencing the same variant
+        # now  ensures the model and the view are referencing the same variant.
         selection = self.view.selection_index.get()
 
         # saving the disposition also
         disposition = self.view.variant['Disposition'].get()
 
-        # Carry the change through the model's method, which also update dispo counts
+        # Carry the change through the model's method, which also update \
+        # dispo counts.
         self.model.change_disposition(selection, disposition, updated_record)
 
         # Refresh the view
@@ -240,7 +245,8 @@ class Application(tk.Window):
         return None
 
     def transfer_disposition_counts(self, *args, **kwargs) -> None:
-        """ Method to move data between model and view for disposition counts. """
+        """ Method to move data between model and view for disposition \
+            counts. """
 
         for x in DISPOSITIONS:
             self.view.disposition[x].set(self.model.count_dispositions(x))

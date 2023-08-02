@@ -1,5 +1,6 @@
 # variant_data_viewer/infotrack_db.py
-''' This dataclass holds a lookup table for the infotrack information to help annotate the variants. '''
+''' This dataclass holds a lookup table for the infotrack information to help \
+    annotate the variants. '''
 
 # IMPORTS ------------------------------------------------
 
@@ -38,7 +39,8 @@ INFOTRACK_REF_COLUMNS = [
 # CLASSES ------------------------------------------------
 
 class InfotrackLookupTable():
-    """ Brings in the lookup table for finding the most likely Tier of the variant. """
+    """ Brings in the lookup table for finding the most likely Tier of the \
+        variant. """
 
     def __init__(self) -> None:
 
@@ -49,8 +51,10 @@ class InfotrackLookupTable():
 
         return None
 
-    def recommend_tier(self, gene: str, c_dot: str, tissue:str = 'blood') -> str:
-        """ Method to recommend a tier for the variant based on the gene, c-dot number, and tissue type (default is 'blood'). """
+    def recommend_tier(self, gene: str, c_dot: str, tissue:str = 'blood') \
+        -> str:
+        """ Method to recommend a tier for the variant based on the gene, 
+        c-dot number, and tissue type (default is 'blood'). """
 
         # make a temporary filtered DF
         temp_DF = self.DF.loc[(self.DF['genes'] == gene)]
@@ -68,7 +72,8 @@ class InfotrackLookupTable():
             count = temp_DF.loc[self.DF['tier'] == tier].shape[0]
             tier_counts.append(count)
 
-        # make a dictionary with the counts as keys (enables max function on keys)
+        # make a dictionary with the counts as keys 
+        # (enables max function on keys)
         tier_dict = dict(zip(tier_counts, tier_types))
         
         return tier_dict[max(tier_dict.keys())]
@@ -89,7 +94,8 @@ class InfotrackLookupTable():
         for tissue in set(temp_DF['test_tissue'].to_list()):
             if tissue not in tissue_dict.keys():
                 tissue_dict[tissue] = 0
-            tissue_dict[tissue] = temp_DF[temp_DF['test_tissue'] == tissue].shape[0]
+            tissue_dict[tissue] = temp_DF[temp_DF['test_tissue'] \
+                                          == tissue].shape[0]
         
         # return "Done"
         return str(tissue_dict)

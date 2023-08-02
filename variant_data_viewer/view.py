@@ -113,7 +113,8 @@ class RecordView(tk.Frame):
         
         # Variables ------------------------------------------------------------------------
 
-        # Holder dictionary for tk variables and widgets to be used by the view.  Variant dict Must match the model's fields. (DATA_FIELDS)
+        # Holder dictionary for tk variables and widgets to be used by the \
+        # view.  Variant dict Must match the model's fields. (DATA_FIELDS)
 
         self.filename = tk.StringVar()
         # self.variables = dict()
@@ -150,40 +151,65 @@ class RecordView(tk.Frame):
         self.frames['base'].pack(expand=True, fill='both',ipadx=10, ipady=10)
 
         # Left Frame
-        self.frames['left'] = tk.Frame(self.frames['base'], bootstyle='secondary')
-        self.frames['left'].pack(side='left', expand=False, fill='y', padx=5, pady=5)
+        self.frames['left'] = tk.Frame(self.frames['base'], \
+                                       bootstyle='secondary')
+        self.frames['left'].pack(side='left', expand=False, fill='y', padx=5, \
+                                 pady=5)
         self.frames['left'].rowconfigure(3, weight=99)
-        self.labels['file_info_label'] = tk.Label(self.frames['left'], text="Variant File Information", bootstyle='info.inverse', anchor='c')
-        self.labels['file_info_label'].grid(row=0, column=0, columnspan=2, sticky='news', padx=5, pady=5)
+        self.labels['file_info_label'] = tk.Label(self.frames['left'], \
+            text="Variant File Information", bootstyle='info.inverse', \
+            anchor='c')
+        self.labels['file_info_label'].grid(row=0, column=0, columnspan=2, \
+                                            sticky='news', padx=5, pady=5)
 
         #File load button
-        self.entries['filename'] = tk.Entry(self.frames['left'], textvariable=self.filename, width=24)
-        self.entries['filename'].grid(row=1, column=0, columnspan=2, sticky='news', padx=5, pady=5)
-        self.buttons['load_file'] = tk.Button(self.frames['left'], text="Open a File", command=self._event('<<FileLoad>>'))
-        self.buttons['load_file'].grid(row=2, column=0, columnspan=2, sticky='news', padx=5, pady=5)
+        self.entries['filename'] = tk.Entry(self.frames['left'], \
+            textvariable=self.filename, width=24)
+        self.entries['filename'].grid(row=1, column=0, columnspan=2, \
+            sticky='news', padx=5, pady=5)
+        self.buttons['load_file'] = tk.Button(self.frames['left'], \
+            text="Open a File", command=self._event('<<FileLoad>>'))
+        self.buttons['load_file'].grid(row=2, column=0, columnspan=2, \
+                                       sticky='news', padx=5, pady=5)
 
         # Treeview list
-        self.treeviews['variant_list'] = tk.Treeview(self.frames['left'], columns=DATA_FIELDS, displaycolumns=[4,77], selectmode='browse', show='headings')
+        self.treeviews['variant_list'] = tk.Treeview(self.frames['left'], \
+            columns=DATA_FIELDS, displaycolumns=[4,77], selectmode='browse', \
+                show='headings')
         for x in DATA_FIELDS:
             self.treeviews['variant_list'].heading(x, text=x, anchor='center')
-        self.treeviews['variant_list'].column(column=4, width=120, anchor='center')
-        self.treeviews['variant_list'].column(column=77, width=140, anchor='center')
-        self.treeviews['variant_list'].grid(row=3, column=0, columnspan=2, sticky='news', padx=5, pady=5)
-        self.treeviews['variant_list'].bind('<<TreeviewSelect>>', self.record_selected)
-        self.treeviews['variant_list'].tag_configure('None', background="#c4c4c4")
-        self.treeviews['variant_list'].tag_configure('Hotspot_Exceptions', background="#f92134")
-        self.treeviews['variant_list'].tag_configure('VUS', background="#f0aa44")
-        self.treeviews['variant_list'].tag_configure('Low_VAF_Variants', background="#70aaff")
-        self.treeviews['variant_list'].tag_configure('Oncogenic', background="#fc6622")
-        self.treeviews['variant_list'].tag_configure('FLT3_ITDs', background="#f794fa")
+        self.treeviews['variant_list'].column(column=4, width=120, \
+                                              anchor='center')
+        self.treeviews['variant_list'].column(column=77, width=140, \
+                                              anchor='center')
+        self.treeviews['variant_list'].grid(row=3, column=0, columnspan=2, \
+                                            sticky='news', padx=5, pady=5)
+        self.treeviews['variant_list'].bind('<<TreeviewSelect>>', \
+                                            self.record_selected)
+        self.treeviews['variant_list'].tag_configure('None', \
+                                                     background="#c4c4c4")
+        self.treeviews['variant_list'].tag_configure('Hotspot_Exceptions', \
+                                                     background="#f92134")
+        self.treeviews['variant_list'].tag_configure('VUS', \
+                                                     background="#f0aa44")
+        self.treeviews['variant_list'].tag_configure('Low_VAF_Variants', \
+                                                     background="#70aaff")
+        self.treeviews['variant_list'].tag_configure('Oncogenic', \
+                                                     background="#fc6622")
+        self.treeviews['variant_list'].tag_configure('FLT3_ITDs', \
+                                                     background="#f794fa")
 
         # Treeview Scrollbar
-        self.scrollbars['variant_list'] = tk.Scrollbar(self.frames['left'], orient=tk.VERTICAL, command=self.treeviews['variant_list'].yview)
-        self.treeviews['variant_list'].configure(yscroll=self.scrollbars['variant_list'].set)
+        self.scrollbars['variant_list'] = tk.Scrollbar(self.frames['left'], \
+                                                       orient=tk.VERTICAL, command=self.treeviews['variant_list'].yview)
+        self.treeviews['variant_list'].configure(yscroll=\
+            self.scrollbars['variant_list'].set)
         self.scrollbars['variant_list'].grid(row=3, column=1, sticky='nes')
 
         # Disposition labels
-        self.labels['disposition_label'] = tk.Label(self.frames['left'], text="Assign Disposition", bootstyle='secondary.inverse', anchor='c')
+        self.labels['disposition_label'] = tk.Label(self.frames['left'], \
+            text="Assign Disposition", bootstyle='secondary.inverse', \
+            anchor='c')
         self.labels['disposition_label'].grid(row=4, column=0, columnspan=2, sticky='news', padx=5, pady=5)
         self.entries["None"] = tk.Entry(self.frames['left'], textvariable=self.disposition['None'], width=5)
         self.entries["None"].grid(row=5, column=0, sticky='news', padx=5, pady=5)

@@ -4,7 +4,8 @@
 __title__ = "Variant Data Viewer"
 __author__ = "Vektra Casler MD"
 __version__ = "1.0.0"
-__license__ = "Built for use only at University of Rochester Medical Center in Rochester, NY."
+__license__ = "Built for use only at University of \
+    Rochester Medical Center in Rochester, NY."
 
 # IMPORTS ------------------------------------------------
 
