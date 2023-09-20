@@ -1,10 +1,10 @@
 # variant_data_viewer/application.py
-''' An application to view a variant data output file in a dashboard. '''
+""" An application to view a variant data output file in a dashboard. """
 
 # IMPORTS ------------------------------------------------
 
 import sys
-import ttkbootstrap as tk 
+import ttkbootstrap as tk
 
 from .global_variables import *
 from .infotrack_db import *
@@ -85,32 +85,31 @@ DATA_FIELDS = [
     "MDL: Sample Count",
     "MDL: Variant Frequency",
     "MDL: Sample List",
-    'amp_ID',
-    'Cytoband',
-    'MANE_transcript (GRCh38)',
-    'Genexus_transcript (GRCh37)',
-    'Genexus_Exon(s)',
-    'Genexus_codons',
-    'tier',
-    'test_tissue',
+    "amp_ID",
+    "Cytoband",
+    "MANE_transcript (GRCh38)",
+    "Genexus_transcript (GRCh37)",
+    "Genexus_Exon(s)",
+    "Genexus_codons",
+    "tier",
+    "test_tissue",
     "Disposition",
 ]
 
 # CLASSES ------------------------------------------------
 
+
 class Application(tk.Window):
-
     def __init__(self) -> None:
-
         super().__init__()
 
         # Root Window
-        self.title('Variant Data Viewer')
+        self.title("Variant Data Viewer")
         self.resizable(True, True)
-        self.style.theme_use('flatly')
+        self.style.theme_use("flatly")
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        self.geometry('800x600')
+        self.geometry("800x600")
 
         # Data Model
         self.model = DataModel()
@@ -123,36 +122,31 @@ class Application(tk.Window):
         self.view = RecordView(self)
 
         # Event binding, dictionary of event keywords and callbacks
-        event_callbacks={
-            '<<FileLoad>>': self.load_file,
-            '<<FileClear>>': self.clear_view,
-            '<<FileSave>>': self.save_file,
-            '<<FileQuit>>': lambda _: sys.exit(),
-
-            '<<DispoSave>>': self.update_disposition,
-
+        event_callbacks = {
+            "<<FileLoad>>": self.load_file,
+            "<<FileClear>>": self.clear_view,
+            "<<FileSave>>": self.save_file,
+            "<<FileQuit>>": lambda _: sys.exit(),
+            "<<DispoSave>>": self.update_disposition,
             # '<space>': self.update_disposition,
             # '<Right>': self.treeview_next_focus,
             # '<Left>': self.treeview_prev_focus,
             # '<Up>': lambda _: self.view.treeviews['variant_list'].focus(),
             # '<Down>': lambda _: self.view.treeviews['variant_list'].focus(),
-
-            '<<ExportTextFiles>>': self.model.output_text_files,
-
-            '<<ThemeCosmo>>': lambda _: self.style.theme_use('cosmo'),
-            '<<ThemeFlatly>>': lambda _: self.style.theme_use('flatly'),
-            '<<ThemeJournal>>': lambda _: self.style.theme_use('journal'),
-            '<<ThemeLitera>>': lambda _: self.style.theme_use('litera'),
-            '<<ThemeLumen>>': lambda _: self.style.theme_use('lumen'),
-            '<<ThemePulse>>': lambda _: self.style.theme_use('pulse'),
-            '<<ThemeSandstone>>': lambda _: self.style.theme_use('sandstone'),
-            '<<ThemeUnited>>': lambda _: self.style.theme_use('united'),
-            '<<ThemeYeti>>': lambda _: self.style.theme_use('yeti'),
-            '<<ThemeSuperhero>>': lambda _: self.style.theme_use('superhero'),
-            '<<ThemeDarkly>>': lambda _: self.style.theme_use('darkly'),
-            '<<ThemeCyborg>>': lambda _: self.style.theme_use('cyborg'),
-
-            '<<TreeviewSelect>>': None,
+            "<<ExportTextFiles>>": self.model.output_text_files,
+            "<<ThemeCosmo>>": lambda _: self.style.theme_use("cosmo"),
+            "<<ThemeFlatly>>": lambda _: self.style.theme_use("flatly"),
+            "<<ThemeJournal>>": lambda _: self.style.theme_use("journal"),
+            "<<ThemeLitera>>": lambda _: self.style.theme_use("litera"),
+            "<<ThemeLumen>>": lambda _: self.style.theme_use("lumen"),
+            "<<ThemePulse>>": lambda _: self.style.theme_use("pulse"),
+            "<<ThemeSandstone>>": lambda _: self.style.theme_use("sandstone"),
+            "<<ThemeUnited>>": lambda _: self.style.theme_use("united"),
+            "<<ThemeYeti>>": lambda _: self.style.theme_use("yeti"),
+            "<<ThemeSuperhero>>": lambda _: self.style.theme_use("superhero"),
+            "<<ThemeDarkly>>": lambda _: self.style.theme_use("darkly"),
+            "<<ThemeCyborg>>": lambda _: self.style.theme_use("cyborg"),
+            "<<TreeviewSelect>>": None,
         }
 
         # Binding all the callbacks and events
@@ -167,20 +161,20 @@ class Application(tk.Window):
             self.disposition[x] = int()
 
         self.validation = dict()
-        self.validation['p-values'] = [
+        self.validation["p-values"] = [
             "VCF: Binom P Value",
             "VCF: Fisher P Value",
             "Mpileup Qual: Filtered Variant Binomial P Value",
             "Mpileup Qual: Filtered Variant Fishers P Value",
             "Mpileup Qual: Unfiltered Variant Binomial P Value",
             "Mpileup Qual: Unfiltered Variant Fishers P Value",
-            "VCF: STBP"
+            "VCF: STBP",
         ]
 
         return None
 
     def clear_view(self, *args) -> None:
-        """ Method to clear the view and loaded data. """
+        """Method to clear the view and loaded data."""
 
         # nukes the data model and starts anew.
         self.model = DataModel()
@@ -212,7 +206,7 @@ class Application(tk.Window):
         return None
 
     def save_file(self, *args, **kwargs) -> None:
-        """ Calls the model save method. """
+        """Calls the model save method."""
 
         self.model.save_file()
 
@@ -230,7 +224,7 @@ class Application(tk.Window):
         selection = self.view.selection_index.get()
 
         # saving the disposition also
-        disposition = self.view.variant['Disposition'].get()
+        disposition = self.view.variant["Disposition"].get()
 
         # Carry the change through the model's method, which also update \
         # dispo counts.
@@ -253,15 +247,17 @@ class Application(tk.Window):
 
         return None
 
+
 # MAIN LOOP ----------------------------------------------
 
-def main() -> None:
 
+def main() -> None:
     # Mainloop
     root = Application()
-    root.mainloop()    
+    root.mainloop()
 
     return None
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
