@@ -2,41 +2,13 @@
 ''' This dataclass holds a lookup table for the infotrack information to help \
     annotate the variants. '''
 
-# IMPORTS ------------------------------------------------
+# IMPORTS ---------------------------------------------------------------------
 
 import os
 import pandas as pd
+from .global_variables import *
 
-# VARIABLES ----------------------------------------------
-
-INFOTRACK_REF_FOLDER = "reference"
-INFOTRACK_REF_FILENAME = "infotrack_data_dump.tsv"
-INFOTRACK_REF_COLUMNS = [
-    'mol_num',
-    'sample_name', 
-    'observed_variant_id', 
-    'run_id', 
-    'interpt_id', 
-    'genes', 
-    'coding', 
-    'amino_acid_change', 
-    'frequency', 
-    'genotype', 
-    'allele_coverage', 
-    'coverage', 
-    'include_in_report', 
-    'tier', 
-    'time_stamp', 
-    'confirm_status', 
-    'variant_allele', 
-    'ref_allele', 
-    'ref_var_strand_counts', 
-    'strand', 
-    'genetic_call', 
-    'test_tissue',
-] # listed here just for convenience while coding
-
-# CLASSES ------------------------------------------------
+# CLASSES ---------------------------------------------------------------------
 
 class InfotrackLookupTable():
     """ Brings in the lookup table for finding the most likely Tier of the \
@@ -100,17 +72,18 @@ class InfotrackLookupTable():
         # return "Done"
         return str(tissue_dict)
 
-# MAIN LOOP ----------------------------------------------
+# MAIN LOOP -------------------------------------------------------------------
 
-def main():
+def main() -> None:
+    """Testing function for module."""
 
-    lut = InfotrackLookupTable()
+    test_lut = InfotrackLookupTable()
 
-    print(lut.recommend_tier('ASXL1','c.1934delG'))
-    print(lut.recommend_tier('ASXL1','c.1934dupG'))
-    print(lut.get_tissue_list('ASXL1', 'c.1934dupG'))
+    print(test_lut.recommend_tier('ASXL1','c.1934delG'))
+    print(test_lut.recommend_tier('ASXL1','c.1934dupG'))
+    print(test_lut.get_tissue_list('ASXL1', 'c.1934dupG'))
 
-    return
+    return None
 
 if __name__ == '__main__':
     main()

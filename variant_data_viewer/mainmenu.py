@@ -1,27 +1,27 @@
 # variant_data_viewer/mainmenu.py
 """ The menu bar of the variant Data Viewer application. """
 
-# IMPORTS ------------------------------------------------
+# IMPORTS ---------------------------------------------------------------------
 
-import ttkbootstrap as tk
+import tkinter as tk
 from tkinter import messagebox as mb
+from typing import Callable
 
-# VARIABLES ----------------------------------------------
-
-# CLASSES ------------------------------------------------
-
+# CLASSES ---------------------------------------------------------------------
 
 class MainMenu(tk.Menu):
     """The Application's main menu."""
 
-    def _event(self, sequence):
+    def _event(self, sequence) -> Callable:
         def callback(*_):
             root = self.master.winfo_toplevel()
             root.event_generate(sequence)
 
         return callback
 
-    def __init__(self, parent, **kwargs):
+    def __init__(self, parent, **kwargs) -> None:
+        """Initialize MainMenu class."""
+
         super().__init__(parent, **kwargs)
         # self.settings = settings
 
@@ -71,8 +71,8 @@ class MainMenu(tk.Menu):
 
         return
 
-    def show_about(self):
-        """Show the about dialog"""
+    def show_about(self) -> None:
+        """Show the about dialog."""
 
         about_message = "Variant Data Viewer"
         about_detail = (
@@ -83,15 +83,16 @@ class MainMenu(tk.Menu):
         )
         mb.showinfo(title="About", message=about_message, detail=about_detail)
 
+        return None
 
-# MAIN LOOP ----------------------------------------------
+# MAIN LOOP -------------------------------------------------------------------
 
+def main() -> None:
+    """Testing function for module."""
 
-def main():
     pass
 
-    return
-
+    return None
 
 if __name__ == "__main__":
     main()

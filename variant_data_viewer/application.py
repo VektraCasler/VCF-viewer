@@ -1,10 +1,11 @@
 # variant_data_viewer/application.py
 """ An application to view a variant data output file in a dashboard. """
 
-# IMPORTS ------------------------------------------------
+# IMPORTS ---------------------------------------------------------------------
 
 import sys
-import ttkbootstrap as tk
+import tkinter as tk
+import ttkbootstrap as ttk
 
 from .global_variables import *
 from .infotrack_db import *
@@ -13,100 +14,19 @@ from .model import DataModel
 from .mainmenu import MainMenu
 from .view import RecordView
 
-# VARIABLES ----------------------------------------------
+# CLASSES ---------------------------------------------------------------------
 
-DATA_FIELDS = [
-    "Original Input: Chrom",
-    "Original Input: Pos",
-    "Original Input: Reference allele",
-    "Original Input: Alternate allele",
-    "Variant Annotation: Gene",
-    "Variant Annotation: cDNA change",
-    "Variant Annotation: Protein Change",
-    "Variant Annotation: RefSeq",
-    "VCF: AF",
-    "VCF: FAO",
-    "VCF: FDP",
-    "VCF: HRUN",
-    "VCF: Filter",
-    "VCF: Genotype",
-    "COSMIC: ID",
-    "COSMIC: Variant Count",
-    "COSMIC: Variant Count (Tissue)",
-    "ClinVar: ClinVar ID",
-    "ClinVar: Clinical Significance",
-    "gnomAD3: Global AF",
-    "PhyloP: Vert Score",
-    "CADD: Phred",
-    "PolyPhen-2: HDIV Prediction",
-    "SIFT: Prediction",
-    "VCF: FSAF",
-    "VCF: FSAR",
-    "VCF: FSRF",
-    "VCF: FSRR",
-    "VCF: Fisher Odds Ratio",
-    "VCF: Fisher P Value",
-    "VCF: Binom Proportion",
-    "VCF: Binom P Value",
-    "Mpileup Qual: Read Depth",
-    "Mpileup Qual: Start Reads",
-    "Mpileup Qual: Stop Reads",
-    "Mpileup Qual: Filtered Reference Forward Read Depth",
-    "Mpileup Qual: Filtered Reference Reverse Read Depth",
-    "Mpileup Qual: Unfiltered Reference Forward Read Depth",
-    "Mpileup Qual: Unfiltered Reference Reverse Read Depth",
-    "Mpileup Qual: Filtered Variant Forward Read Depth",
-    "Mpileup Qual: Filtered Variant Reverse Read Depth",
-    "Mpileup Qual: Filtered Variant Binomial Proportion",
-    "Mpileup Qual: Filtered Variant Binomial P Value",
-    "Mpileup Qual: Filtered Variant Fishers Odds Ratio",
-    "Mpileup Qual: Filtered Variant Fishers P Value",
-    "Mpileup Qual: Filtered VAF",
-    "Mpileup Qual: Unfiltered Variant Forward Read Depth",
-    "Mpileup Qual: Unfiltered Variant Reverse Read Depth",
-    "Mpileup Qual: Unfiltered Variant Binomial Proportion",
-    "Mpileup Qual: Unfiltered Variant Binomial P Value",
-    "Mpileup Qual: Unfiltered Variant Fishers Odds Ratio",
-    "Mpileup Qual: Unfiltered Variant Fishers P Value",
-    "Mpileup Qual: Unfiltered VAF",
-    "VCF: LEN",
-    "VCF: QD",
-    "VCF: STB",
-    "VCF: STBP",
-    "VCF: SVTYPE",
-    "VCF: TYPE",
-    "VCF: QUAL",
-    "Variant Annotation: Coding",
-    "Variant Annotation: Sequence Ontology",
-    "Variant Annotation: Transcript",
-    "Variant Annotation: All Mappings",
-    "UniProt (GENE): Accession Number",
-    "dbSNP: rsID",
-    "MDL: Sample Count",
-    "MDL: Variant Frequency",
-    "MDL: Sample List",
-    "amp_ID",
-    "Cytoband",
-    "MANE_transcript (GRCh38)",
-    "Genexus_transcript (GRCh37)",
-    "Genexus_Exon(s)",
-    "Genexus_codons",
-    "tier",
-    "test_tissue",
-    "Disposition",
-]
+class Application(ttk.Window):
 
-# CLASSES ------------------------------------------------
-
-
-class Application(tk.Window):
     def __init__(self) -> None:
+        """Initialized Application class."""
+
         super().__init__()
 
         # Root Window
         self.title("Variant Data Viewer")
         self.resizable(True, True)
-        self.style.theme_use("flatly")
+        # self.style.theme_use("flatly")
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.geometry("800x600")
@@ -247,17 +167,14 @@ class Application(tk.Window):
 
         return None
 
-
-# MAIN LOOP ----------------------------------------------
-
+# MAIN LOOP -------------------------------------------------------------------
 
 def main() -> None:
-    # Mainloop
-    root = Application()
-    root.mainloop()
+    """Testing function for module."""
+
+    pass
 
     return None
-
 
 if __name__ == "__main__":
     main()

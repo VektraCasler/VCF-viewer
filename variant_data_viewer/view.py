@@ -1,7 +1,7 @@
 # variant_data_viewer/view.py
 """ The view of the variant Data Viewer application, comprised of the tkinter portion. """
 
-# IMPORTS ------------------------------------------------
+# IMPORTS ---------------------------------------------------------------------
 
 import ttkbootstrap as tk
 from tkinter import filedialog as fd
@@ -11,91 +11,7 @@ from .tool_tip import ToolTip, CreateToolTip
 
 import webbrowser
 
-# VARIABLES ----------------------------------------------
-
-DATA_FIELDS = [
-    "Original Input: Chrom",
-    "Original Input: Pos",
-    "Original Input: Reference allele",
-    "Original Input: Alternate allele",
-    "Variant Annotation: Gene",
-    "Variant Annotation: cDNA change",
-    "Variant Annotation: Protein Change",
-    "Variant Annotation: RefSeq",
-    "VCF: AF",
-    "VCF: FAO",
-    "VCF: FDP",
-    "VCF: HRUN",
-    "VCF: Filter",
-    "VCF: Genotype",
-    "COSMIC: ID",
-    "COSMIC: Variant Count",
-    "COSMIC: Variant Count (Tissue)",
-    "ClinVar: ClinVar ID",
-    "ClinVar: Clinical Significance",
-    "gnomAD3: Global AF",
-    "PhyloP: Vert Score",
-    "CADD: Phred",
-    "PolyPhen-2: HDIV Prediction",
-    "SIFT: Prediction",
-    "VCF: FSAF",
-    "VCF: FSAR",
-    "VCF: FSRF",
-    "VCF: FSRR",
-    "VCF: Fisher Odds Ratio",
-    "VCF: Fisher P Value",
-    "VCF: Binom Proportion",
-    "VCF: Binom P Value",
-    "Mpileup Qual: Read Depth",
-    "Mpileup Qual: Start Reads",
-    "Mpileup Qual: Stop Reads",
-    "Mpileup Qual: Filtered Reference Forward Read Depth",
-    "Mpileup Qual: Filtered Reference Reverse Read Depth",
-    "Mpileup Qual: Unfiltered Reference Forward Read Depth",
-    "Mpileup Qual: Unfiltered Reference Reverse Read Depth",
-    "Mpileup Qual: Filtered Variant Forward Read Depth",
-    "Mpileup Qual: Filtered Variant Reverse Read Depth",
-    "Mpileup Qual: Filtered Variant Binomial Proportion",
-    "Mpileup Qual: Filtered Variant Binomial P Value",
-    "Mpileup Qual: Filtered Variant Fishers Odds Ratio",
-    "Mpileup Qual: Filtered Variant Fishers P Value",
-    "Mpileup Qual: Filtered VAF",
-    "Mpileup Qual: Unfiltered Variant Forward Read Depth",
-    "Mpileup Qual: Unfiltered Variant Reverse Read Depth",
-    "Mpileup Qual: Unfiltered Variant Binomial Proportion",
-    "Mpileup Qual: Unfiltered Variant Binomial P Value",
-    "Mpileup Qual: Unfiltered Variant Fishers Odds Ratio",
-    "Mpileup Qual: Unfiltered Variant Fishers P Value",
-    "Mpileup Qual: Unfiltered VAF",
-    "VCF: LEN",
-    "VCF: QD",
-    "VCF: STB",
-    "VCF: STBP",
-    "VCF: SVTYPE",
-    "VCF: TYPE",
-    "VCF: QUAL",
-    "Variant Annotation: Coding",
-    "Variant Annotation: Sequence Ontology",
-    "Variant Annotation: Transcript",
-    "Variant Annotation: All Mappings",
-    "UniProt (GENE): Accession Number",
-    "dbSNP: rsID",
-    "MDL: Sample Count",
-    "MDL: Variant Frequency",
-    "MDL: Sample List",
-    "amp_ID",
-    "Cytoband",
-    "MANE_transcript (GRCh38)",
-    "Genexus_transcript (GRCh37)",
-    "Genexus_Exon(s)",
-    "Genexus_codons",
-    "tier",
-    "test_tissue",
-    "Disposition",
-]
-
-# CLASSES ------------------------------------------------
-
+# CLASSES ---------------------------------------------------------------------
 
 class RecordView(tk.Frame):
     def _event(self, sequence):

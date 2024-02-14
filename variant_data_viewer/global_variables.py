@@ -1,11 +1,9 @@
 # variant_data_viewer/global_variables.py
 """ Holds the large lists of global variable lists and dictionaries. """
 
-# IMPORTS ------------------------------------------------
+# VARIABLES -------------------------------------------------------------------
 
-# VARIABLES ----------------------------------------------
-
-# Data Model Settings -------------------------------------------------
+# Data Model Settings ---------------------------------------------------------
 
 VCF_FILE_SETTINGS = {
     "excel_extension": ".xlsx",
@@ -14,7 +12,7 @@ VCF_FILE_SETTINGS = {
     "text_output_folder": "texts/",
 }
 
-# Controller Settings -------------------------------------------------
+# Controller Settings ---------------------------------------------------------
 
 DISPOSITIONS = [
     "None",
@@ -25,7 +23,7 @@ DISPOSITIONS = [
     "Hotspot Exceptions",
 ]
 
-# View Settings -------------------------------------------------------
+# View Settings ---------------------------------------------------------------
 
 VALIDATION = {
     "cutoffs": {
@@ -92,6 +90,7 @@ VALIDATION = {
         "Mpileup Qual: Filtered Variant Fishers Odds Ratio",
     ],
 }
+
 TOOLTIPS = {
     "Disposition": "What to call this variant.",
     "Original Input: Chrom": "Chromosome on which this gene is found.",
@@ -209,6 +208,7 @@ TOOLTIPS = {
     "MDL: Sample List": "JSON-style dictionary breakdown of tissue types \
         present in ??? knowledgebase for this variant.",
 }
+
 TEXTBOXES = [
     "MDL: Sample List",
     "Variant Annotation: All Mappings",
@@ -216,7 +216,101 @@ TEXTBOXES = [
     "test_tissue",
 ]
 
-# VCF File Settings ---------------------------------------------------
+DATA_FIELDS = [
+    "Original Input: Chrom",
+    "Original Input: Pos",
+    "Original Input: Reference allele",
+    "Original Input: Alternate allele",
+    "Variant Annotation: Gene",
+    "Variant Annotation: cDNA change",
+    "Variant Annotation: Protein Change",
+    "Variant Annotation: RefSeq",
+    "VCF: AF",
+    "VCF: FAO",
+    "VCF: FDP",
+    "VCF: HRUN",
+    "VCF: Filter",
+    "VCF: Genotype",
+    "COSMIC: ID",
+    "COSMIC: Variant Count",
+    "COSMIC: Variant Count (Tissue)",
+    "ClinVar: ClinVar ID",
+    "ClinVar: Clinical Significance",
+    "gnomAD3: Global AF",
+    "PhyloP: Vert Score",
+    "CADD: Phred",
+    "PolyPhen-2: HDIV Prediction",
+    "SIFT: Prediction",
+    "VCF: FSAF",
+    "VCF: FSAR",
+    "VCF: FSRF",
+    "VCF: FSRR",
+    "VCF: Fisher Odds Ratio",
+    "VCF: Fisher P Value",
+    "VCF: Binom Proportion",
+    "VCF: Binom P Value",
+    "Mpileup Qual: Read Depth",
+    "Mpileup Qual: Start Reads",
+    "Mpileup Qual: Stop Reads",
+    "Mpileup Qual: Filtered Reference Forward Read Depth",
+    "Mpileup Qual: Filtered Reference Reverse Read Depth",
+    "Mpileup Qual: Unfiltered Reference Forward Read Depth",
+    "Mpileup Qual: Unfiltered Reference Reverse Read Depth",
+    "Mpileup Qual: Filtered Variant Forward Read Depth",
+    "Mpileup Qual: Filtered Variant Reverse Read Depth",
+    "Mpileup Qual: Filtered Variant Binomial Proportion",
+    "Mpileup Qual: Filtered Variant Binomial P Value",
+    "Mpileup Qual: Filtered Variant Fishers Odds Ratio",
+    "Mpileup Qual: Filtered Variant Fishers P Value",
+    "Mpileup Qual: Filtered VAF",
+    "Mpileup Qual: Unfiltered Variant Forward Read Depth",
+    "Mpileup Qual: Unfiltered Variant Reverse Read Depth",
+    "Mpileup Qual: Unfiltered Variant Binomial Proportion",
+    "Mpileup Qual: Unfiltered Variant Binomial P Value",
+    "Mpileup Qual: Unfiltered Variant Fishers Odds Ratio",
+    "Mpileup Qual: Unfiltered Variant Fishers P Value",
+    "Mpileup Qual: Unfiltered VAF",
+    "VCF: LEN",
+    "VCF: QD",
+    "VCF: STB",
+    "VCF: STBP",
+    "VCF: SVTYPE",
+    "VCF: TYPE",
+    "VCF: QUAL",
+    "Variant Annotation: Coding",
+    "Variant Annotation: Sequence Ontology",
+    "Variant Annotation: Transcript",
+    "Variant Annotation: All Mappings",
+    "UniProt (GENE): Accession Number",
+    "dbSNP: rsID",
+    "MDL: Sample Count",
+    "MDL: Variant Frequency",
+    "MDL: Sample List",
+    "amp_ID",
+    "Cytoband",
+    "MANE_transcript (GRCh38)",
+    "Genexus_transcript (GRCh37)",
+    "Genexus_Exon(s)",
+    "Genexus_codons",
+    "tier",
+    "test_tissue",
+    "Disposition",
+]
+
+# Model Settings --------------------------------------------------------------
+
+ADDON_LIST = [
+    "amp_ID",
+    "Cytoband",
+    "MANE_transcript (GRCh38)",
+    "Genexus_transcript (GRCh37)",
+    "Genexus_Exon(s)",
+    "Genexus_codons",
+    "tier",
+    "test_tissue",
+]
+
+# VCF File Settings -----------------------------------------------------------
 
 VCF_FIELDS = [
     "Original Input: Chrom",
@@ -290,7 +384,7 @@ VCF_FIELDS = [
     "MDL: Sample List",
 ]
 
-# InfoTrack DB Lookup Module ----------------------------------------------
+# InfoTrack DB Lookup Module --------------------------------------------------
 
 INFOTRACK_REF_FOLDER = "reference"
 INFOTRACK_REF_FILENAME = "infotrack_data_dump.tsv"
@@ -319,7 +413,7 @@ INFOTRACK_REF_COLUMNS = [
     "test_tissue",
 ]
 
-# Bed File Lookup Module ------------------------------------------------
+# Bed File Lookup Module ------------------------------------------------------
 
 BED_REF_FOLDER = "reference"
 BED_REF_FILENAME = "Genexus_bed_working.xlsx"
@@ -339,13 +433,14 @@ BED_REF_COLUMNS = [
     "Genexus_codons",
 ]
 
-# MAIN LOOP ----------------------------------------------
+# MAIN LOOP -------------------------------------------------------------------
 
+def main() -> None:
+    """Testing function for module."""
 
-def main():
     pass
-    return
 
+    return None
 
 if __name__ == "__main__":
     main()

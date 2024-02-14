@@ -4,106 +4,16 @@
 # IMPORTS ------------------------------------------------
 
 from tkinter import messagebox as mb
-from .global_variables import *
-from .infotrack_db import *
-from .bed_db import *
+
 import openpyxl
+import os
 
-# VARIABLES ----------------------------------------------
+from .global_variables import *
+from .infotrack_db import InfotrackLookupTable
+from .bed_db import BedLookupTable
+from .low_coverage import LowCoverageTable
 
-ADDON_LIST = [
-    "amp_ID",
-    "Cytoband",
-    "MANE_transcript (GRCh38)",
-    "Genexus_transcript (GRCh37)",
-    "Genexus_Exon(s)",
-    "Genexus_codons",
-    "tier",
-    "test_tissue",
-]
-DATA_FIELDS = [
-    "Original Input: Chrom",
-    "Original Input: Pos",
-    "Original Input: Reference allele",
-    "Original Input: Alternate allele",
-    "Variant Annotation: Gene",
-    "Variant Annotation: cDNA change",
-    "Variant Annotation: Protein Change",
-    "Variant Annotation: RefSeq",
-    "VCF: AF",
-    "VCF: FAO",
-    "VCF: FDP",
-    "VCF: HRUN",
-    "VCF: Filter",
-    "VCF: Genotype",
-    "COSMIC: ID",
-    "COSMIC: Variant Count",
-    "COSMIC: Variant Count (Tissue)",
-    "ClinVar: ClinVar ID",
-    "ClinVar: Clinical Significance",
-    "gnomAD3: Global AF",
-    "PhyloP: Vert Score",
-    "CADD: Phred",
-    "PolyPhen-2: HDIV Prediction",
-    "SIFT: Prediction",
-    "VCF: FSAF",
-    "VCF: FSAR",
-    "VCF: FSRF",
-    "VCF: FSRR",
-    "VCF: Fisher Odds Ratio",
-    "VCF: Fisher P Value",
-    "VCF: Binom Proportion",
-    "VCF: Binom P Value",
-    "Mpileup Qual: Read Depth",
-    "Mpileup Qual: Start Reads",
-    "Mpileup Qual: Stop Reads",
-    "Mpileup Qual: Filtered Reference Forward Read Depth",
-    "Mpileup Qual: Filtered Reference Reverse Read Depth",
-    "Mpileup Qual: Unfiltered Reference Forward Read Depth",
-    "Mpileup Qual: Unfiltered Reference Reverse Read Depth",
-    "Mpileup Qual: Filtered Variant Forward Read Depth",
-    "Mpileup Qual: Filtered Variant Reverse Read Depth",
-    "Mpileup Qual: Filtered Variant Binomial Proportion",
-    "Mpileup Qual: Filtered Variant Binomial P Value",
-    "Mpileup Qual: Filtered Variant Fishers Odds Ratio",
-    "Mpileup Qual: Filtered Variant Fishers P Value",
-    "Mpileup Qual: Filtered VAF",
-    "Mpileup Qual: Unfiltered Variant Forward Read Depth",
-    "Mpileup Qual: Unfiltered Variant Reverse Read Depth",
-    "Mpileup Qual: Unfiltered Variant Binomial Proportion",
-    "Mpileup Qual: Unfiltered Variant Binomial P Value",
-    "Mpileup Qual: Unfiltered Variant Fishers Odds Ratio",
-    "Mpileup Qual: Unfiltered Variant Fishers P Value",
-    "Mpileup Qual: Unfiltered VAF",
-    "VCF: LEN",
-    "VCF: QD",
-    "VCF: STB",
-    "VCF: STBP",
-    "VCF: SVTYPE",
-    "VCF: TYPE",
-    "VCF: QUAL",
-    "Variant Annotation: Coding",
-    "Variant Annotation: Sequence Ontology",
-    "Variant Annotation: Transcript",
-    "Variant Annotation: All Mappings",
-    "UniProt (GENE): Accession Number",
-    "dbSNP: rsID",
-    "MDL: Sample Count",
-    "MDL: Variant Frequency",
-    "MDL: Sample List",
-    "amp_ID",
-    "Cytoband",
-    "MANE_transcript (GRCh38)",
-    "Genexus_transcript (GRCh37)",
-    "Genexus_Exon(s)",
-    "Genexus_codons",
-    "tier",
-    "test_tissue",
-    "Disposition",
-]
-
-# CLASSES ------------------------------------------------
-
+# CLASSES ---------------------------------------------------------------------
 
 class DataModel:
     def __init__(self) -> None:
@@ -257,13 +167,15 @@ class DataModel:
 
         # pull out the MD number from the filename
         MD_number = (os.path.split(self.filename)[1]).split(".")[0]
-        file_location = os.path.split(self.filename)[0]
-
+        file_location = os.path.join(os.path.split(self.filename)[0], "output")
+        if not os.path.exists(file_location):
+            os.mkdir(file_location)
+        
         # creating filenames, note that the "XXX" replaces the build version \
         # number
         filenames = [
             os.path.join(file_location, (MD_number + x))
-            for x in ["_low_coverage.tsv", "_mutations.tsv", "_vus.tsv"]
+            for x in ["_low_VAF_list.tsv", "_mutations.tsv", "_vus.tsv"]
         ]
 
         # open all three files at once with a context manager
@@ -273,12 +185,10 @@ class DataModel:
             # write the headers for the tsvs
             file_low.write("Gene	Amplicon	Exon	Codon	Depth\n")
             file_mut.write(
-                "Gene	DNA	Protein	VAF^1	COSMIC^2	Tier^3	\
-                           Cytoband\n"
+                "Gene	DNA	Protein	VAF^1	COSMIC^2	Tier^3	Cytoband\n",
             )
             file_vus.write(
-                "Gene	DNA	Protein	VAF^1	COSMIC^2	Tier^3	\
-                           Cytoband\n"
+                "Gene	DNA	Protein	VAF^1	COSMIC^2	Tier^3	Cytoband\n",
             )
 
             # now step through the variant list and write each line out to \
@@ -322,17 +232,23 @@ class DataModel:
         detail = "Text files were successfully written\n" "to the VCF file location.\n"
         mb.showinfo(title="Export Complete", message=message, detail=detail)
 
+        try:
+            self.lct = LowCoverageTable(original_file=self.filename)
+            del(self.lct)
+        except:
+            message = "Low Coverage Table creation failed."
+            mb.showerror(title="Low-Coverage Error", message=message)
+
         return None
 
-
-# MAIN LOOP ----------------------------------------------
-
+# MAIN LOOP -------------------------------------------------------------------
 
 def main() -> None:
-    model = DataModel()
+    """Testing function for module."""
+
+    pass
 
     return None
-
 
 if __name__ == "__main__":
     main()

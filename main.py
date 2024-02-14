@@ -7,20 +7,19 @@ __version__ = "1.0.0"
 __license__ = "Built for use only at University of \
     Rochester Medical Center in Rochester, NY."
 
-# IMPORTS ------------------------------------------------
+# IMPORTS ---------------------------------------------------------------------
 
 from variant_data_viewer.application import Application
 
-# VARIABLES ----------------------------------------------
+# MAIN LOOP -------------------------------------------------------------------
 
-# MAIN LOOP ----------------------------------------------
-
-def main():
+def main() -> None:
+    """Testing function for module."""
 
     app = Application()
     app.mainloop()
 
-    return
+    return None
 
 if __name__ == '__main__':
     main()

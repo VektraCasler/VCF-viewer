@@ -2,38 +2,20 @@
 ''' Creates a lookup data class to help further annotate variants with some \
     static information. '''
 
-# IMPORTS ------------------------------------------------
+# IMPORTS ---------------------------------------------------------------------
 
 import os
 import pandas as pd
+from .global_variables import *
 
-# VARIABLES ----------------------------------------------
-
-BED_REF_FOLDER = "reference"
-BED_REF_FILENAME = "Genexus_bed_working.xlsx"
-BED_REF_COLUMNS = [
-    'Chrom',
-    'bp_start',
-    'bp_end',
-    'amp_ID',
-    'N_A',
-    'amp_info',
-    'Gene',
-    'Cytoband',
-    'Refseq (GRCh38)',
-    'MANE_transcript (GRCh38)',
-    'Genexus_transcript (GRCh37)',
-    'Genexus_Exon(s)',
-    'Genexus_codons',
-]
-
-# CLASSES ------------------------------------------------
+# CLASSES ---------------------------------------------------------------------
 
 class BedLookupTable():
     """ Brings in the lookup table for finding the additional pieces of data \
         for the variant from the bed file. """
 
     def __init__(self) -> None:
+        """Initialize BedLookupTable class."""
 
         # read in the file
         file_path = os.path.join(BED_REF_FOLDER, BED_REF_FILENAME)
@@ -54,10 +36,19 @@ class BedLookupTable():
                 return str(temp_DF[column][ind])
         
         return ""
+    
+    def lookup_by_amplicon(self, amplicon: str, column: str) -> str:
 
-# MAIN LOOP ----------------------------------------------
+        # first make a much smaller temp DF
+        temp_DF = self.DF[self.DF['amp_ID'] == amplicon]
+        target = temp_DF.iloc[0][column]
+        
+        return target
 
-def main():
+# MAIN LOOP -------------------------------------------------------------------
+
+def main() -> None:
+    """Testing function for module."""
 
     lut = BedLookupTable()
 
@@ -78,7 +69,7 @@ def main():
             lut.get_data(x[0], x[1], 'Genexus_codons')
         )
 
-    return
+    return None
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
